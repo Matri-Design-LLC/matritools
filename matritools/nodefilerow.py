@@ -1,5 +1,3 @@
-import pandas as pd
-
 class NodeFileRow:
 
     def __init__(self, comma_string):

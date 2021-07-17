@@ -1,4 +1,5 @@
 import pandas as pd
+from .nodefilerow import NodeFileRow
 
 class AntzGlyph:
     """
