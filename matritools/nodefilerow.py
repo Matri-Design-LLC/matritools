@@ -468,6 +468,16 @@ class NodeRowProperties:
         self.record_id = row_id
         self.data = row_id
 
+    def set_tag(self, tag_text="", tag_mode=0):
+        """
+        Sets tag_text and tag_mode
+        :param tag_text: (default "")
+        :param tag_mode: (default 0)
+        :return: None
+        """
+        self.tag_text = tag_text
+        self.tag_mode = tag_mode
+
     def set_aux_a(self, x=30, y=30, z=30):
         """
         Sets aux_a_x, y, and z
