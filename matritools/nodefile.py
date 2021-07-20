@@ -785,6 +785,17 @@ class NodeRowProperties:
 
     # region setters for x, y , z properties
 
+    def make_link(self, link_id_a, link_id_b):
+        """
+        Creates a visable link between link_id_a, and link_id_b using these properties
+        :param link_id_a: id of NodeFileRow
+        :param link_id_b: id of NodeFileRow
+        :return: None
+        """
+
+        self.parent_id = link_id_a
+        self.child_id = link_id_b
+
     def set_id(self, row_id):
         """ Sets id, record_id, and data to row_id """
         self.id = row_id
