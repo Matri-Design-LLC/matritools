@@ -1,5 +1,6 @@
 import pandas as pd
 import copy
+from typing import List
 
 
 class NodeFile:
@@ -19,8 +20,6 @@ class NodeFile:
       Then call AntzGlyph.increment_glyph, modify rows again accordingly, then use NodeFile.add_glyph_to_rows.
       Repeat as necessary.
     """
-
-    taginc = 1  # line number for a tag file row
 
     header = "id,type,data,selected,parent_id," \
              "branch_level,child_id,child_index,palette_id,ch_input_id," \
@@ -42,20 +41,24 @@ class NodeFile:
              "proximity_mode_z,segments_x,segments_y,segments_z,tag_mode," \
              "format_id,table_id,record_id,size\n"
 
-    node_file_rows = []
-
-    def __init__(self, file_name):
+    def __init__(self, file_name=""):
         """
         :param file_name: name of node and tag file created on write_to_csv()
         """
-        self.properties = NodeRowProperties()
+
+        self.taginc = 1  # line number for a tag file row
+        self.node_file_rows = []
+
+        if file_name == "":
+            raise RuntimeError("NodeFile constructed without a name")
+        self.properties = NodeFileRow()
         self.node_file_name = file_name
         self.__add_initial_rows__()
 
-    def get_row_by_index(self, index):
+    def get_row_by_index(self, index:int):
         return self.node_file_rows[index]
 
-    def get_row_by_id(self, row_id):
+    def get_row_by_id(self, row_id:int):
         for row in self.node_file_rows:
             if row.properties.id == row_id:
                 return row
@@ -69,7 +72,7 @@ class NodeFile:
         node_file.write(self.header)
 
         for file_row in self.node_file_rows:
-            node_file.write(file_row.properties.to_string())
+            node_file.write(file_row.properties.to_string() + "\n")
             if file_row.properties.tag_text != "":
                 tag_text = str(self.taginc) + "," + \
                            str(file_row.properties.record_id) + ",0,\"" + \
@@ -80,13 +83,18 @@ class NodeFile:
 
         node_file.close()
 
+    def check_for_duplicate_id(self):
+        ids = [row.id for row in self.node_file_rows]
+        if len(set(ids)) != len(node_file_rows):
+            raise RuntimeError("Node File contains duplicate IDs")
+
     def create_node_row(self, tag_text=""):
         """
         Creates a node file row from node_file current properties and increments id by 1
         :param tag_text: text that will be written in the tag file associated with this node file row (default "")
         :return: None
         """
-        node_row = NodeFileRow(self.properties.to_string())
+        node_row = copy.deepcopy(self.properties)
         self.node_file_rows.append(node_row)
         if tag_text != "":
             node_row.properties.tag_text = tag_text
@@ -98,6 +106,9 @@ class NodeFile:
         :param glyph:
         :return: None
         """
+
+        if not isinstance(glyph, AntzGlyph):
+            raise RuntimeError("glyph must be of type AntzGlyph")
         for row in glyph.node_file_rows:
             self.node_file_rows.append(copy.deepcopy(row))
         glyph.increment_node_file_rows()
@@ -239,12 +250,16 @@ class AntzGlyph:
     Used to represent a antz_glyph. Construct using node file generated from antz that contains only one glyph.
     node_file_rows[0] is the root object.
     """
-    node_file_rows = []
 
-    def __init__(self, csv_file_name):
+    def __init__(self, csv_file_name=""):
         """
         :param csv_file_name: name of the glyph template csv file
         """
+        self.node_file_rows = []
+
+        csv_file_name = str(csv_file_name)
+        if not csv_file_name.endswith(".csv"):
+            raise RuntimeError("csv_file_name must be name of csv file (must include '.csv'")
         if csv_file_name != "":
             df = pd.read_csv(csv_file_name)
             df = df.applymap(lambda cell: int(cell) if str(cell).endswith('.0') else cell)
@@ -254,6 +269,11 @@ class AntzGlyph:
                     line += str(row[column]) + ","
                 line = line[:len(line) - 1]
                 self.node_file_rows.append(NodeFileRow(line))
+            i = 0
+            for row in self.node_file_rows:
+                if row.id in range(8):
+                    raise RuntimeError("Glyph template csv contains row id's between 1-7. Perhaps you generated the file in Antz using 'k' as opposed to 'ALT + K'")
+                i += 1
         else:
             raise RuntimeError("antz_glyph was constructed without a csv file name")
 
@@ -266,42 +286,41 @@ class AntzGlyph:
         old_parent_ids = []
         new_parent_ids = []
 
-        old_parent_ids.append(self.node_file_rows[0].properties.id)
-        row_id = self.node_file_rows[len(self.node_file_rows) - 1].properties.id
-        row_id += 1
+        old_parent_ids.append(self.node_file_rows[0].id)
+        row_id = self.node_file_rows[len(self.node_file_rows) - 1].id + 1
         new_parent_ids.append(row_id)
-        self.node_file_rows[0].properties.set_id(row_id)
-        self.node_file_rows[0].properties.tag_text = ""
+        self.node_file_rows[0].set_id(row_id)
+        self.node_file_rows[0].tag_text = ""
 
         for row in self.node_file_rows[1:]:
             row_id += 1
-            row.properties.set_id(row_id)
-            row.properties.tag_text = ""
+            row.set_id(row_id)
+            row.tag_text = ""
 
             # find parent objects and give them updated parent ids
-            if row.properties.parent_id not in old_parent_ids:
-                old_parent_ids.append(row.properties.parent_id)
+            if row.parent_id not in old_parent_ids:
+                old_parent_ids.append(row.parent_id)
                 new_parent_ids.append(row_id - 1)
-                row.properties.parent_id = row_id - 1
+                row.parent_id = row_id - 1
             else:
                 parent_id_index = self.__find_old_parent_id_index__(row, old_parent_ids)
 
-                row.properties.parent_id = new_parent_ids[parent_id_index]
+                row.parent_id = new_parent_ids[parent_id_index]
 
     def unselect_all(self):
         """ Changes the selected property of all node file rows to 0. """
         for row in self.node_file_rows:
-            row.properties.selected = 0
+            row.selected = 0
 
     def match_record_ids_and_data_to_ids(self):
         for row in self.node_file_rows:
-            row.properties.set_id(row.properties.id)
+            row.set_id(row.id)
 
     def get_rows_of_branch_level(self, branch_level):
         """ Returns a list of NodeFileRow's of a given branch level"""
         rows = []
         for row in self.node_file_rows:
-            if row.properties.branch_level == branch_level:
+            if row.branch_level == branch_level:
                 rows.append(row)
         return rows
 
@@ -313,282 +332,283 @@ class AntzGlyph:
             self.node_file_rows.remove(row)
 
 
-    @staticmethod
-    def __find_old_parent_id_index__(row, old_parent_ids):
+    def __find_old_parent_id_index__(self, row, old_parent_ids):
         parent_id_index = 0
         for row_id in old_parent_ids:
-            if row.properties.parent_id != old_parent_ids[parent_id_index]:
+            if row.parent_id != old_parent_ids[parent_id_index]:
                 parent_id_index += 1
             else:
                 return parent_id_index
 
-class NodeFileRow:
 
-    def __init__(self, comma_string):
+class NodeFileRow:
+    """ Container of properties and property setters for node file rows."""
+
+    def __init__(self, comma_string:str=""):
         """
         :param comma_string: a string with 94 comma seperated values in the order of an antz node file
         """
-        self.properties = NodeRowProperties()
+
+        # region properties
+
+        self.id = 8  # node ID used for pin tree relationship graph
+        self._type = 5  # node type - 1: Camera; 2: video; 3: Surface; 4: Points, 5:Pin, 6:Grid
+        self.data = 0  # additional node specific type, defined by node type
+
+        # selection set status, 1 if part of active set, 0 if not
+        # // Useful if you want the root nodes selected upon loading.
+        self.selected = 0
+
+        self.parent_id = 0  # ID of parent node
+        self.branch_level = 0  # root node is 0, each sub-level is 1, 2, 3, … n
+        self.child_id = 0  # same as node ID
+        self.child_index = 0  # currently selected child node
+
+        # hard coded palettes.
+        # 0: distinct set of 20 original colors/
+        # 1: same as 0 but inverted/
+        # 2: Rainbow Heatmap a composite of gradients/
+        # 3 Rainbow Heatmap inverted/
+        # 4-25 are gradients with 256 color_id's each (0-256)
+        # odd palette_id's are inverted of their mirrors - even numbered pallete_id's
+        self.palette_id = 0
+
+        self.ch_input_id = 0  # channel number
+        self.ch_output_id = 0  # channel number
+        self.ch_last_updated = 0  # previous data update time-stamp (last read)
+        self.average = 0  # type of averaging applied to channel data
+        self.samples = 0  # number of samples to average
+
+        self.aux_a_x = 30  # size of grid segments, x axis (30 is default)
+        self.aux_a_y = 30  # size of grid segments, y axis (30 is default)
+        self.aux_a_z = 30  # size of grid segments, z axis (30 is default)
+
+        self.aux_b_x = 30  # size of grid segments, x axis (30 is default)
+        self.aux_b_y = 30  # size of grid segments, y axis (30 is default)
+        self.aux_b_z = 30  # size of grid segments, z axis (30 is default)
+
+        self.color_shift = 0  # ?
+
+        # reserved - unit vector calculated from rotate_x/y/z
+        self.rotate_vec_x = 0
+        self.rotate_vec_y = 0
+        self.rotate_vec_z = 0
+        self.rotate_vec_s = 1
+
+        # 1.0 for no scaling, negative value inverts geometry
+        self.scale_x = 1
+        self.scale_y = 1
+        self.scale_z = 1
+
+        self.translate_x = 0  # longitude, relative to parent coordinate system
+        self.translate_y = 0  # latitude, relative to parent coordinate system
+        self.translate_z = 0  # altitude, relative to parent coordinate system
+
+        # ?
+        self.tag_offset_x = 0
+        self.tag_offset_y = 0
+        self.tag_offset_z = 0
+
+        # angular velocity rate applied per cycle
+        self.rotate_rate_x = 0
+        self.rotate_rate_y = 0
+        self.rotate_rate_z = 0
+
+        self.rotate_x = 0  # heading, 0 to 360 deg
+        self.rotate_y = 0  # tilt, 0 to 180 deg
+        self.rotate_z = 0  # roll, -180 to 180
+
+        # scaling rate applied per cycle
+        self.scale_rate_x = 0
+        self.scale_rate_y = 0
+        self.scale_rate_z = 0
+
+        # velocity rate applied per cycle
+        self.translate_rate_x = 0
+        self.translate_rate_y = 0
+        self.translate_rate_z = 0
+
+        # reserved
+        self.translate_vec_x = 0
+        self.translate_vec_y = 0
+        self.translate_vec_z = 0
+
+        self.shader = 0  # shader type: 1: Wire / 2: Flat/ 3: Gouraud/ 4: Phong/ 5: Reflection/ 6: Raytrace
+        self.geometry = 7  # primitive type - the shape visible
+        self.line_width = 1  # line width used for wireframes and line plots
+        self.point_size = 0  # vertex point size used for plots
+        self.ratio = 0.1  # ratio effects geometry such as inner radius of a torus
+        self.color_id = 0  # color index from color palette
+
+        # 8bit RGBA color value
+        self.color_r = 0
+        self.color_g = 0
+        self.color_b = 0
+        self.color_a = 255
+
+        self.color_fade = 0  # fades older data points over time
+        self.texture_id = 0  # texture map ID, none-0, starts at 1, 2, 3, …n
+        self.hide = 0  # hides the plot if set to 1
+        self.freeze = 0  # freezes the plot if set to 1
+        self.topo = 3  # topology type …uses KML coordinates
+        self.facet = 0  # facet node belongs to, such as which side of a cube
+
+        # auto-zooms plots to keep in bounds of the screen
+        self.auto_zoom_x = 0
+        self.auto_zoom_y = 0
+        self.auto_zoom_z = 0
+
+        # if 1 then turn on upper limit
+        self.trigger_hi_x = 0
+        self.trigger_hi_y = 0
+        self.trigger_hi_z = 0
+
+        # if 1 then turn on lower limit
+        self.trigger_lo_x = 0
+        self.trigger_lo_y = 0
+        self.trigger_lo_z = 0
+
+        # upper limit
+        self.set_hi_x = 0
+        self.set_hi_y = 0
+        self.set_hi_z = 0
+
+        # lower limit
+        self.set_lo_x = 0
+        self.set_lo_y = 0
+        self.set_lo_z = 0
+
+        # reserved for future proximity and collision detection
+        self.proximity_x = 0
+        self.proximity_y = 0
+        self.proximity_z = 0
+
+        # reserved for future proximity and collision detection
+        self.proximity_mode_x = 0
+        self.proximity_mode_y = 0
+        self.proximity_mode_z = 0
+
+        # number of segments, 0 for none, grid default is 12
+        self.segments_x = 20
+        self.segments_y = 12
+        self.segments_z = 0
+
+        self.tag_mode = 0  # type of tag (color, font , size)
+        self.format_id = 0  # draw the label by id
+        self.table_id = 0  # table id maps external DB used by record id and format
+        self.record_id = 0  # record id is external source DB record key
+        self.size = 420  # size in bytes of memory used per node
+
+        self.tag_text = ""
+
+        # endregion
+
+        if not isinstance(comma_string, str):
+            raise RuntimeError('comma_string must be of type str')
+        if comma_string == "":
+            return
         values = comma_string.split(",")
         if len(values) != 94:
-            print("Values length = " + str(len(values)))
-            print(comma_string)
-            raise RuntimeError("Comma separated string has incorrect number of values")
+            raise RuntimeError("Comma separated string has incorrect number of values.\n Values length = " +
+                               str(len(values)) + "\nInput: " + comma_string)
 
         self.set_properties_from_string_list(values)
 
-    def set_properties_from_string_list(self, values):
-        self.properties.id = int(float(values[0]))
-        self.properties._type = int(float(values[1]))
-        self.properties.data = int(float(values[2]))
-        self.properties.selected = int(float(values[3]))
-        self.properties.parent_id = int(float(values[4]))
-        self.properties.branch_level = int(float(values[5]))
-        self.properties.child_id = int(float(values[6]))
-        self.properties.child_index = int(float(values[7]))
-        self.properties.palette_id = int(float(values[8]))
-        self.properties.ch_input_id = int(float(values[9]))
-        self.properties.ch_output_id = int(float(values[10]))
-        self.properties.ch_last_updated = int(float(values[11]))
-        self.properties.average = int(float(values[12]))
-        self.properties.samples = int(float(values[13]))
-        self.properties.aux_a_x = int(float(values[14]))
-        self.properties.aux_a_y = int(float(values[15]))
-        self.properties.aux_a_z = int(float(values[16]))
-        self.properties.aux_b_x = int(float(values[17]))
-        self.properties.aux_b_y = int(float(values[18]))
-        self.properties.aux_b_z = int(float(values[19]))
-        self.properties.color_shift = int(float(values[20]))
-        self.properties.rotate_vec_x = float(values[21])
-        self.properties.rotate_vec_y = float(values[22])
-        self.properties.rotate_vec_z = float(values[23])
-        self.properties.rotate_vec_s = float(values[24])
-        self.properties.scale_x = float(values[25])
-        self.properties.scale_y = float(values[26])
-        self.properties.scale_z = float(values[27])
-        self.properties.translate_x = float(values[28])
-        self.properties.translate_y = float(values[29])
-        self.properties.translate_z = float(values[30])
-        self.properties.tag_offset_x = float(values[31])
-        self.properties.tag_offset_y = float(values[32])
-        self.properties.tag_offset_z = float(values[33])
-        self.properties.rotate_rate_x = int(float(values[34]))
-        self.properties.rotate_rate_y = int(float(values[35]))
-        self.properties.rotate_rate_z = int(float(values[36]))
-        self.properties.rotate_x = float(values[37])
-        self.properties.rotate_y = float(values[38])
-        self.properties.rotate_z = float(values[39])
-        self.properties.scale_rate_x = int(float(values[40]))
-        self.properties.scale_rate_y = int(float(values[41]))
-        self.properties.scale_rate_z = int(float(values[42]))
-        self.properties.translate_rate_x = int(float(values[43]))
-        self.properties.translate_rate_y = int(float(values[44]))
-        self.properties.translate_rate_z = int(float(values[45]))
-        self.properties.translate_vec_x = int(float(values[46]))
-        self.properties.translate_vec_y = int(float(values[47]))
-        self.properties.translate_vec_z = int(float(values[48]))
-        self.properties.shader = int(float(values[49]))
-        self.properties.geometry = int(float(values[50]))
-        self.properties.line_width = int(float(values[51]))
-        self.properties.point_size = int(float(values[52]))
-        self.properties.ratio = float(values[53])
-        self.properties.color_index = int(float(values[54]))
-        self.properties.color_r = int(float(values[55]))
-        self.properties.color_g = int(float(values[56]))
-        self.properties.color_b = int(float(values[57]))
-        self.properties.color_a = int(float(values[58]))
-        self.properties.color_fade = int(float(values[59]))
-        self.properties.texture_id = int(float(values[60]))
-        self.properties.hide = int(float(values[61]))
-        self.properties.freeze = int(float(values[62]))
-        self.properties.topo = int(float(values[63]))
-        self.properties.facet = int(float(values[64]))
-        self.properties.auto_zoom_x = int(float(values[65]))
-        self.properties.auto_zoom_y = int(float(values[66]))
-        self.properties.auto_zoom_z = int(float(values[67]))
-        self.properties.trigger_hi_x = int(float(values[68]))
-        self.properties.trigger_hi_y = int(float(values[69]))
-        self.properties.trigger_hi_z = int(float(values[70]))
-        self.properties.trigger_lo_x = int(float(values[71]))
-        self.properties.trigger_lo_y = int(float(values[72]))
-        self.properties.trigger_lo_z = int(float(values[73]))
-        self.properties.set_hi_x = int(float(values[74]))
-        self.properties.set_hi_y = int(float(values[75]))
-        self.properties.set_hi_z = int(float(values[76]))
-        self.properties.set_lo_x = int(float(values[77]))
-        self.properties.set_lo_y = int(float(values[78]))
-        self.properties.set_lo_z = int(float(values[79]))
-        self.properties.proximity_x = float(values[80])
-        self.properties.proximity_y = float(values[81])
-        self.properties.proximity_z = float(values[82])
-        self.properties.proximity_mode_x = int(float(values[83]))
-        self.properties.proximity_mode_y = int(float(values[84]))
-        self.properties.proximity_mode_z = int(float(values[85]))
-        self.properties.segments_x = int(float(values[86]))
-        self.properties.segments_y = int(float(values[87]))
-        self.properties.segments_z = int(float(values[88]))
-        self.properties.tag_mode = int(float(values[89]))
-        self.properties.format_id = int(float(values[90]))
-        self.properties.table_id = int(float(values[91]))
-        self.properties.record_id = int(float(values[92]))
-        self.properties.size = int(float(values[93]))
-
-class NodeRowProperties:
-    """ Container of properties and property setters for node file rows."""
-
-    # region properties
-
-    id = 7  # node ID used for pin tree relationship graph
-    _type = 5  # node type - 1: Camera; 2: video; 3: Surface; 4: Points, 5:Pin, 6:Grid
-    data = 0  # additional node specific type, defined by node type
-
-    # selection set status, 1 if part of active set, 0 if not
-    # // Useful if you want the root nodes selected upon loading.
-    selected = 0
-
-    parent_id = 0  # ID of parent node
-    branch_level = 0  # root node is 0, each sub-level is 1, 2, 3, … n
-    child_id = 0  # same as node ID
-    child_index = 0  # currently selected child node
-
-    # hard coded palettes.
-    # 0: distinct set of 20 original colors/
-    # 1: same as 0 but inverted/
-    # 2: Rainbow Heatmap a composite of gradients/
-    # 3 Rainbow Heatmap inverted/
-    # 4-25 are gradients with 256 color_id's each (0-256)
-    # odd palette_id's are inverted of their mirrors - even numbered pallete_id's
-    palette_id = 0
-
-    ch_input_id = 0  # channel number
-    ch_output_id = 0  # channel number
-    ch_last_updated = 0  # previous data update time-stamp (last read)
-    average = 0  # type of averaging applied to channel data
-    samples = 0  # number of samples to average
-
-    aux_a_x = 30  # size of grid segments, x axis (30 is default)
-    aux_a_y = 30  # size of grid segments, y axis (30 is default)
-    aux_a_z = 30  # size of grid segments, z axis (30 is default)
-
-    aux_b_x = 30  # size of grid segments, x axis (30 is default)
-    aux_b_y = 30  # size of grid segments, y axis (30 is default)
-    aux_b_z = 30  # size of grid segments, z axis (30 is default)
-
-    color_shift = 0  # ?
-
-    # reserved - unit vector calculated from rotate_x/y/z
-    rotate_vec_x = 0
-    rotate_vec_y = 0
-    rotate_vec_z = 0
-    rotate_vec_s = 1
-
-    # 1.0 for no scaling, negative value inverts geometry
-    scale_x = 1
-    scale_y = 1
-    scale_z = 1
-
-    translate_x = 0  # longitude, relative to parent coordinate system
-    translate_y = 0  # latitude, relative to parent coordinate system
-    translate_z = 0  # altitude, relative to parent coordinate system
-
-    # ?
-    tag_offset_x = 0
-    tag_offset_y = 0
-    tag_offset_z = 0
-
-    # angular velocity rate applied per cycle
-    rotate_rate_x = 0
-    rotate_rate_y = 0
-    rotate_rate_z = 0
-
-    rotate_x = 0  # heading, 0 to 360 deg
-    rotate_y = 0  # tilt, 0 to 180 deg
-    rotate_z = 0  # roll, -180 to 180
-
-    # scaling rate applied per cycle
-    scale_rate_x = 0
-    scale_rate_y = 0
-    scale_rate_z = 0
-
-    # velocity rate applied per cycle
-    translate_rate_x = 0
-    translate_rate_y = 0
-    translate_rate_z = 0
-
-    # reserved
-    translate_vec_x = 0
-    translate_vec_y = 0
-    translate_vec_z = 0
-
-    shader = 0  # shader type: 1: Wire / 2: Flat/ 3: Gouraud/ 4: Phong/ 5: Reflection/ 6: Raytrace
-    geometry = 7  # primitive type - the shape visible
-    line_width = 1  # line width used for wireframes and line plots
-    point_size = 0  # vertex point size used for plots
-    ratio = 0.1  # ratio effects geometry such as inner radius of a torus
-    color_id = 0  # color index from color palette
-
-    # 8bit RGBA color value
-    color_r = 0
-    color_g = 0
-    color_b = 0
-    color_a = 255
-
-    color_fade = 0  # fades older data points over time
-    texture_id = 0  # texture map ID, none-0, starts at 1, 2, 3, …n
-    hide = 0  # hides the plot if set to 1
-    freeze = 0  # freezes the plot if set to 1
-    topo = 3  # topology type …uses KML coordinates
-    facet = 0  # facet node belongs to, such as which side of a cube
-
-    # auto-zooms plots to keep in bounds of the screen
-    auto_zoom_x = 0
-    auto_zoom_y = 0
-    auto_zoom_z = 0
-
-    # if 1 then turn on upper limit
-    trigger_hi_x = 0
-    trigger_hi_y = 0
-    trigger_hi_z = 0
-
-    # if 1 then turn on lower limit
-    trigger_lo_x = 0
-    trigger_lo_y = 0
-    trigger_lo_z = 0
-
-    # upper limit
-    set_hi_x = 0
-    set_hi_y = 0
-    set_hi_z = 0
-
-    # lower limit
-    set_lo_x = 0
-    set_lo_y = 0
-    set_lo_z = 0
-
-    # reserved for future proximity and collision detection
-    proximity_x = 0
-    proximity_y = 0
-    proximity_z = 0
-
-    # reserved for future proximity and collision detection
-    proximity_mode_x = 0
-    proximity_mode_y = 0
-    proximity_mode_z = 0
-
-    # number of segments, 0 for none, grid default is 12
-    segments_x = 20
-    segments_y = 12
-    segments_z = 0
-
-    tag_mode = 0  # ?
-    format_id = 0  # draw the label by id
-    table_id = 0  # table id maps external DB used by record id and format
-    record_id = 0  # record id is external source DB record key
-    size = 420  # size in bytes of memory used per node
-
-    tag_text = ""
-
-    # endregion
+    def set_properties_from_string_list(self, values: List[str]):
+        self.id = int(float(values[0]))
+        self._type = int(float(values[1]))
+        self.data = int(float(values[2]))
+        self.selected = int(float(values[3]))
+        self.parent_id = int(float(values[4]))
+        self.branch_level = int(float(values[5]))
+        self.child_id = int(float(values[6]))
+        self.child_index = int(float(values[7]))
+        self.palette_id = int(float(values[8]))
+        self.ch_input_id = int(float(values[9]))
+        self.ch_output_id = int(float(values[10]))
+        self.ch_last_updated = int(float(values[11]))
+        self.average = int(float(values[12]))
+        self.samples = int(float(values[13]))
+        self.aux_a_x = int(float(values[14]))
+        self.aux_a_y = int(float(values[15]))
+        self.aux_a_z = int(float(values[16]))
+        self.aux_b_x = int(float(values[17]))
+        self.aux_b_y = int(float(values[18]))
+        self.aux_b_z = int(float(values[19]))
+        self.color_shift = int(float(values[20]))
+        self.rotate_vec_x = float(values[21])
+        self.rotate_vec_y = float(values[22])
+        self.rotate_vec_z = float(values[23])
+        self.rotate_vec_s = float(values[24])
+        self.scale_x = float(values[25])
+        self.scale_y = float(values[26])
+        self.scale_z = float(values[27])
+        self.translate_x = float(values[28])
+        self.translate_y = float(values[29])
+        self.translate_z = float(values[30])
+        self.tag_offset_x = float(values[31])
+        self.tag_offset_y = float(values[32])
+        self.tag_offset_z = float(values[33])
+        self.rotate_rate_x = int(float(values[34]))
+        self.rotate_rate_y = int(float(values[35]))
+        self.rotate_rate_z = int(float(values[36]))
+        self.rotate_x = float(values[37])
+        self.rotate_y = float(values[38])
+        self.rotate_z = float(values[39])
+        self.scale_rate_x = int(float(values[40]))
+        self.scale_rate_y = int(float(values[41]))
+        self.scale_rate_z = int(float(values[42]))
+        self.translate_rate_x = int(float(values[43]))
+        self.translate_rate_y = int(float(values[44]))
+        self.translate_rate_z = int(float(values[45]))
+        self.translate_vec_x = int(float(values[46]))
+        self.translate_vec_y = int(float(values[47]))
+        self.translate_vec_z = int(float(values[48]))
+        self.shader = int(float(values[49]))
+        self.geometry = int(float(values[50]))
+        self.line_width = int(float(values[51]))
+        self.point_size = int(float(values[52]))
+        self.ratio = float(values[53])
+        self.color_index = int(float(values[54]))
+        self.color_r = int(float(values[55]))
+        self.color_g = int(float(values[56]))
+        self.color_b = int(float(values[57]))
+        self.color_a = int(float(values[58]))
+        self.color_fade = int(float(values[59]))
+        self.texture_id = int(float(values[60]))
+        self.hide = int(float(values[61]))
+        self.freeze = int(float(values[62]))
+        self.topo = int(float(values[63]))
+        self.facet = int(float(values[64]))
+        self.auto_zoom_x = int(float(values[65]))
+        self.auto_zoom_y = int(float(values[66]))
+        self.auto_zoom_z = int(float(values[67]))
+        self.trigger_hi_x = int(float(values[68]))
+        self.trigger_hi_y = int(float(values[69]))
+        self.trigger_hi_z = int(float(values[70]))
+        self.trigger_lo_x = int(float(values[71]))
+        self.trigger_lo_y = int(float(values[72]))
+        self.trigger_lo_z = int(float(values[73]))
+        self.set_hi_x = int(float(values[74]))
+        self.set_hi_y = int(float(values[75]))
+        self.set_hi_z = int(float(values[76]))
+        self.set_lo_x = int(float(values[77]))
+        self.set_lo_y = int(float(values[78]))
+        self.set_lo_z = int(float(values[79]))
+        self.proximity_x = float(values[80])
+        self.proximity_y = float(values[81])
+        self.proximity_z = float(values[82])
+        self.proximity_mode_x = int(float(values[83]))
+        self.proximity_mode_y = int(float(values[84]))
+        self.proximity_mode_z = int(float(values[85]))
+        self.segments_x = int(float(values[86]))
+        self.segments_y = int(float(values[87]))
+        self.segments_z = int(float(values[88]))
+        self.tag_mode = int(float(values[89]))
+        self.format_id = int(float(values[90]))
+        self.table_id = int(float(values[91]))
+        self.record_id = int(float(values[92]))
+        self.size = int(float(values[93]))
 
     def print_properties(self):
         print("id: " + str(self.id))
@@ -645,7 +665,7 @@ class NodeRowProperties:
         print("line_width: " + str(self.line_width))
         print("point_size: " + str(self.point_size))
         print("ratio: " + str(self.ratio))
-        print("color_id: " + str(self.color_id))
+        print("color_id: " + str(self.color_index))
         print("color_r: " + str(self.color_r))
         print("color_g: " + str(self.color_g))
         print("color_b: " + str(self.color_b))
@@ -742,7 +762,7 @@ class NodeRowProperties:
                str(self.line_width) + "," + \
                str(self.point_size) + "," + \
                str(self.ratio) + "," + \
-               str(self.color_id) + "," + \
+               str(self.color_index) + "," + \
                str(self.color_r) + "," + \
                str(self.color_g) + "," + \
                str(self.color_b) + "," + \
@@ -785,7 +805,7 @@ class NodeRowProperties:
 
     # region setters for x, y , z properties
 
-    def make_link(self, link_id_a, link_id_b):
+    def make_link(self, link_id_a:int, link_id_b:int):
         """
         Creates a visable link between link_id_a, and link_id_b using these properties
         :param link_id_a: id of NodeFileRow
@@ -793,26 +813,36 @@ class NodeRowProperties:
         :return: None
         """
 
+        link_id_a = int(link_id_a)
+        link_id_b = int(link_id_b)
+
+        if (link_id_a == link_id_b) or link_id_a == self.id or link_id_b == self.id:
+            raise RuntimeError("link_id_a and link_id_b cannot be equal to eachother and neither can be equal to id")
+
         self.parent_id = link_id_a
         self.child_id = link_id_b
 
-    def set_id(self, row_id):
+    def set_id(self, row_id: int):
         """ Sets id, record_id, and data to row_id """
+
+        row_id = int(row_id)
+
         self.id = row_id
         self.record_id = row_id
         self.data = row_id
 
-    def set_tag(self, tag_text="", tag_mode=0):
+    def set_tag(self, tag_text="", tag_mode:int=0):
         """
         Sets tag_text and tag_mode
         :param tag_text: (default "")
         :param tag_mode: (default 0)
         :return: None
         """
+        tag_mode = int(tag_mode)
         self.tag_text = tag_text
         self.tag_mode = tag_mode
 
-    def set_aux_a(self, x=30, y=30, z=30):
+    def set_aux_a(self, x:int=30, y:int=30, z:int=30):
         """
         Sets aux_a_x, y, and z
 
@@ -821,11 +851,16 @@ class NodeRowProperties:
         :param z: (default 30)
         :return: None
         """
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.aux_a_x = x
         self.aux_a_y = y
         self.aux_a_z = z
 
-    def set_aux_b(self, x=30, y=30, z=30):
+    def set_aux_b(self, x:int=30, y:int=30, z=30):
         """
         Sets aux_b_x,y, and z
 
@@ -834,11 +869,16 @@ class NodeRowProperties:
         :param z: (default 30)
         :return: None
         """
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.aux_b_x = x
         self.aux_b_y = y
         self.aux_b_z = z
 
-    def rotate_vec(self, x=0, y=0, z=0, s=0):
+    def set_rotate_vec(self, x:int=0, y:int=0, z:int=0, s:int=0):
         """
         Sets rotate_vec_x, y, z, and s
         :param x: (default 0)
@@ -847,12 +887,18 @@ class NodeRowProperties:
         :param s: (default 0)
         :return: None
         """
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+        s = int(s)
+
         self.rotate_vec_x = x
         self.rotate_vec_y = y
         self.rotate_vec_z = z
         self.rotate_vec_s = s
 
-    def set_scale(self, x=1, y=1, z=1):
+    def set_scale(self, x:float=1, y:float=1, z:float=1):
         """
         Sets scale_x, y, z
         :param x: (default 1)
@@ -860,11 +906,16 @@ class NodeRowProperties:
         :param z: (default 1)
         :return: None
         """
+
+        x = float(x)
+        y = float(y)
+        z = float(z)
+
         self.scale_x = x
         self.scale_y = y
         self.scale_z = z
 
-    def set_translate(self, x=0, y=0, z=0):
+    def set_translate(self, x:float=0, y:float=0, z:float=0):
         """
         Sets translate_x, y, z
         :param x: (default 0)
@@ -872,11 +923,16 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = float(x)
+        y = float(y)
+        z = float(z)
+
         self.translate_x = x
         self.translate_y = y
         self.translate_z = z
 
-    def set_tag_offset(self, x=0, y=0, z=0):
+    def set_tag_offset(self, x:float=0, y:float=0, z:float=0):
         """
         Sets tag_offset_x, y, z
         :param x: (default 0)
@@ -884,11 +940,16 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = float(x)
+        y = float(y)
+        z = float(z)
+
         self.tag_offset_x = x
         self.tag_offset_y = y
         self.tag_offset_z = z
 
-    def set_rotate(self, x=0, y=0, z=0):
+    def set_rotate(self, x:float=0, y:float=0, z:float=0):
         """
         Sets rotate_x, y, z
         :param x: (default 0)
@@ -896,11 +957,16 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = float(x)
+        y = float(y)
+        z = float(z)
+
         self.rotate_x = x
         self.rotate_y = y
         self.rotate_z = z
 
-    def set_rotate_rate(self, x=0, y=0, z=0):
+    def set_rotate_rate(self, x:int=0, y:int=0, z:int=0):
         """
         Sets rotate_rate_x, y, z
         :param x: (default 0)
@@ -908,11 +974,16 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.rotate_rate_x = x
         self.rotate_rate_y = y
         self.rotate_rate_z = z
 
-    def set_scale_rate(self, x=0, y=0, z=0):
+    def set_scale_rate(self, x:int=0, y:int=0, z:int=0):
         """
         Sets scale_rate_x, y, z
         :param x: (default 0)
@@ -920,11 +991,16 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.scale_rate_x = x
         self.scale_rate_y = y
         self.scale_rate_z = z
 
-    def set_translate_rate(self, x=0, y=0, z=0):
+    def set_translate_rate(self, x:int=0, y:int=0, z:int=0):
         """
         Sets translate_rate_x, y, z
         :param x: (default 0)
@@ -932,11 +1008,16 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.translate_rate_x = x
         self.translate_rate_y = y
         self.translate_rate_z = z
 
-    def set_translate_vec(self, x=0, y=0, z=0):
+    def set_translate_vec(self, x:int=0, y:int=0, z:int=0):
         """
         Sets translate_vec_x, y, z
         :param x: (default 0)
@@ -944,11 +1025,16 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.translate_vec_x = x
         self.translate_vec_y = y
         self.translate_vec_z = z
 
-    def set_color(self, r=0, g=0, b=0, a=255):
+    def set_color(self, r:int=0, g:int=0, b:int=0, a:int=255):
         """
         Sets color values
         :param r: red (int) 0-255 (default 0)
@@ -957,12 +1043,18 @@ class NodeRowProperties:
         :param a: transparency 0-255 (default 255)
         :return: None
         """
+
+        r = int(r)
+        g = int(g)
+        b = int(b)
+        a = int(a)
+
         self.color_r = r
         self.color_g = g
         self.color_b = b
         self.color_a = a
 
-    def set_auto_zoom(self, x=0, y=0, z=0):
+    def set_auto_zoom(self, x:int=0, y:int=0, z:int=0):
         """
         Sets auto_zoom_x, y, z
         :param x: (default 0)
@@ -970,11 +1062,16 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.auto_zoom_x = x
         self.auto_zoom_y = y
         self.auto_zoom_z = z
 
-    def set_trigger_hi(self, x=0, y=0, z=0):
+    def set_trigger_hi(self, x:int=0, y:int=0, z:int=0):
         """
         Sets trigger_hi_x, y, z
         :param x: (default 0)
@@ -982,11 +1079,15 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.trigger_hi_x = x
         self.trigger_hi_y = y
         self.trigger_hi_z = z
 
-    def set_trigger_lo(self, x=0, y=0, z=0):
+    def set_trigger_lo(self, x:int=0, y:int=0, z:int=0):
         """
         Sets trigger_low_x, y, z
         :param x: (default 0)
@@ -994,11 +1095,15 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.trigger_lo_x = x
         self.trigger_lo_y = y
         self.trigger_lo_z = z
 
-    def set_hi(self, x=0, y=0, z=0):
+    def set_hi(self, x:int=0, y:int=0, z:int=0):
         """
         Sets hi_x, y, z
         :param x: (default 0)
@@ -1006,11 +1111,16 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.set_hi_x = x
         self.set_hi_y = y
         self.set_hi_z = z
 
-    def set_lo(self, x=0, y=0, z=0):
+    def set_lo(self, x:int=0, y:int=0, z:int=0):
         """
         Sets lo_x, y, z
         :param x: (default 0)
@@ -1018,11 +1128,16 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.set_lo_x = x
         self.set_lo_y = y
         self.set_lo_z = z
 
-    def set_proximity(self, x=0, y=0, z=0):
+    def set_proximity(self, x:float=0, y:float=0, z:float=0):
         """
         Sets proximity_x, y, z
         :param x: (default 0)
@@ -1030,11 +1145,16 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = float(x)
+        y = float(y)
+        z = float(z)
+
         self.proximity_x = x
         self.proximity_y = y
         self.proximity_z = z
 
-    def proximity_mode(self, x=0, y=0, z=0):
+    def set_proximity_mode(self, x:int=0, y:int=0, z:int=0):
         """
         Sets proximity_mode_x, y, z
         :param x: (default 0)
@@ -1042,11 +1162,16 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.proximity_mode_x = x
         self.proximity_mode_y = y
         self.proximity_mode_z = z
 
-    def set_segments(self, x=20, y=12, z=0):
+    def set_segments(self, x:int=20, y:int=12, z:int=0):
         """
         Sets segments_x, y, z
         :param x: (default 0)
@@ -1054,6 +1179,13 @@ class NodeRowProperties:
         :param z: (default 0)
         :return: None
         """
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         self.segments_x = x
         self.segments_y = y
         self.segments_z = z
+
+    #endregion
