@@ -1,64 +1,125 @@
 import matritools.nodefile as nf
+import pytest
 
 
-print("Testing AntzGlyph")
-tests = []
+# region constructor
 
-#region constructor
+def test_empty_constructor():
+    with pytest.raises(RuntimeError):
+        nf.AntzGlyph()
 
-try:
-    test_glyph = nf.AntzGlyph()
-    tests.append("Fail: empty construtor")
-except RuntimeError:
-    tests.append("Pass: empty constructor")
 
-try:
-    test_glyph0 = nf.AntzGlyph("no file ext")
-    tests.append("Fail: no csv file extion")
-except RuntimeError:
-    tests.append("Pass: no csv file extension")
+def test_construct_without_file_extension():
+    with pytest.raises(RuntimeError):
+        nf.AntzGlyph("no file ext")
 
-try:
-    test_glyph1 = nf.AntzGlyph("Test1.csv")
-    tests.append("Pass: proper formated csv input to constructor")
-except:
-    tests.append("Fail: proper formated csv input to constructor")
 
-try:
-    test_glyph2 = nf.AntzGlyph("Test2.csv")
-    tests.append("Fail: improper formated csv input to constructor")
-except:
-    tests.append("Pass: improper formated csv input to constructor")
+def test_proper_construction():
+    try:
+        nf.AntzGlyph("Test1.csv")
+    except Exception as exc:
+        assert False, exc
 
-try:
-    test_glyph3 = nf.AntzGlyph("Test3.csv")
-    tests.append("Fail: csv rows with reserved ids input to constructor")
-except:
-    tests.append("Pass: csv rows with reserved ids input to constructor")
 
-#endregion
+def test_improperly_formatted_csv_construction():
+    with pytest.raises(Exception):
+        nf.AntzGlyph("Test2.csv")
 
-correct_results = [45, 46, 47, 48, 49, 50, 51]
+
+def test_construct_with_reservered_rows_without_removal():
+    with pytest.raises(Exception):
+        nf.AntzGlyph("Test3.csv", False)
+
+
+def test_construct_with_reservered_rows_with_removal():
+    try:
+        nf.AntzGlyph("Test3.csv")
+    except Exception as exc:
+        assert False, exc
+
+
+# endregion
+
+# region increment_node_file_rows()
 test_glyph4 = nf.AntzGlyph("Test4.csv")
 test_glyph4.increment_node_file_rows()
 
-i = 0
-success = True
-for row in test_glyph4.node_file_rows:
-    if row.id != correct_results[i]:
-        tests.append("Fail: id properly incremented")
-        success = False
-        break
-    i += 1
-    print(i)
 
-if success:
-    tests.append("Pass: id properly incremented")
+def test_id_properly_incremented():
+    i = 0
+    results = []
+    for row in test_glyph4.node_file_rows:
+        results.append(row.id)
+        i += 1
+    assert results == [16, 17, 18, 19, 20, 21, 22, 23]
 
 
-############ test other parent id and child id
+def test_parent_id_properly_incremented():
+    i = 0
+    results = []
+    for row in test_glyph4.node_file_rows:
+        results.append(row.parent_id)
+        i += 1
+    assert results == [0, 16, 17, 17, 0, 20, 21, 20]
 
 
-print("\n******************Results***************")
-for test in tests:
-    print(test)
+def test_child_id_properly_incremented():
+    i = 0
+    results = []
+    for row in test_glyph4.node_file_rows:
+        results.append(row.child_id)
+        i += 1
+    assert results == [0, 0, 0, 0, 0, 0, 0, 16]
+
+# endregion
+
+def test_unselect_all():
+    for row in test_glyph4.node_file_rows:
+        row.selected = 1
+
+    test_glyph4.unselect_all()
+
+    for row in test_glyph4.node_file_rows:
+        if row.selected == 1:
+            assert row.selected == 0
+
+    assert True
+
+def test_match_record_ids_and_data_to_ids_record_id():
+    test_glyph = nf.AntzGlyph("Test1.csv", False, False)
+    test_glyph.match_record_ids_and_data_to_ids()
+    results = []
+    for row in test_glyph.node_file_rows:
+        results.append(row.record_id)
+    assert results == [38, 39]
+
+def test_match_record_ids_and_data_to_ids_data():
+    test_glyph = nf.AntzGlyph("Test1.csv", False, False)
+    test_glyph.match_record_ids_and_data_to_ids()
+    results = []
+    for row in test_glyph.node_file_rows:
+        results.append(row.data)
+    assert results == [38, 39]
+
+def test_get_rows_of_branch_level():
+    test_glyph = nf.AntzGlyph("Test4.csv", False, False)
+    rows = test_glyph.get_rows_of_branch_level(3)
+
+    results = []
+
+    for row in rows:
+        results.append(row.id)
+
+    assert results == [40, 41, 44, 45]
+
+def test_remove_rows_of_branch_level():
+    test_glyph = nf.AntzGlyph("Test4.csv", False, False)
+    test_glyph.remove_rows_of_branch_level(3)
+    rows = test_glyph.get_rows_of_branch_level(3)
+
+    results = []
+
+    for row in rows:
+        results.append(row.id)
+
+    assert results == []

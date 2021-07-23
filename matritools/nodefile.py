@@ -41,9 +41,9 @@ class NodeFile:
              "proximity_mode_z,segments_x,segments_y,segments_z,tag_mode," \
              "format_id,table_id,record_id,size\n"
 
-    def __init__(self, file_name=""):
+    def __init__(self, file_name: str = ""):
         """
-        :param file_name: name of node and tag file created on write_to_csv()
+        :param file_name: name of node and tag file created on write_to_csv() (default:"")
         """
 
         self.taginc = 1  # line number for a tag file row
@@ -55,16 +55,32 @@ class NodeFile:
         self.node_file_name = file_name
         self.__add_initial_rows__()
 
-    def get_row_by_index(self, index:int):
+    def get_row_by_index(self, index: int):
+        """
+        :param index: index of requested NodeFileRow
+        :return: requested NodeFileRow
+        """
         return self.node_file_rows[index]
 
-    def get_row_by_id(self, row_id:int):
+    def get_row_by_id(self, row_id: int):
+        """
+        :param row_id: ID of requested NodeFileRow
+        :return: requested NodeFileRow
+        """
         for row in self.node_file_rows:
-            if row.properties.id == row_id:
+            if row.id == row_id:
                 return row
 
     def write_to_csv(self):
-        """ Write all node_file_rows to csv. This will overwrite the file."""
+        """
+        Write all node_file_rows to csv.
+        Creates a tag file.
+        This will overwrite the node and tag file.
+        :return: None
+        """
+
+        self.check_for_duplicate_id()
+
         node_file = open(self.node_file_name + "_node.csv", "w")
         tag_file = open(self.node_file_name + "_tag.csv", "w")
         tag_file.write("id,record_id,table_id,title,description\n")
@@ -72,11 +88,11 @@ class NodeFile:
         node_file.write(self.header)
 
         for file_row in self.node_file_rows:
-            node_file.write(file_row.properties.to_string() + "\n")
-            if file_row.properties.tag_text != "":
+            node_file.write(file_row.to_string())
+            if file_row.tag_text != "":
                 tag_text = str(self.taginc) + "," + \
-                           str(file_row.properties.record_id) + ",0,\"" + \
-                           str(file_row.properties.tag_text) + "\",\"\"\n"
+                           str(file_row.record_id) + ",0,\"" + \
+                           str(file_row.tag_text) + "\",\"\"\n"
 
                 self.taginc += 1
                 tag_file.write(tag_text)
@@ -85,7 +101,7 @@ class NodeFile:
 
     def check_for_duplicate_id(self):
         ids = [row.id for row in self.node_file_rows]
-        if len(set(ids)) != len(node_file_rows):
+        if len(set(ids)) != len(self.node_file_rows):
             raise RuntimeError("Node File contains duplicate IDs")
 
     def create_node_row(self, tag_text=""):
@@ -97,7 +113,7 @@ class NodeFile:
         node_row = copy.deepcopy(self.properties)
         self.node_file_rows.append(node_row)
         if tag_text != "":
-            node_row.properties.tag_text = tag_text
+            node_row.tag_text = tag_text
         self.properties.set_id(self.properties.id + 1)
 
     def add_glyph_to_node_file_rows(self, glyph):
@@ -245,70 +261,42 @@ class NodeFile:
                                                "0,1,1,0,0,"
                                                "0,0,0,420"))
 
+
 class AntzGlyph:
     """
-    Used to represent a antz_glyph. Construct using node file generated from antz that contains only one glyph.
+    Used to represent a antz_glyph.
+    Construct using node file generated from antz that contains only one glyph.
     node_file_rows[0] is the root object.
     """
 
-    def __init__(self, csv_file_name=""):
+    def __init__(self, csv_file_name: str = "", remove_global_params: bool = True, make_ids_consecutive: bool = True):
         """
-        :param csv_file_name: name of the glyph template csv file
+        :param csv_file_name: name of the glyph template csv file (default: "")
+        :param remove_global_params: remove rows with an IDs that are 1-7 (default: True)
+        :param make_IDs_consecutive: remove gaps in between row IDs. i.e 1,2,4 becomes 1,2,3 (default: True)
         """
+
         self.node_file_rows = []
 
         csv_file_name = str(csv_file_name)
         if not csv_file_name.endswith(".csv"):
             raise RuntimeError("csv_file_name must be name of csv file (must include '.csv'")
+
         if csv_file_name != "":
-            df = pd.read_csv(csv_file_name)
-            df = df.applymap(lambda cell: int(cell) if str(cell).endswith('.0') else cell)
-            for index, row in df.iterrows():
-                line = ""
-                for column in df.columns:
-                    line += str(row[column]) + ","
-                line = line[:len(line) - 1]
-                self.node_file_rows.append(NodeFileRow(line))
-            i = 0
-            for row in self.node_file_rows:
-                if row.id in range(8):
-                    raise RuntimeError("Glyph template csv contains row id's between 1-7. Perhaps you generated the file in Antz using 'k' as opposed to 'ALT + K'")
-                i += 1
+            self.__populate_glyph__(csv_file_name, remove_global_params, make_ids_consecutive)
         else:
             raise RuntimeError("antz_glyph was constructed without a csv file name")
 
-    def increment_node_file_rows(self):
-        """
-        Use this to update the ids, parent ids, data, and record_id of each row of the glyph to represent a new glyph.
-        By default this gets called when adding glyph to node file.
-        :return: None
-        """
-        old_parent_ids = []
-        new_parent_ids = []
-
-        old_parent_ids.append(self.node_file_rows[0].id)
-        row_id = self.node_file_rows[len(self.node_file_rows) - 1].id + 1
-        new_parent_ids.append(row_id)
-        self.node_file_rows[0].set_id(row_id)
-        self.node_file_rows[0].tag_text = ""
-
-        for row in self.node_file_rows[1:]:
-            row_id += 1
-            row.set_id(row_id)
-            row.tag_text = ""
-
-            # find parent objects and give them updated parent ids
-            if row.parent_id not in old_parent_ids:
-                old_parent_ids.append(row.parent_id)
-                new_parent_ids.append(row_id - 1)
-                row.parent_id = row_id - 1
-            else:
-                parent_id_index = self.__find_old_parent_id_index__(row, old_parent_ids)
-
-                row.parent_id = new_parent_ids[parent_id_index]
+    def increment_node_file_rows(self, match_data_and_record_id_to_id: bool = True):
+        self.make_ids_consecutive(self.node_file_rows[len(self.node_file_rows) - 1].id + 1,
+                                      match_data_and_record_id_to_id)
 
     def unselect_all(self):
-        """ Changes the selected property of all node file rows to 0. """
+        """
+        Changes the selected property of all node file rows to 0.
+        :return: None
+        """
+
         for row in self.node_file_rows:
             row.selected = 0
 
@@ -331,20 +319,68 @@ class AntzGlyph:
         for row in rows:
             self.node_file_rows.remove(row)
 
+    def make_ids_consecutive(self, starting_id: int = 8,  match_data_and_record_id_to_id: bool=True ):
+        """
+        Removes gaps in ids. i.e IDs 1,2,4 become 1,2,3
+        Can also be used to change the ID's of the glyph to start from a specified index
+        :param starting_id: first id of the glyph (default 8)
+        :param match_data_and_record_id_to_id: set true to set the data and record id of each row to match its id
+        (default: true)
+        :return:
+        """
+        # keys = old IDs, values = new IDs
+        ids = {0:0}
+        current_id = starting_id
 
-    def __find_old_parent_id_index__(self, row, old_parent_ids):
-        parent_id_index = 0
-        for row_id in old_parent_ids:
-            if row.parent_id != old_parent_ids[parent_id_index]:
-                parent_id_index += 1
-            else:
-                return parent_id_index
+
+        for row in self.node_file_rows:
+            # replace old IDs with new IDs
+            row.parent_id = ids[row.parent_id]
+            row.child_id = ids[row.child_id]
+
+            # map old ID to new ID
+            ids[row.id] = current_id
+
+            if match_data_and_record_id_to_id:
+                row.set_id(current_id)
+
+            current_id += 1
+
+    def __populate_glyph__(self, csv_file_name: str = "",
+                           remove_global_params: bool = False,
+                           make_ids_consecutive: bool = True,
+                           match_data_and_record_id_to_id: bool = True):
+
+        df = pd.read_csv(csv_file_name)
+        df = df.applymap(lambda cell: int(cell) if str(cell).endswith('.0') else cell)
+
+        for index, row in df.iterrows():
+            line = ""
+            for column in df.columns:
+                line += str(row[column]) + ","
+            line = line[:len(line) - 1]
+
+            ntr = NodeFileRow(line)
+            if (not remove_global_params) or (remove_global_params and ntr.id not in range(8)):
+                self.node_file_rows.append(NodeFileRow(line))
+
+        i = 0
+        for row in self.node_file_rows:
+            if row.id in range(8):
+                raise RuntimeError("Glyph template csv contains row id's between 1-7. "
+                                   "Perhaps you generated the file in Antz using 'K' as opposed to 'ALT + K'")
+            i += 1
+
+        if make_ids_consecutive:
+            self.make_ids_consecutive(8, match_data_and_record_id_to_id)
+
+
 
 
 class NodeFileRow:
     """ Container of properties and property setters for node file rows."""
 
-    def __init__(self, comma_string:str=""):
+    def __init__(self, comma_string: str = ""):
         """
         :param comma_string: a string with 94 comma seperated values in the order of an antz node file
         """
@@ -369,7 +405,7 @@ class NodeFileRow:
         # 1: same as 0 but inverted/
         # 2: Rainbow Heatmap a composite of gradients/
         # 3 Rainbow Heatmap inverted/
-        # 4-25 are gradients with 256 color_id's each (0-256)
+        # 4-25 are gradients with 256 index's each (0-256)
         # odd palette_id's are inverted of their mirrors - even numbered pallete_id's
         self.palette_id = 0
 
@@ -438,7 +474,7 @@ class NodeFileRow:
         self.line_width = 1  # line width used for wireframes and line plots
         self.point_size = 0  # vertex point size used for plots
         self.ratio = 0.1  # ratio effects geometry such as inner radius of a torus
-        self.color_id = 0  # color index from color palette
+        self.color_index = 0  # color index from color palette
 
         # 8bit RGBA color value
         self.color_r = 0
@@ -628,9 +664,9 @@ class NodeFileRow:
         print("aux_a_x: " + str(self.aux_a_x))
         print("aux_a_y: " + str(self.aux_a_y))
         print("aux_a_z: " + str(self.aux_a_z))
-        print("aux_b_x: " + str(self.aux_b_y))
-        print("aux_b_y: " + str(self.aux_b_z))
-        print("aux_b_z: " + str(self.aux_b_x))
+        print("aux_b_x: " + str(self.aux_b_x))
+        print("aux_b_y: " + str(self.aux_b_y))
+        print("aux_b_z: " + str(self.aux_b_z))
         print("color_shift: " + str(self.color_shift))
         print("rotate_vec_x: " + str(self.rotate_vec_x))
         print("rotate_vec_y: " + str(self.rotate_vec_y))
@@ -643,8 +679,8 @@ class NodeFileRow:
         print("translate_y: " + str(self.translate_y))
         print("translate_z: " + str(self.translate_z))
         print("tag_offset_x: " + str(self.tag_offset_x))
-        print("tag_offsett_y: " + str(self.tag_offset_y))
-        print("tag_offsett_z: " + str(self.tag_offset_z))
+        print("tag_offset_y: " + str(self.tag_offset_y))
+        print("tag_offset_z: " + str(self.tag_offset_z))
         print("rotate_rate_x: " + str(self.rotate_rate_x))
         print("rotate_rate_y: " + str(self.rotate_rate_y))
         print("rotate_rate_z: " + str(self.rotate_rate_z))
@@ -665,7 +701,7 @@ class NodeFileRow:
         print("line_width: " + str(self.line_width))
         print("point_size: " + str(self.point_size))
         print("ratio: " + str(self.ratio))
-        print("color_id: " + str(self.color_index))
+        print("color_index: " + str(self.color_index))
         print("color_r: " + str(self.color_r))
         print("color_g: " + str(self.color_g))
         print("color_b: " + str(self.color_b))
@@ -805,7 +841,7 @@ class NodeFileRow:
 
     # region setters for x, y , z properties
 
-    def make_link(self, link_id_a:int, link_id_b:int):
+    def make_link(self, link_id_a: int, link_id_b: int):
         """
         Creates a visable link between link_id_a, and link_id_b using these properties
         :param link_id_a: id of NodeFileRow
@@ -831,7 +867,7 @@ class NodeFileRow:
         self.record_id = row_id
         self.data = row_id
 
-    def set_tag(self, tag_text="", tag_mode:int=0):
+    def set_tag(self, tag_text="", tag_mode: int = 0):
         """
         Sets tag_text and tag_mode
         :param tag_text: (default "")
@@ -842,7 +878,7 @@ class NodeFileRow:
         self.tag_text = tag_text
         self.tag_mode = tag_mode
 
-    def set_aux_a(self, x:int=30, y:int=30, z:int=30):
+    def set_aux_a(self, x: int = 30, y: int = 30, z: int = 30):
         """
         Sets aux_a_x, y, and z
 
@@ -860,7 +896,7 @@ class NodeFileRow:
         self.aux_a_y = y
         self.aux_a_z = z
 
-    def set_aux_b(self, x:int=30, y:int=30, z=30):
+    def set_aux_b(self, x: int = 30, y: int = 30, z=30):
         """
         Sets aux_b_x,y, and z
 
@@ -878,7 +914,7 @@ class NodeFileRow:
         self.aux_b_y = y
         self.aux_b_z = z
 
-    def set_rotate_vec(self, x:int=0, y:int=0, z:int=0, s:int=0):
+    def set_rotate_vec(self, x: int = 0, y: int = 0, z: int = 0, s: int = 0):
         """
         Sets rotate_vec_x, y, z, and s
         :param x: (default 0)
@@ -898,7 +934,7 @@ class NodeFileRow:
         self.rotate_vec_z = z
         self.rotate_vec_s = s
 
-    def set_scale(self, x:float=1, y:float=1, z:float=1):
+    def set_scale(self, x: float = 1, y: float = 1, z: float = 1):
         """
         Sets scale_x, y, z
         :param x: (default 1)
@@ -915,7 +951,7 @@ class NodeFileRow:
         self.scale_y = y
         self.scale_z = z
 
-    def set_translate(self, x:float=0, y:float=0, z:float=0):
+    def set_translate(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets translate_x, y, z
         :param x: (default 0)
@@ -932,7 +968,7 @@ class NodeFileRow:
         self.translate_y = y
         self.translate_z = z
 
-    def set_tag_offset(self, x:float=0, y:float=0, z:float=0):
+    def set_tag_offset(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets tag_offset_x, y, z
         :param x: (default 0)
@@ -949,7 +985,7 @@ class NodeFileRow:
         self.tag_offset_y = y
         self.tag_offset_z = z
 
-    def set_rotate(self, x:float=0, y:float=0, z:float=0):
+    def set_rotate(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets rotate_x, y, z
         :param x: (default 0)
@@ -966,7 +1002,7 @@ class NodeFileRow:
         self.rotate_y = y
         self.rotate_z = z
 
-    def set_rotate_rate(self, x:int=0, y:int=0, z:int=0):
+    def set_rotate_rate(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets rotate_rate_x, y, z
         :param x: (default 0)
@@ -983,7 +1019,7 @@ class NodeFileRow:
         self.rotate_rate_y = y
         self.rotate_rate_z = z
 
-    def set_scale_rate(self, x:int=0, y:int=0, z:int=0):
+    def set_scale_rate(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets scale_rate_x, y, z
         :param x: (default 0)
@@ -1000,7 +1036,7 @@ class NodeFileRow:
         self.scale_rate_y = y
         self.scale_rate_z = z
 
-    def set_translate_rate(self, x:int=0, y:int=0, z:int=0):
+    def set_translate_rate(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets translate_rate_x, y, z
         :param x: (default 0)
@@ -1017,7 +1053,7 @@ class NodeFileRow:
         self.translate_rate_y = y
         self.translate_rate_z = z
 
-    def set_translate_vec(self, x:int=0, y:int=0, z:int=0):
+    def set_translate_vec(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets translate_vec_x, y, z
         :param x: (default 0)
@@ -1034,7 +1070,7 @@ class NodeFileRow:
         self.translate_vec_y = y
         self.translate_vec_z = z
 
-    def set_color(self, r:int=0, g:int=0, b:int=0, a:int=255):
+    def set_color(self, r: int = 0, g: int = 0, b: int = 0, a: int = 255):
         """
         Sets color values
         :param r: red (int) 0-255 (default 0)
@@ -1054,7 +1090,7 @@ class NodeFileRow:
         self.color_b = b
         self.color_a = a
 
-    def set_auto_zoom(self, x:int=0, y:int=0, z:int=0):
+    def set_auto_zoom(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets auto_zoom_x, y, z
         :param x: (default 0)
@@ -1071,7 +1107,7 @@ class NodeFileRow:
         self.auto_zoom_y = y
         self.auto_zoom_z = z
 
-    def set_trigger_hi(self, x:int=0, y:int=0, z:int=0):
+    def set_trigger_hi(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets trigger_hi_x, y, z
         :param x: (default 0)
@@ -1087,7 +1123,7 @@ class NodeFileRow:
         self.trigger_hi_y = y
         self.trigger_hi_z = z
 
-    def set_trigger_lo(self, x:int=0, y:int=0, z:int=0):
+    def set_trigger_lo(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets trigger_low_x, y, z
         :param x: (default 0)
@@ -1103,7 +1139,7 @@ class NodeFileRow:
         self.trigger_lo_y = y
         self.trigger_lo_z = z
 
-    def set_hi(self, x:int=0, y:int=0, z:int=0):
+    def set_set_hi(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets hi_x, y, z
         :param x: (default 0)
@@ -1120,7 +1156,7 @@ class NodeFileRow:
         self.set_hi_y = y
         self.set_hi_z = z
 
-    def set_lo(self, x:int=0, y:int=0, z:int=0):
+    def set_set_lo(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets lo_x, y, z
         :param x: (default 0)
@@ -1137,7 +1173,7 @@ class NodeFileRow:
         self.set_lo_y = y
         self.set_lo_z = z
 
-    def set_proximity(self, x:float=0, y:float=0, z:float=0):
+    def set_proximity(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets proximity_x, y, z
         :param x: (default 0)
@@ -1154,7 +1190,7 @@ class NodeFileRow:
         self.proximity_y = y
         self.proximity_z = z
 
-    def set_proximity_mode(self, x:int=0, y:int=0, z:int=0):
+    def set_proximity_mode(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets proximity_mode_x, y, z
         :param x: (default 0)
@@ -1171,7 +1207,7 @@ class NodeFileRow:
         self.proximity_mode_y = y
         self.proximity_mode_z = z
 
-    def set_segments(self, x:int=20, y:int=12, z:int=0):
+    def set_segments(self, x: int = 20, y: int = 12, z: int = 0):
         """
         Sets segments_x, y, z
         :param x: (default 0)
@@ -1188,4 +1224,4 @@ class NodeFileRow:
         self.segments_y = y
         self.segments_z = z
 
-    #endregion
+    # endregion

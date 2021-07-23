@@ -1,6 +1,5 @@
 import matritools.nodefile as nf
-
-print("Testing NodeFileRow")
+import pytest
 
 test_property_string = '1,2,3,4,5,6,7,8,9,10,' \
                        '11,12,13,14,15,16,17,18,19,20,' \
@@ -13,574 +12,576 @@ test_property_string = '1,2,3,4,5,6,7,8,9,10,' \
                        '81,82,83,84,85,86,87,88,89,90,' \
                        '91,92,93,94' \
 
-tests = []
+# region constructor
 
-#region constructor
+def test_empty_construction():
+    try:
+        nf.NodeFileRow()
+    except Exception as exc:
+        assert False, exc
 
-try:
-    test_nfr = nf.NodeFileRow()
-    tests.append("Pass: Empty Constructor")
-except:
-    tests.append("Fail: Empty Constructor")
 
-try:
-    test_nfr = nf.NodeFileRow('0')
-    tests.append("Fail: Construct with less than 94 values")
-except RuntimeError:
-    tests.append("Pass: Construct with less than 94 values")
+def test_construct_with_less_than_94_values():
+    with pytest.raises(RuntimeError):
+        nf.NodeFileRow('0')
 
-try:
-    test_nfr = nf.NodeFileRow(test_property_string + ',95')
-    tests.append("Fail: Construct with more than 94 values")
-except RuntimeError:
-    tests.append("Pass: Construct with more than 94 values")
 
-try:
-    test_nfr = nf.NodeFileRow(test_property_string)
-    tests.append("Pass: Construct with 94 values")
-except:
-    tests.append("Fail: Construct with 94 values")
+def test_construct_with_more_than_94_values():
+    with pytest.raises(RuntimeError):
+        nf.NodeFileRow(test_property_string + ',95')
+
+
+def test_proper_construction():
+    try:
+        nf.NodeFileRow(test_property_string)
+    except Exception as exc:
+        assert False, exc
+
 
 test_nfr = nf.NodeFileRow(test_property_string)
-test_values = test_property_string.split(',')
-test_floats = [float(value) for value in test_values]
 
-result_values = test_nfr.to_string().split(',')
-result_floats = [float(value)for value in result_values]
 
-result = True
-for i in range(len(test_floats)):
-    if test_floats[i] != result_floats[i]:
-        tests.append("Fail: To string")
-        result = False
-        break
+def test_to_string():
+    test_values = test_property_string.split(',')
+    result_values = test_nfr.to_string().split(',')
+    assert [float(value) for value in test_values] == [float(value) for value in result_values]
 
-if result:
-    tests.append("Pass: To string")
-
-#endregion
-
-#region make link
-
-test_nfr.make_link(100, 200)
-if test_nfr.parent_id == 100 and test_nfr.child_id == 200:
-    tests.append("Pass: make link correct input (ints)")
-else:
-    tests.append("Fail: make link correct input (ints)")
-
-test_nfr.make_link("300", "400")
-if test_nfr.parent_id == 300 and test_nfr.child_id == 400:
-    tests.append("Pass: make link correct input (int castable strings)")
-else:
-    tests.append("Fail: make link correct input (int castable strings)")
-
-test_nfr.make_link(500.0, 600.0)
-if test_nfr.parent_id == 500 and test_nfr.child_id == 600:
-    tests.append("Pass: make link correct input (int castable floats)")
-else:
-    tests.append("Fail: make link correct input (int castable floats)")
-
-try:
-    test_nfr.make_link("a", "b")
-    tests.append("Fail: make link with bad input (strings)")
-except:
-    tests.append("Pass: make link with bad input (strings)")
-
-try:
-    test_nfr.make_link(1.1, 2.1)
-    tests.append("Fail: make link with bad input (floats)")
-except:
-    tests.append("Pass: make link with bad input (floats)")
-
-try:
-    test_nfr.make_link(1,1)
-    tests.append("Fail: make link with equal parameters")
-except:
-    tests.append("Pass: make link with equal parameters")
-
-try:
-    test_nfr.id = 1000
-    test_nfr.make_link(1000, 2000)
-    tests.append("Fail: make link with parameters equal to id 1")
-except:
-    tests.append("Pass: make link with parameters equal to id 1")
-
-try:
-    test_nfr.id = 2000
-    test_nfr.make_link(1000, 2000)
-    tests.append("Fail: make link with parameters equal to id 2")
-except:
-    tests.append("Pass: make link with parameters equal to id 2")
-
-#endregion
-
-#region set id
-
-test_nfr.set_id(100)
-if test_nfr.id == test_nfr.data == test_nfr.record_id == 100:
-    tests.append("Pass: set id correct input int")
-else:
-    tests.append("Fail: set id correct input int")
-
-test_nfr.set_id("600")
-if test_nfr.id == test_nfr.data == test_nfr.record_id == 600:
-    tests.append("Pass: set id correct input castable string")
-else:
-    tests.append("Fail: set id correct input castable string")
-
-test_nfr.set_id(300.0)
-if test_nfr.id == test_nfr.data == test_nfr.record_id == 300:
-    tests.append("Pass: set id correct input castable float")
-else:
-    tests.append("Fail: set id correct input castable float")
-
-test_nfr.set_id(100)
-if test_nfr.id == test_nfr.data == test_nfr.record_id == 100:
-    tests.append("Pass: set id bad input")
-else:
-    tests.append("Fail: set id bad input")
-
-#endregion
-
-#region set tag
-
-test_nfr.set_tag("Test", 1)
-if test_nfr.tag_text == "Test" and test_nfr.tag_mode == 1:
-    tests.append("Pass: set tag")
-else:
-    tests.append("Fail: set tag")
-
-test_nfr.set_tag("Test", "3")
-if test_nfr.tag_text == "Test" and test_nfr.tag_mode == 3:
-    tests.append("Pass: set tag")
-else:
-    tests.append("Fail: set tag")
-
-test_nfr.set_tag("Test", 5.0)
-if test_nfr.tag_text == "Test" and test_nfr.tag_mode == 5:
-    tests.append("Pass: set tag")
-else:
-    tests.append("Fail: set tag")
-
-#endregion
-
-#region set aux a
-test_nfr.set_aux_a(100, 200, 300)
-if test_nfr.aux_a_x == 100 and test_nfr.aux_a_y == 200 and test_nfr.aux_a_z == 300:
-    tests.append("Pass: set aux acorrect input ints")
-else:
-    tests.append("Fail: set aux acorrect input ints")
-
-test_nfr.set_aux_a("400", "500", "600")
-if test_nfr.aux_a_x == 400 and test_nfr.aux_a_y == 500 and test_nfr.aux_a_z == 600:
-    tests.append("Pass: set aux acorrect input castable strings")
-else:
-    tests.append("Fail: set aux acorrect input castable strings")
-
-test_nfr.set_aux_a(700.0, 800.0, 900.0)
-if test_nfr.aux_a_x == 700 and test_nfr.aux_a_y == 800 and test_nfr.aux_a_z == 900:
-    tests.append("Pass: set aux a orrect input castable floats")
-else:
-    tests.append("Fail: set aux a correct input castable floats")
-
-#endregion
-
-#region set aux b
-
-test_nfr.set_aux_b(100, 200, 300)
-if test_nfr.aux_b_x == 100 and test_nfr.aux_b_y == 200 and test_nfr.aux_b_z == 300:
-    tests.append("Pass: set aux b correct input ints")
-else:
-    tests.append("Fail: set aux b correct input ints")
-
-test_nfr.set_aux_b("400", "500", "600")
-if test_nfr.aux_b_x == 400 and test_nfr.aux_b_y == 500 and test_nfr.aux_b_z == 600:
-    tests.append("Pass: set aux b correct input castable strings")
-else:
-    tests.append("Fail: set aux b correct input castable strings")
-
-test_nfr.set_aux_b(700.0, 800.0, 900.0)
-if test_nfr.aux_b_x == 700 and test_nfr.aux_b_y == 800 and test_nfr.aux_b_z == 900:
-    tests.append("Pass: set aux b correct input castable floats")
-else:
-    tests.append("Fail: set aux b correct input castable floats")
-
-#endregion
-
-# region set rotate vec
-
-test_nfr.set_rotate_vec(100, 200, 300, 110)
-if test_nfr.rotate_vec_x == 100 and \
-        test_nfr.rotate_vec_y == 200 and \
-        test_nfr.rotate_vec_z == 300 and \
-        test_nfr.rotate_vec_s == 110:
-    tests.append("Pass: set_rotate_vec correct input ints")
-else:
-    tests.append("Fail: set_rotate_vec correct input ints")
-
-test_nfr.set_rotate_vec("400", "500", "600", "120")
-if test_nfr.rotate_vec_x == 400 and \
-        test_nfr.rotate_vec_y == 500 and \
-        test_nfr.rotate_vec_z == 600 and \
-        test_nfr.rotate_vec_s == 120:
-    tests.append("Pass: set_rotate_vec correct input castable strings")
-else:
-    tests.append("Fail:et set_rotate_vec correct input castable strings")
-
-test_nfr.set_rotate_vec(700.0, 800.0, 900.0, 130.0)
-if test_nfr.rotate_vec_x == 700 and test_nfr.rotate_vec_y == 800 and test_nfr.rotate_vec_z == 900:
-    tests.append("Pass: set_rotate_vec correct input castable floats")
-else:
-    tests.append("Fail: set_rotate_vec correct input castable floats")
-
-# endregion vec
-
-#region set scale
-
-test_nfr.set_scale(100.1, 200.2, 300.3)
-if test_nfr.scale_x == 100.1 and test_nfr.scale_y == 200.2 and test_nfr.scale_z == 300.3:
-    tests.append("Pass: set scale correct input integrals")
-else:
-    tests.append("Fail: set scale correct input integrals")
-
-test_nfr.set_scale("400.4", "500.5", "600.6")
-if test_nfr.scale_x == 400.4 and test_nfr.scale_y == 500.5 and test_nfr.scale_z == 600.6:
-    tests.append("Pass: set scale correct input castable strings")
-else:
-    tests.append("Fail: set scale correct input castable strings")
-
-#endregion
-# region set translate
-
-test_nfr.set_translate(100.1, 200.2, 300.3)
-if test_nfr.translate_x == 100.1 and test_nfr.translate_y == 200.2 and test_nfr.translate_z == 300.3:
-    tests.append("Pass: set translate correct input integrals")
-else:
-    tests.append("Fail: set translate correct input integrals")
-
-test_nfr.set_translate("400.4", "500.5", "600.6")
-if test_nfr.translate_x == 400.4 and test_nfr.translate_y == 500.5 and test_nfr.translate_z == 600.6:
-    tests.append("Pass: set translate correct input castable strings")
-else:
-    tests.append("Fail: set translate correct input castable strings")
 
 # endregion
 
-# region set tag offset
+# region setters
 
-test_nfr.set_tag_offset(100, 200, 300)
-if test_nfr.tag_offset_x == 100 and test_nfr.tag_offset_y == 200 and test_nfr.tag_offset_z == 300:
-    tests.append("Pass: set tag offset correct input ints")
-else:
-    tests.append("Fail: set tag offset correct input ints")
+# region make link
 
-test_nfr.set_tag_offset("400", "500", "600")
-if test_nfr.tag_offset_x == 400 and test_nfr.tag_offset_y == 500 and test_nfr.tag_offset_z == 600:
-    tests.append("Pass: set tag offset correct input castable strings")
-else:
-    tests.append("Fail: set tag offset correct input castable strings")
+def test_make_link_correct_input_ints():
+    test_nfr.make_link(100, 200)
+    assert test_nfr.parent_id == 100 and test_nfr.child_id == 200
 
-# endregion
 
-# region set rotate
+def test_make_link_correct_input_strings():
+    test_nfr.make_link("300", "400")
+    assert test_nfr.parent_id == 300 and test_nfr.child_id == 400
 
-test_nfr.set_rotate(100.1, 200.2, 300.3)
-if test_nfr.rotate_x == 100.1 and test_nfr.rotate_y == 200.2 and test_nfr.rotate_z == 300.3:
-    tests.append("Pass: set rotate correct input integrals")
-else:
-    tests.append("Fail: set rotate correct input integrals")
 
-test_nfr.set_rotate("400.4", "500.5", "600.6")
-if test_nfr.rotate_x == 400.4 and test_nfr.rotate_y == 500.5 and test_nfr.rotate_z == 600.6:
-    tests.append("Pass: set rotate correct input castable strings")
-else:
-    tests.append("Fail: set rotate correct input castable strings")
+def test_make_link_correct_input_floats():
+    test_nfr.make_link(500.0, 600.0)
+    assert test_nfr.parent_id == 500 and test_nfr.child_id == 600
 
-# endregion
 
-# region set rotate rate
+def test_make_link_bad_input_strings():
+    with pytest.raises(Exception):
+        test_nfr.make_link("a", "b")
 
-test_nfr.set_rotate_rate(100, 200, 300)
-if test_nfr.rotate_rate_x == 100 and test_nfr.rotate_rate_y == 200 and test_nfr.rotate_rate_z == 300:
-    tests.append("Pass: set rotate_rate correct input ints")
-else:
-    tests.append("Fail: set rotate_rate correct input ints")
 
-test_nfr.set_rotate_rate("400", "500", "600")
-if test_nfr.rotate_rate_x == 400 and test_nfr.rotate_rate_y == 500 and test_nfr.rotate_rate_z == 600:
-    tests.append("Pass: set rotate_rate correct input castable strings")
-else:
-    tests.append("Fail: set rotate_rate correct input castable strings")
+def test_make_link_bad_input_floats():
+    with pytest.raises(Exception):
+        test_nfr.make_link(1.1, 2.1)
 
-test_nfr.set_rotate_rate(700.0, 800.0, 900.0)
-if test_nfr.rotate_rate_x == 700 and test_nfr.rotate_rate_y == 800 and test_nfr.rotate_rate_z == 900:
-    tests.append("Pass: set rotate_rate correct input castable floats")
-else:
-    tests.append("Fail: set rotate_rate correct input castable floats")
+
+def test_make_link_with_equal_parameters():
+    with pytest.raises(Exception):
+        test_nfr.make_link(1, 1)
+
+
+def test_make_link_parameters_equal_id_1():
+    with pytest.raises(Exception):
+        test_nfr.id = 1000
+        test_nfr.make_link(1000, 2000)
+
+
+def test_make_link_parameters_equal_id_1():
+    with pytest.raises(Exception):
+        test_nfr.id = 2000
+        test_nfr.make_link(1000, 2000)
+
 
 # endregion
 
-# region set scale rate
+# region set id
 
-test_nfr.set_scale_rate(100, 200, 300)
-if test_nfr.scale_rate_x == 100 and test_nfr.scale_rate_y == 200 and test_nfr.scale_rate_z == 300:
-    tests.append("Pass: set scale rate correct input ints")
-else:
-    tests.append("Fail: set scale rate correct input ints")
+def test_set_id_correct_input_int():
+    test_nfr.set_id(100)
+    assert test_nfr.id == test_nfr.data == test_nfr.record_id == 100
 
-test_nfr.set_scale_rate("400", "500", "600")
-if test_nfr.scale_rate_x == 400 and test_nfr.scale_rate_y == 500 and test_nfr.scale_rate_z == 600:
-    tests.append("Pass: set scale rate correct input castable strings")
-else:
-    tests.append("Fail: set scale rate correct input castable strings")
 
-test_nfr.set_scale_rate(700.0, 800.0, 900.0)
-if test_nfr.scale_rate_x == 700 and test_nfr.scale_rate_y == 800 and test_nfr.scale_rate_z == 900:
-    tests.append("Pass: set scale rate correct input castable floats")
-else:
-    tests.append("Fail: set scale rate correct input castable floats")
+def test_set_id_correct_input_string():
+    test_nfr.set_id("600")
+    assert test_nfr.id == test_nfr.data == test_nfr.record_id == 600
+
+
+def test_set_id_correct_input_float():
+    test_nfr.set_id(300.0)
+    assert test_nfr.id == test_nfr.data == test_nfr.record_id == 300
+
+
+def test_set_id_bad_input():
+    test_nfr.set_id(100)
+    assert test_nfr.id == test_nfr.data == test_nfr.record_id == 100
+
 
 # endregion
 
-# region set translate rate
+# region set tag
 
-test_nfr.set_translate_rate(100, 200, 300)
-if test_nfr.translate_rate_x == 100 and test_nfr.translate_rate_y == 200 and test_nfr.translate_rate_z == 300:
-    tests.append("Pass: set translate rate correct input ints")
-else:
-    tests.append("Fail: set translate rate correct input ints")
+def test_set_tag_correct_input_int():
+    test_nfr.set_tag("Test", 1)
+    assert test_nfr.tag_text == "Test" and test_nfr.tag_mode == 1
 
-test_nfr.set_translate_rate("400", "500", "600")
-if test_nfr.translate_rate_x == 400 and test_nfr.translate_rate_y == 500 and test_nfr.translate_rate_z == 600:
-    tests.append("Pass: set translate rate correct input castable strings")
-else:
-    tests.append("Fail: set translate rate correct input castable strings")
 
-test_nfr.set_translate_rate(700.0, 800.0, 900.0)
-if test_nfr.translate_rate_x == 700 and test_nfr.translate_rate_y == 800 and test_nfr.translate_rate_z == 900:
-    tests.append("Pass: set translate rate correct input castable floats")
-else:
-    tests.append("Fail: set translate rate correct input castable floats")
+def test_set_tag_correct_input_string():
+    test_nfr.set_tag("Test", "3")
+    assert test_nfr.tag_text == "Test" and test_nfr.tag_mode == 3
+
+
+def test_set_tag_correct_input_float():
+    test_nfr.set_tag("Test", 5.0)
+    assert test_nfr.tag_text == "Test" and test_nfr.tag_mode == 5
+
 
 # endregion
 
-# region set translate vec
+# region set aux a
 
-test_nfr.set_translate_vec(100, 200, 300)
-if test_nfr.translate_vec_x == 100 and test_nfr.translate_vec_y == 200 and test_nfr.translate_vec_z == 300:
-    tests.append("Pass: set translate vec correct input ints")
-else:
-    tests.append("Fail: set translate vec correct input ints")
+def test_set_aux_a_correct_input_ints():
+    test_nfr.set_aux_a(100, 200, 300)
+    assert test_nfr.aux_a_x == 100 and test_nfr.aux_a_y == 200 and test_nfr.aux_a_z == 300
 
-test_nfr.set_translate_vec("400", "500", "600")
-if test_nfr.translate_vec_x == 400 and test_nfr.translate_vec_y == 500 and test_nfr.translate_vec_z == 600:
-    tests.append("Pass: set translate vec correct input castable strings")
-else:
-    tests.append("Fail: set translate vec correct input castable strings")
 
-test_nfr.set_translate_vec(700.0, 800.0, 900.0)
-if test_nfr.translate_vec_x == 700 and test_nfr.translate_vec_y == 800 and test_nfr.translate_vec_z == 900:
-    tests.append("Pass: set translate vec correct input castable floats")
-else:
-    tests.append("Fail: set translate vec correct input castable floats")
+def test_set_aux_a_correct_input_strings():
+    test_nfr.set_aux_a("400", "500", "600")
+    assert test_nfr.aux_a_x == 400 and test_nfr.aux_a_y == 500 and test_nfr.aux_a_z == 600
+
+
+def test_set_aux_a_correct_input_floats():
+    test_nfr.set_aux_a(700.0, 800.0, 900.0)
+    assert test_nfr.aux_a_x == 700 and test_nfr.aux_a_y == 800 and test_nfr.aux_a_z == 900
+
+
+def test_set_aux_a_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_aux_a("a", "b", "C")
+
 
 # endregion
 
-# region set auto zoom
+# region aux_b
 
-test_nfr.set_auto_zoom(100, 200, 300)
-if test_nfr.auto_zoom_x == 100 and test_nfr.auto_zoom_y == 200 and test_nfr.auto_zoom_z == 300:
-    tests.append("Pass: set auto zoom correct input ints")
-else:
-    tests.append("Fail: set auto zoom correct input ints")
+def test_set_aux_b_correct_input_ints():
+    test_nfr.set_aux_b(100, 200, 300)
+    assert test_nfr.aux_b_x == 100 and test_nfr.aux_b_y == 200 and test_nfr.aux_b_z == 300
 
-test_nfr.set_auto_zoom("400", "500", "600")
-if test_nfr.auto_zoom_x == 400 and test_nfr.auto_zoom_y == 500 and test_nfr.auto_zoom_z == 600:
-    tests.append("Pass: set auto zoom correct input castable strings")
-else:
-    tests.append("Fail: set auto zoom correct input castable strings")
 
-test_nfr.set_auto_zoom(700.0, 800.0, 900.0)
-if test_nfr.auto_zoom_x == 700 and test_nfr.auto_zoom_y == 800 and test_nfr.auto_zoom_z == 900:
-    tests.append("Pass: set auto zoom correct input castable floats")
-else:
-    tests.append("Fail: set auto zoom correct input castable floats")
+def test_set_aux_b_correct_input_strings():
+    test_nfr.set_aux_b("400", "500", "600")
+    assert test_nfr.aux_b_x == 400 and test_nfr.aux_b_y == 500 and test_nfr.aux_b_z == 600
+
+
+def test_set_aux_b_correct_input_floats():
+    test_nfr.set_aux_b(700.0, 800.0, 900.0)
+    assert test_nfr.aux_b_x == 700 and test_nfr.aux_b_y == 800 and test_nfr.aux_b_z == 900
+
+
+def test_set_aux_b_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_aux_b("a", "b", "C")
+
 
 # endregion
 
-# region set trigger hi
+# region rotate_rate
 
-test_nfr.set_auto_zoom(100, 200, 300)
-if test_nfr.auto_zoom_x == 100 and test_nfr.auto_zoom_y == 200 and test_nfr.auto_zoom_z == 300:
-    tests.append("Pass: set auto zoom correct input ints")
-else:
-    tests.append("Fail: set auto zoom correct input ints")
+def test_set_rotate_rate_correct_input_ints():
+    test_nfr.set_rotate_rate(100, 200, 300)
+    assert test_nfr.rotate_rate_x == 100 and test_nfr.rotate_rate_y == 200 and test_nfr.rotate_rate_z == 300
 
-test_nfr.set_auto_zoom("400", "500", "600")
-if test_nfr.auto_zoom_x == 400 and test_nfr.auto_zoom_y == 500 and test_nfr.auto_zoom_z == 600:
-    tests.append("Pass: set auto zoom correct input castable strings")
-else:
-    tests.append("Fail: set auto zoom correct input castable strings")
 
-test_nfr.set_auto_zoom(700.0, 800.0, 900.0)
-if test_nfr.auto_zoom_x == 700 and test_nfr.auto_zoom_y == 800 and test_nfr.auto_zoom_z == 900:
-    tests.append("Pass: set auto zoom correct input castable floats")
-else:
-    tests.append("Fail: set auto zoom correct input castable floats")
+def test_set_rotate_rate_correct_input_strings():
+    test_nfr.set_rotate_rate("400", "500", "600")
+    assert test_nfr.rotate_rate_x == 400 and test_nfr.rotate_rate_y == 500 and test_nfr.rotate_rate_z == 600
+
+
+def test_set_rotate_rate_correct_input_floats():
+    test_nfr.set_rotate_rate(700.0, 800.0, 900.0)
+    assert test_nfr.rotate_rate_x == 700 and test_nfr.rotate_rate_y == 800 and test_nfr.rotate_rate_z == 900
+
+
+def test_set_rotate_rate_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_rotate_rate("a", "b", "C")
+
 
 # endregion
 
-# region set trigger_hi
+# region scale_rate
 
-test_nfr.set_trigger_hi(100, 200, 300)
-if test_nfr.trigger_hi_x == 100 and test_nfr.trigger_hi_y == 200 and test_nfr.trigger_hi_z == 300:
-	tests.append("Pass: set trigger_hi correct input ints")
-else:
-	tests.append("Fail: set trigger_hi correct input ints")
+def test_set_scale_rate_correct_input_ints():
+    test_nfr.set_scale_rate(100, 200, 300)
+    assert test_nfr.scale_rate_x == 100 and test_nfr.scale_rate_y == 200 and test_nfr.scale_rate_z == 300
 
-test_nfr.set_trigger_hi("400", "500", "600")
-if test_nfr.trigger_hi_x == 400 and test_nfr.trigger_hi_y == 500 and test_nfr.trigger_hi_z == 600:
-	tests.append("Pass: set trigger_hi correct input castable strings")
-else:
-	tests.append("Fail: set trigger_hi correct input castable strings")
 
-test_nfr.set_trigger_hi(700.0, 800.0, 900.0)
-if test_nfr.trigger_hi_x == 700 and test_nfr.trigger_hi_y == 800 and test_nfr.trigger_hi_z == 900:
-	tests.append("Pass: set trigger_hi correct input castable floats")
-else:
-	tests.append("Fail: set trigger_hi correct input castable floats")
+def test_set_scale_rate_correct_input_strings():
+    test_nfr.set_scale_rate("400", "500", "600")
+    assert test_nfr.scale_rate_x == 400 and test_nfr.scale_rate_y == 500 and test_nfr.scale_rate_z == 600
+
+
+def test_set_scale_rate_correct_input_floats():
+    test_nfr.set_scale_rate(700.0, 800.0, 900.0)
+    assert test_nfr.scale_rate_x == 700 and test_nfr.scale_rate_y == 800 and test_nfr.scale_rate_z == 900
+
+
+def test_set_scale_rate_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_scale_rate("a", "b", "C")
+
 
 # endregion
 
-# region set trigger_lo
+# region rotate_vec
 
-test_nfr.set_trigger_lo(100, 200, 300)
-if test_nfr.trigger_lo_x == 100 and test_nfr.trigger_lo_y == 200 and test_nfr.trigger_lo_z == 300:
-	tests.append("Pass: set trigger_lo correct input ints")
-else:
-	tests.append("Fail: set trigger_lo correct input ints")
+def test_set_rotate_vec_correct_input_ints():
+    test_nfr.set_rotate_vec(100, 200, 300, 110)
+    assert test_nfr.rotate_vec_x == 100 and \
+           test_nfr.rotate_vec_y == 200 and \
+           test_nfr.rotate_vec_z == 300 and \
+           test_nfr.rotate_vec_s == 110
 
-test_nfr.set_trigger_lo("400", "500", "600")
-if test_nfr.trigger_lo_x == 400 and test_nfr.trigger_lo_y == 500 and test_nfr.trigger_lo_z == 600:
-	tests.append("Pass: set trigger_lo correct input castable strings")
-else:
-	tests.append("Fail: set trigger_lo correct input castable strings")
 
-test_nfr.set_trigger_lo(700.0, 800.0, 900.0)
-if test_nfr.trigger_lo_x == 700 and test_nfr.trigger_lo_y == 800 and test_nfr.trigger_lo_z == 900:
-	tests.append("Pass: set trigger_lo correct input castable floats")
-else:
-	tests.append("Fail: set trigger_lo correct input castable floats")
+def test_set_rotate_vec_correct_input_strings():
+    test_nfr.set_rotate_vec("400", "500", "600", "120")
+    assert test_nfr.rotate_vec_x == 400 and \
+           test_nfr.rotate_vec_y == 500 and \
+           test_nfr.rotate_vec_z == 600 and \
+           test_nfr.rotate_vec_s == 120
+
+
+def test_set_rotate_vec_correct_input_floats():
+    test_nfr.set_rotate_vec(700.0, 800.0, 900.0, 130.0)
+    assert test_nfr.rotate_vec_x == 700 \
+           and test_nfr.rotate_vec_y == 800 \
+           and test_nfr.rotate_vec_z == 900 \
+           and test_nfr.rotate_vec_s == 130
+
+
+def test_set_rotate_vec_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_rotate_vec("a", "b", "C", "D")
+
 
 # endregion
 
-# region set hi
+# region scale
 
-test_nfr.set_hi(100, 200, 300)
-if test_nfr.set_hi_x == 100 and test_nfr.set_hi_y == 200 and test_nfr.set_hi_z == 300:
-	tests.append("Pass: set hi correct input ints")
-else:
-	tests.append("Fail: set hi correct input ints")
+def test_set_scale_correct_input_integrals():
+    test_nfr.set_scale(100.1, 200.2, 300.3)
+    assert test_nfr.scale_x == 100.1 and test_nfr.scale_y == 200.2 and test_nfr.scale_z == 300.3
 
-test_nfr.set_hi("400", "500", "600")
-if test_nfr.set_hi_x == 400 and test_nfr.set_hi_y == 500 and test_nfr.set_hi_z == 600:
-	tests.append("Pass: set hi correct input castable strings")
-else:
-	tests.append("Fail: set hi correct input castable strings")
 
-test_nfr.set_hi(700.0, 800.0, 900.0)
-if test_nfr.set_hi_x == 700 and test_nfr.set_hi_y == 800 and test_nfr.set_hi_z == 900:
-	tests.append("Pass: set hi correct input castable floats")
-else:
-	tests.append("Fail: set hi correct input castable floats")
+def test_set_scale_correct_input_strings():
+    test_nfr.set_scale("400.4", "500.5", "600.6")
+    assert test_nfr.scale_x == 400.4 and test_nfr.scale_y == 500.5 and test_nfr.scale_z == 600.6
+
+
+def test_set_scale_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_scale("a", "b", "C")
+
 
 # endregion
 
-# region set lo
+# region translate
 
-test_nfr.set_lo(100, 200, 300)
-if test_nfr.set_lo_x == 100 and test_nfr.set_lo_y == 200 and test_nfr.set_lo_z == 300:
-	tests.append("Pass: set lo correct input ints")
-else:
-	tests.append("Fail: set lo correct input ints")
+def test_set_translate_correct_input_integrals():
+    test_nfr.set_translate(100.1, 200.2, 300.3)
+    assert test_nfr.translate_x == 100.1 and test_nfr.translate_y == 200.2 and test_nfr.translate_z == 300.3
 
-test_nfr.set_lo("400", "500", "600")
-if test_nfr.set_lo_x == 400 and test_nfr.set_lo_y == 500 and test_nfr.set_lo_z == 600:
-	tests.append("Pass: set lo correct input castable strings")
-else:
-	tests.append("Fail: set lo correct input castable strings")
 
-test_nfr.set_lo(700.0, 800.0, 900.0)
-if test_nfr.set_lo_x == 700 and test_nfr.set_lo_y == 800 and test_nfr.set_lo_z == 900:
-	tests.append("Pass: set lo correct input castable floats")
-else:
-	tests.append("Fail: set lo correct input castable floats")
+def test_set_translate_correct_input_strings():
+    test_nfr.set_translate("400.4", "500.5", "600.6")
+    assert test_nfr.translate_x == 400.4 and test_nfr.translate_y == 500.5 and test_nfr.translate_z == 600.6
+
+
+def test_set_translate_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_translate("a", "b", "C")
+
 
 # endregion
 
-# region set proximity
+# region tag_offset
 
-test_nfr.set_proximity(100.1, 200.2, 300.3)
-if test_nfr.proximity_x == 100.1 and test_nfr.proximity_y == 200.2 and test_nfr.proximity_z == 300.3:
-	tests.append("Pass: set proximity correct input integrals")
-else:
-	tests.append("Fail: set proximity correct input integrals")
+def test_set_tag_offset_correct_input_integrals():
+    test_nfr.set_tag_offset(100.1, 200.2, 300.3)
+    assert test_nfr.tag_offset_x == 100.1 and test_nfr.tag_offset_y == 200.2 and test_nfr.tag_offset_z == 300.3
 
-test_nfr.set_proximity("400", "500", "600")
-if test_nfr.proximity_x == 400 and test_nfr.proximity_y == 500 and test_nfr.proximity_z == 600:
-	tests.append("Pass: set proximity correct input castable strings")
-else:
-	tests.append("Fail: set proximity correct input castable strings")
+
+def test_set_tag_offset_correct_input_strings():
+    test_nfr.set_tag_offset("400.4", "500.5", "600.6")
+    assert test_nfr.tag_offset_x == 400.4 and test_nfr.tag_offset_y == 500.5 and test_nfr.tag_offset_z == 600.6
+
+
+def test_set_tag_offset_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_tag_offset("a", "b", "C")
+
 
 # endregion
 
-# region set proximity_mode
+# region rotate
 
-test_nfr.set_proximity_mode(100, 200, 300)
-if test_nfr.proximity_mode_x == 100 and test_nfr.proximity_mode_y == 200 and test_nfr.proximity_mode_z == 300:
-	tests.append("Pass: set proximity_mode correct input ints")
-else:
-	tests.append("Fail: set proximity_mode correct input ints")
+def test_set_rotate_correct_input_integrals():
+    test_nfr.set_rotate(100.1, 200.2, 300.3)
+    assert test_nfr.rotate_x == 100.1 and test_nfr.rotate_y == 200.2 and test_nfr.rotate_z == 300.3
 
-test_nfr.set_proximity_mode("400", "500", "600")
-if test_nfr.proximity_mode_x == 400 and test_nfr.proximity_mode_y == 500 and test_nfr.proximity_mode_z == 600:
-	tests.append("Pass: set proximity_mode correct input castable strings")
-else:
-	tests.append("Fail: set proximity_mode correct input castable strings")
 
-test_nfr.set_proximity_mode(700.0, 800.0, 900.0)
-if test_nfr.proximity_mode_x == 700 and test_nfr.proximity_mode_y == 800 and test_nfr.proximity_mode_z == 900:
-	tests.append("Pass: set proximity_mode correct input castable floats")
-else:
-	tests.append("Fail: set proximity_mode correct input castable floats")
+def test_set_rotate_correct_input_strings():
+    test_nfr.set_rotate("400.4", "500.5", "600.6")
+    assert test_nfr.rotate_x == 400.4 and test_nfr.rotate_y == 500.5 and test_nfr.rotate_z == 600.6
+
+
+def test_set_rotate_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_rotate("a", "b", "C")
+
 
 # endregion
 
-# region set segments
+# region translate_rate
 
-test_nfr.set_segments(100, 200, 300)
-if test_nfr.segments_x == 100 and test_nfr.segments_y == 200 and test_nfr.segments_z == 300:
-	tests.append("Pass: set segments correct input ints")
-else:
-	tests.append("Fail: set segments correct input ints")
+def test_set_translate_rate_correct_input_ints():
+    test_nfr.set_translate_rate(100, 200, 300)
+    assert test_nfr.translate_rate_x == 100 and test_nfr.translate_rate_y == 200 and test_nfr.translate_rate_z == 300
 
-test_nfr.set_segments("400", "500", "600")
-if test_nfr.segments_x == 400 and test_nfr.segments_y == 500 and test_nfr.segments_z == 600:
-	tests.append("Pass: set segments correct input castable strings")
-else:
-	tests.append("Fail: set segments correct input castable strings")
 
-test_nfr.set_segments(700.0, 800.0, 900.0)
-if test_nfr.segments_x == 700 and test_nfr.segments_y == 800 and test_nfr.segments_z == 900:
-	tests.append("Pass: set segments correct input castable floats")
-else:
-	tests.append("Fail: set segments correct input castable floats")
+def test_set_translate_rate_correct_input_strings():
+    test_nfr.set_translate_rate("400", "500", "600")
+    assert test_nfr.translate_rate_x == 400 and test_nfr.translate_rate_y == 500 and test_nfr.translate_rate_z == 600
+
+
+def test_set_translate_rate_correct_input_floats():
+    test_nfr.set_translate_rate(700.0, 800.0, 900.0)
+    assert test_nfr.translate_rate_x == 700 and test_nfr.translate_rate_y == 800 and test_nfr.translate_rate_z == 900
+
+
+def test_set_translate_rate_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_translate_rate("a", "b", "C")
+
 
 # endregion
 
+# region translate_vec
+
+def test_set_translate_vec_correct_input_ints():
+    test_nfr.set_translate_vec(100, 200, 300)
+    assert test_nfr.translate_vec_x == 100 and test_nfr.translate_vec_y == 200 and test_nfr.translate_vec_z == 300
 
 
-print("\n******************Results***************")
-for test in tests:
-    print(test)
+def test_set_translate_vec_correct_input_strings():
+    test_nfr.set_translate_vec("400", "500", "600")
+    assert test_nfr.translate_vec_x == 400 and test_nfr.translate_vec_y == 500 and test_nfr.translate_vec_z == 600
 
+
+def test_set_translate_vec_correct_input_floats():
+    test_nfr.set_translate_vec(700.0, 800.0, 900.0)
+    assert test_nfr.translate_vec_x == 700 and test_nfr.translate_vec_y == 800 and test_nfr.translate_vec_z == 900
+
+
+def test_set_translate_vec_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_translate_vec("a", "b", "C")
+
+
+# endregion
+
+# region color
+
+def test_set_color_correct_input_ints():
+    test_nfr.set_color(100, 200, 300, 430)
+    assert test_nfr.color_r == 100 and test_nfr.color_g == 200 and test_nfr.color_b == 300 and test_nfr.color_a == 430
+
+
+def test_set_color_correct_input_strings():
+    test_nfr.set_color("400", "500", "600", "770")
+    assert test_nfr.color_r == 400 and test_nfr.color_g == 500 and test_nfr.color_b == 600 and test_nfr.color_a == 770
+
+
+def test_set_color_correct_input_floats():
+    test_nfr.set_color(700.0, 800.0, 900.0, 1050)
+    assert test_nfr.color_r == 700 and test_nfr.color_g == 800 and test_nfr.color_b == 900 and test_nfr.color_a == 1050
+
+
+def test_set_color_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_color("a", "b", "C", "D")
+
+
+# endregion
+
+# region auto_zoom
+
+def test_set_auto_zoom_correct_input_ints():
+    test_nfr.set_auto_zoom(100, 200, 300)
+    assert test_nfr.auto_zoom_x == 100 and test_nfr.auto_zoom_y == 200 and test_nfr.auto_zoom_z == 300
+
+
+def test_set_auto_zoom_correct_input_strings():
+    test_nfr.set_auto_zoom("400", "500", "600")
+    assert test_nfr.auto_zoom_x == 400 and test_nfr.auto_zoom_y == 500 and test_nfr.auto_zoom_z == 600
+
+
+def test_set_auto_zoom_correct_input_floats():
+    test_nfr.set_auto_zoom(700.0, 800.0, 900.0)
+    assert test_nfr.auto_zoom_x == 700 and test_nfr.auto_zoom_y == 800 and test_nfr.auto_zoom_z == 900
+
+
+def test_set_auto_zoom_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_auto_zoom("a", "b", "C")
+
+
+# endregion
+
+# region trigger_hi
+
+def test_set_trigger_hi_correct_input_ints():
+    test_nfr.set_trigger_hi(100, 200, 300)
+    assert test_nfr.trigger_hi_x == 100 and test_nfr.trigger_hi_y == 200 and test_nfr.trigger_hi_z == 300
+
+
+def test_set_trigger_hi_correct_input_strings():
+    test_nfr.set_trigger_hi("400", "500", "600")
+    assert test_nfr.trigger_hi_x == 400 and test_nfr.trigger_hi_y == 500 and test_nfr.trigger_hi_z == 600
+
+
+def test_set_trigger_hi_correct_input_floats():
+    test_nfr.set_trigger_hi(700.0, 800.0, 900.0)
+    assert test_nfr.trigger_hi_x == 700 and test_nfr.trigger_hi_y == 800 and test_nfr.trigger_hi_z == 900
+
+
+def test_set_trigger_hi_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_trigger_hi("a", "b", "C")
+
+
+# endregion
+
+# region trigger_lo
+
+def test_set_trigger_lo_correct_input_ints():
+    test_nfr.set_trigger_lo(100, 200, 300)
+    assert test_nfr.trigger_lo_x == 100 and test_nfr.trigger_lo_y == 200 and test_nfr.trigger_lo_z == 300
+
+
+def test_set_trigger_lo_correct_input_strings():
+    test_nfr.set_trigger_lo("400", "500", "600")
+    assert test_nfr.trigger_lo_x == 400 and test_nfr.trigger_lo_y == 500 and test_nfr.trigger_lo_z == 600
+
+
+def test_set_trigger_lo_correct_input_floats():
+    test_nfr.set_trigger_lo(700.0, 800.0, 900.0)
+    assert test_nfr.trigger_lo_x == 700 and test_nfr.trigger_lo_y == 800 and test_nfr.trigger_lo_z == 900
+
+
+def test_set_trigger_lo_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_trigger_lo("a", "b", "C")
+
+
+# endregion
+
+# region set_hi
+
+def test_set_set_hi_correct_input_ints():
+    test_nfr.set_set_hi(100, 200, 300)
+    assert test_nfr.set_hi_x == 100 and test_nfr.set_hi_y == 200 and test_nfr.set_hi_z == 300
+
+
+def test_set_set_hi_correct_input_strings():
+    test_nfr.set_set_hi("400", "500", "600")
+    assert test_nfr.set_hi_x == 400 and test_nfr.set_hi_y == 500 and test_nfr.set_hi_z == 600
+
+
+def test_set_set_hi_correct_input_floats():
+    test_nfr.set_set_hi(700.0, 800.0, 900.0)
+    assert test_nfr.set_hi_x == 700 and test_nfr.set_hi_y == 800 and test_nfr.set_hi_z == 900
+
+
+def test_set_set_hi_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_set_hi("a", "b", "C")
+
+
+# endregion
+
+# region set_lo
+
+def test_set_set_lo_correct_input_ints():
+    test_nfr.set_set_lo(100, 200, 300)
+    assert test_nfr.set_lo_x == 100 and test_nfr.set_lo_y == 200 and test_nfr.set_lo_z == 300
+
+
+def test_set_set_lo_correct_input_strings():
+    test_nfr.set_set_lo("400", "500", "600")
+    assert test_nfr.set_lo_x == 400 and test_nfr.set_lo_y == 500 and test_nfr.set_lo_z == 600
+
+
+def test_set_set_lo_correct_input_floats():
+    test_nfr.set_set_lo(700.0, 800.0, 900.0)
+    assert test_nfr.set_lo_x == 700 and test_nfr.set_lo_y == 800 and test_nfr.set_lo_z == 900
+
+
+def test_set_set_lo_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_set_lo("a", "b", "C")
+
+
+# endregion
+
+# region proximity_mode
+
+def test_set_proximity_mode_correct_input_ints():
+    test_nfr.set_proximity_mode(100, 200, 300)
+    assert test_nfr.proximity_mode_x == 100 and test_nfr.proximity_mode_y == 200 and test_nfr.proximity_mode_z == 300
+
+
+def test_set_proximity_mode_correct_input_strings():
+    test_nfr.set_proximity_mode("400", "500", "600")
+    assert test_nfr.proximity_mode_x == 400 and test_nfr.proximity_mode_y == 500 and test_nfr.proximity_mode_z == 600
+
+
+def test_set_proximity_mode_correct_input_floats():
+    test_nfr.set_proximity_mode(700.0, 800.0, 900.0)
+    assert test_nfr.proximity_mode_x == 700 and test_nfr.proximity_mode_y == 800 and test_nfr.proximity_mode_z == 900
+
+
+def test_set_proximity_mode_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_proximity_mode("a", "b", "C")
+
+
+# endregion
+
+# region segments
+
+def test_set_segments_correct_input_ints():
+    test_nfr.set_segments(100, 200, 300)
+    assert test_nfr.segments_x == 100 and test_nfr.segments_y == 200 and test_nfr.segments_z == 300
+
+
+def test_set_segments_correct_input_strings():
+    test_nfr.set_segments("400", "500", "600")
+    assert test_nfr.segments_x == 400 and test_nfr.segments_y == 500 and test_nfr.segments_z == 600
+
+
+def test_set_segments_correct_input_floats():
+    test_nfr.set_segments(700.0, 800.0, 900.0)
+    assert test_nfr.segments_x == 700 and test_nfr.segments_y == 800 and test_nfr.segments_z == 900
+
+
+def test_set_segments_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_segments("a", "b", "C")
+
+# endregion
+
+# endregion
