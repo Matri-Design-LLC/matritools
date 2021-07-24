@@ -1,0 +1,8 @@
+blackmagic-design.txt 2021-02-03
+
+---------------------------------------------------------------
+
+We support Blackmagic Design video capture devices. You may
+request support at:
+
+https://openantz.com

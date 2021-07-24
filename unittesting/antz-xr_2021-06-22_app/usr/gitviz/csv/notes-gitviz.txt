@@ -1,0 +1,5 @@
+gitviz CSV files go here.
+
+For configuring see:
+
+https://github.com/openantz/antz/wiki/GitViz
