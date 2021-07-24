@@ -1,0 +1,4 @@
+csv-notes.txt 2021-01-25
+
+antzglobals.csv
+Loads globals environment variables, eg. fullscreen, gitviz, mysql....

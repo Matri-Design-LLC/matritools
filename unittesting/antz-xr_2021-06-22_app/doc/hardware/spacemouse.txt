@@ -1,0 +1,12 @@
+spacemouse.txt 2021-02-03
+
+Logitech - 3Dconnexion SpaceMouse family (Pro, Enterprise...)
+---------------------------------------------------------------
+
+We work directly with the HID messages and do not require a 
+driver.
+
+However, you likely will install the 3Dconnexion driver and 
+may find our wiki page useful:
+
+https://github.com/openantz/antz/wiki/3D-Mouse

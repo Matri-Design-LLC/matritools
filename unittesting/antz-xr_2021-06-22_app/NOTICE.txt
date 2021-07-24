@@ -1,0 +1,32 @@
+ANTz - Attributions & 3rd Party Libraries
+
+NOTICE.txt last updated: 2021-02-11
+
+-------------------------------------------------------------------------------
+*
+*  ANTz - 3D data visualization tools for the group mind, based on NPE.
+*
+*  Written in 2010-2021 by Shane Saxon - saxon@openantz.com
+*
+*  Additional code contributors are listed chronologically: Lucas Erickson,
+*  Mark Buchanan and Johannes Johannsen.
+*
+*  Special thanks to Dave Warner, project synergist and conceptual architect.
+*
+*  Gratitude to Jeff Sale for training, documentation and great visualizations!
+*
+-------------------------------------------------------------------------------
+
+FOREWORD:
+
+ANTz is an open source project currently released under the Apache License 2.0.
+We would like to point out two things:
+
+1) You should include a copy of the LICENSE.txt and NOTICE.txt (attributions).
+2) You have clear patent (troll) protection with the Apache-2.0 license.
+
+DISCLAIMER: ANTz LICENSE DOES NOT APPLY TO ANY 3RD PARTY LIBRARIES, MEDIA, ETC.
+
+3RD PARTY LIBRARY LICENSES are in the 'doc' folder.
+
+ALL TRADEMARKS AND COPYRIGHTS BELONG TO THEIR RESPECTIVE OWNERS.
