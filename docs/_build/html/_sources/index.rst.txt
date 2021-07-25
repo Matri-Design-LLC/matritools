@@ -30,7 +30,7 @@ API
 
 nodefile
 -------
-* `NodeFile <https://matritools.readthedocs.io/en/main/index.html>`_
+* `NodeFile <https://matritools.readthedocs.io/en/main/nodefile.html>`_
    * `Constructor <>`_
    * `Attributes <>`_
    * `get_row_by_index <>`_
