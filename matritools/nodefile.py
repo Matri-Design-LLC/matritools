@@ -288,12 +288,13 @@ class AntzGlyph:
             raise RuntimeError("antz_glyph was constructed without a csv file name")
 
     def increment_ids(self, match_data_and_record_id_to_id: bool = True):
+
         self.make_ids_consecutive(self.node_file_rows[len(self.node_file_rows) - 1].id + 1,
                                       match_data_and_record_id_to_id)
 
     def unselect_all(self):
         """
-        Changes the selected property of all node file rows to 0.
+        Changes the selected property of all glyph node file rows to 0.
         :return: None
         """
 
@@ -301,6 +302,10 @@ class AntzGlyph:
             row.selected = 0
 
     def match_record_ids_and_data_to_ids(self):
+        """
+        Iterates over each NodeFileRow in the glyph and matches its record id and data to its id
+        :return: None
+        """
         for row in self.node_file_rows:
             row.set_id(row.id)
 
@@ -313,7 +318,11 @@ class AntzGlyph:
         return rows
 
     def remove_rows_of_branch_level(self, branch_level):
-        """ removes all NodeFileRow's of a given branch level"""
+        """
+        Removes all NodeFileRow's of a given branch level
+        :param branch level of all removed items (default: None)
+        :return: None
+        """
         rows = self.get_rows_of_branch_level(branch_level)
 
         for row in rows:

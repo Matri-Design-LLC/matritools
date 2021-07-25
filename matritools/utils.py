@@ -32,7 +32,7 @@ def interpolate_df_column(df, column, obj_scale_min, obj_scale_max, column_tail)
     df[(column + column_tail)] = col_interp
 
 
-def make_interpolater(old_min, old_max, new_min, new_max):
+def make_interpolator(old_min, old_max, new_min, new_max):
     """
     Creates a reusable interpolation function to scale a value in between a new min and new max
 
