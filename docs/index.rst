@@ -42,7 +42,8 @@ nodefile
    * `to_dataframe <https://matritools.readthedocs.io/en/latest/nodefile-to_dataframe.html>`_
    * `__add_initial_rows__ <https://matritools.readthedocs.io/en/latest/nodefile-__add_initial_rows__.html>`_
 
-* `AntzGlyph <https://matritools.readthedocs.io/en/latest/antzglyph.html>`_
+test test test
+* `AntzGlyph <antzglyph.html>`_
    * `Constructor <https://matritools.readthedocs.io/en/latest/antzglyph-constructor.html>`_
    * `Attributes <https://matritools.readthedocs.io/en/latest/antzglyph-attributes.html>`_
    * `increment_ids <https://matritools.readthedocs.io/en/latest/antzglyph-increment_ids.html>`_
