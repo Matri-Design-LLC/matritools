@@ -1,0 +1,11 @@
+README.md
+setup.py
+matritools/__init__.py
+matritools/dataexploration.py
+matritools/nodefile.py
+matritools/utils.py
+matritools.egg-info/PKG-INFO
+matritools.egg-info/SOURCES.txt
+matritools.egg-info/dependency_links.txt
+matritools.egg-info/requires.txt
+matritools.egg-info/top_level.txt
