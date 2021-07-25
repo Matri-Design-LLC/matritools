@@ -28,7 +28,7 @@ as well as commonly used data manipulation functions used by Matri Design LLC.
 API
 ==================
 
-classes
+nodefile
 -------
 * `NodeFile <>`_
    * `Constructor <>`_
