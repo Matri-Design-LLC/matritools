@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'matritools'
+project = 'Matritools'
 copyright = '2021, Greg Brandt, Marielle Dado'
 author = 'Greg Brandt, Marielle Dado'
 

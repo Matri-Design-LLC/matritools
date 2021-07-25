@@ -116,7 +116,7 @@ class NodeFile:
             node_row.tag_text = tag_text
         self.properties.set_id(self.properties.id + 1)
 
-    def add_glyph_to_node_file_rows(self, glyph):
+    def add_glyph(self, glyph):
         """
         Appends all rows of a glyph to node_file_rows and increments glyph template id, parent_id, data, and record_id
         :param glyph:
@@ -127,7 +127,7 @@ class NodeFile:
             raise RuntimeError("glyph must be of type AntzGlyph")
         for row in glyph.node_file_rows:
             self.node_file_rows.append(copy.deepcopy(row))
-        glyph.increment_node_file_rows()
+        glyph.increment_ids()
 
     def to_dataframe(self):
         """ returns a data frame with all node file rows """
@@ -287,7 +287,7 @@ class AntzGlyph:
         else:
             raise RuntimeError("antz_glyph was constructed without a csv file name")
 
-    def increment_node_file_rows(self, match_data_and_record_id_to_id: bool = True):
+    def increment_ids(self, match_data_and_record_id_to_id: bool = True):
         self.make_ids_consecutive(self.node_file_rows[len(self.node_file_rows) - 1].id + 1,
                                       match_data_and_record_id_to_id)
 
