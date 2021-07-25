@@ -1,4 +1,4 @@
-`AntzGlyph <https://matritools.readthedocs.io/en/main/antzglyph.html>`_
+`AntzGlyph <https://matritools.readthedocs.io/en/lastest/antzglyph.html>`_
 ==========
 get_rows_of_branch_level
 -------------
