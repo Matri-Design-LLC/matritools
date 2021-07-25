@@ -1,8 +1,0 @@
-legacy-csv-folder.txt 2021-01-25
-
-This is the legacy CSV tables folder.
-
-Legacy support will LOAD presets (eg. antz0001node.csv) from here, but
-on SAVE (SHIFT+1) the preset files will be REMOVED from this folder and
-a new folder will be created that is named with the preset and contains
-a similar set of files (eg. '../usr/antz0001/csv/antz0001node.csv').
