@@ -19,7 +19,6 @@ as well as commonly used data manipulation functions used by Matri Design LLC.
    This project is under active development.
 
 .. toctree::
-   :maxdepth: 2
    :caption: API:
 
    Nodefile <nodefile>
