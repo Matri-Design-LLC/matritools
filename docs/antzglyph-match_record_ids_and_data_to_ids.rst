@@ -1,5 +1,5 @@
-`AntzGlyph <https://matritools.readthedocs.io/en/lastest/antzglyph.html>`_
-==========
+`AntzGlyph <antzglyph>`_
+========================
 match_record_ids_and_data_to_ids
 --------------------------------
 Iterates over each NodeFileRow in the glyph and matches its record ID and data to its ID

@@ -1,7 +1,7 @@
-`AntzGlyph <https://matritools.readthedocs.io/en/lastest/antzglyph.html>`_
-==========
+`AntzGlyph <antzglyph>`_
+========================
 make_ids_consecutive
--------------
+--------------------
 Changes the IDs, parent IDs and child IDs to appear sequentially with no gaps between ID number.
 
 

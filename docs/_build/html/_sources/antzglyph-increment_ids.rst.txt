@@ -1,5 +1,5 @@
-`AntzGlyph <https://matritools.readthedocs.io/en/lastest/antzglyph.html>`_
-==========
+`AntzGlyph <antzglyph>`_
+========================
 increment_ids
 -------------
 Iterates over each NodeFileRow in the glyph and updates its ID, parent ID, and child ID reflect as a new glyph in a node

@@ -1,7 +1,7 @@
-`AntzGlyph <https://matritools.readthedocs.io/en/lastest/antzglyph.html>`_
-==========================================================================
+`AntzGlyph <antzglyph>`_
+========================
 Attributes
--------------
+----------
 
     +----------------------+----------------------------------------------+-----------+---------+
     | Name                 | Description                                  | Type      | Default |

@@ -1,7 +1,7 @@
-`AntzGlyph <https://matritools.readthedocs.io/en/lastest/antzglyph.html>`_
-==========
+`AntzGlyph <antzglyph>`_
+========================
 get_rows_of_branch_level
--------------
+------------------------
 Returns a list of NodeFileRows with a given branch level
 
 Parameters:
