@@ -1,4 +1,4 @@
-`Nodefile <nodefile.html>`_
+`NodeFile <nodefile.html>`_
 ===========================
 to_dataframe
 ------------
