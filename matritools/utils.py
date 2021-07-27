@@ -11,7 +11,7 @@ def create_df_from_json_string(json_string):
     return pd.DataFrame(json.load(json_string))
 
 
-def interpolate_df_column(df, column, obj_scale_min, obj_scale_max, column_tail):
+def interpolate_df_column(df, column: str, new_min: float, new_max: float, column_tail: str = "_interpolated"):
     """
     Scales the values of a data frame column between obj_scale_min and obj_scale_max.
     Adds the interpolated data into a new column labeled (original column name) + (column_tail) and preserves original
@@ -27,14 +27,14 @@ def interpolate_df_column(df, column, obj_scale_min, obj_scale_max, column_tail)
     col_min = df[column].min()
     col_max = df[column].max()
     col_list = df[column].tolist()
-    scalar = make_interpolater(col_min + .0002, col_max, obj_scale_min, obj_scale_max)
+    scalar = make_interpolater(col_min + .0002, col_max, float(new_min), float(new_max))
     col_interp = [scalar(x) for x in col_list]
-    df[(column + column_tail)] = col_interp
+    df[(str(column) + str(column_tail))] = col_interp
 
 
 def make_interpolator(old_min, old_max, new_min, new_max):
     """
-    Creates a reusable interpolation function to scale a value in between a new min and new max
+    Creates a reusable interpolation function to scale a value in between a new min and new max.
 
     :param old_min:
     :param old_max:
@@ -61,12 +61,11 @@ def make_interpolator(old_min, old_max, new_min, new_max):
 
     return interp_fn
 
-def separate_compound_dataframe(df, evaluate_df=True, name_template=""):
+def separate_compound_dataframe(df,  name_template=""):
     """
     Use to create a list of data frames from a dataframe with embedded lists.
 
     :param df: a data frame that has lists of data contained in individual cells
-    :param evaluate_df: set True to apply literal_eval (default True)
     :param name_template: individual data frame columns = lambda x: (name_template + "{}").format(x + 1) (default "")
     :return: list of data frames
 
@@ -84,9 +83,11 @@ def separate_compound_dataframe(df, evaluate_df=True, name_template=""):
         [ 31, 32, 33]      [ 34, 35, 36 ]      [ 37, 38, 39 ]
     """
     # Expand evaluate tupled data into lists
-    if evaluate_df:
-        for column in df.columns:
+    for column in df.columns:
+        try:
             df[column] = df[column].apply(literal_eval)
+        except:
+            pass
 
     df_list = []
 

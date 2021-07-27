@@ -1,6 +1,6 @@
 import pandas as pd
 
-def print_df_column_set(df, column, print_sets=False):
+def print_df_column_set(df, column: str, print_set: bool = False):
     """
     Prints every out the number unique values in a dataframe column
     :param df: target data frame
@@ -11,7 +11,7 @@ def print_df_column_set(df, column, print_sets=False):
     col_list = df[column].tolist()
     col_set = set(col_list)
 
-    if print_sets:
+    if print_set:
         print("\n\t" + column + ", \tLength: " + str(len(col_set)) + "\n")
         for value in col_set:
             print("\t\t" + str(value))

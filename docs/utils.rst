@@ -1,5 +1,6 @@
 utils
 =====
+Contains commonly used functions when wrangling data into a usable form to create data visualizations.
 
 .. toctree::
    :maxdepth: 1
