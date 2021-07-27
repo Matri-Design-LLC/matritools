@@ -19,7 +19,9 @@ as well as commonly used data manipulation functions used by Matri Design LLC.
    This project is under active development.
 
 .. toctree::
-   :caption: API:
+   :caption: nodefile
+
+.. toctree::
 
    Nodefile <nodefile>
    Constructor <nodefile-constructor>
@@ -32,6 +34,8 @@ as well as commonly used data manipulation functions used by Matri Design LLC.
    add_glyph <nodefile-add_glyph>
    to_dataframe <nodefile-to_dataframe>
 
+.. toctree::
+
    AntzGlyph <antzglyph>
    Constructor <antzglyph-constructor>
    Attributes <antzglyph-attributes>
@@ -41,6 +45,8 @@ as well as commonly used data manipulation functions used by Matri Design LLC.
    get_rows_of_branch_level <antzglyph-get_rows_of_branch_level>
    remove_rows_of_branch_level <antzglyph-remove_rows_of_branch_level>
    make_ids_consecutive <antzglyph-make_ids_consecutive>
+
+.. toctree::
 
    NodeFileRow <nodefilerow>
    Constructor <nodefilerow-constructor>
@@ -72,12 +78,19 @@ as well as commonly used data manipulation functions used by Matri Design LLC.
    set_proximity_mode <nodefilerow-set_proximity_mode>
    set_segments <nodefilerow-set_segments>
 
+.. toctree::
+   :caption: utils
+
    create_df_from_json <utils-create_df_from_json>
    create_df_from_json_string <utils-create_df_from_json_string>
    interpolate_df_column <utils-interpolate_df_column>
+   make_interpolator <utils-make_interpolator>
    separate_compound_dataframe <utils-separate_compound_dataframe>
    find_index_in_set <utils-find_index_in_set>
    set_to_list <utils-set_to_list>
+
+.. toctree::
+   :caption: dataexploration
 
    print_df_column_set <dataexploration-print_df_column_set>
    explore_df <dataexploration-explore_df>
