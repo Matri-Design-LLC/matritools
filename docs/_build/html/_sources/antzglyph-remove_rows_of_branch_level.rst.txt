@@ -6,11 +6,11 @@ Removes all NodeFileRow's of a given branch level
 
 Parameters:
 
-    +--------------+------------------------------------+------+---------+
-    | Name         | Description                        | Type | Default |
-    +==============+====================================+======+=========+
-    | branch_level | branch level of all removed items  | int  | None    |
-    +--------------+------------------------------------+------+---------+
++--------------+------------------------------------+------+---------+
+| Name         | Description                        | Type | Default |
++==============+====================================+======+=========+
+| branch_level | branch level of all removed items  | int  | None    |
++--------------+------------------------------------+------+---------+
 
 Returns: None
 

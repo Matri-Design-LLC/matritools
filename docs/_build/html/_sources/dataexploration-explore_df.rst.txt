@@ -6,11 +6,11 @@ Returns the result of df.describe() with an added row describe the number of uni
 
 Parameters:
 
-    +------------+-------------------+------------------+---------+
-    | Name       | Description       | Type             | Default |
-    +============+===================+==================+=========+
-    | df         | target dataframe  | pandas.DataFrame | None    |
-    +--------------+-----------------+------------------+---------+
++------------+-------------------+------------------+---------+
+| Name       | Description       | Type             | Default |
++============+===================+==================+=========+
+| df         | target dataframe  | pandas.DataFrame | None    |
++--------------+-----------------+------------------+---------+
 
 Returns: pandas.DataFrame
 

@@ -6,11 +6,11 @@ Converts a set to a list
 
 Parameters:
 
-    +-----------+-------------+------+---------+
-    | Name      | Description | Type | Default |
-    +===========+=============+======+=========+
-    | value_set | target set  | set  | None    |
-    +-----------+-------------+------+---------+
++-----------+-------------+------+---------+
+| Name      | Description | Type | Default |
++===========+=============+======+=========+
+| value_set | target set  | set  | None    |
++-----------+-------------+------+---------+
 
 Returns: list
 

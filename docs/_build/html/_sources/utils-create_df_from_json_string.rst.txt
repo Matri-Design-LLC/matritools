@@ -6,11 +6,11 @@ Crates a dataframe from a json formatted string.
 
 Parameters:
 
-    +----------------+-----------------------+------+---------+
-    | Name           | Description           | Type | Default |
-    +================+=======================+======+=========+
-    | json_string    | json formatted string | str  | None    |
-    +----------------+-----------------------+------+---------+
++----------------+-----------------------+------+---------+
+| Name           | Description           | Type | Default |
++================+=======================+======+=========+
+| json_string    | json formatted string | str  | None    |
++----------------+-----------------------+------+---------+
 
 Returns: pandas.DataFrame
 

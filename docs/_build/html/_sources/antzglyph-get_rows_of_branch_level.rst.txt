@@ -6,11 +6,11 @@ Returns a list of NodeFileRows with a given branch level
 
 Parameters:
 
-    +--------------+---------------------------------------+------+---------+
-    | Name         | Description                           | Type | Default |
-    +==============+=======================================+======+=========+
-    | branch_level | Level of NodeFileRow to be returned   | int  | None    |
-    +--------------+---------------------------------------+------+---------+
++--------------+---------------------------------------+------+---------+
+| Name         | Description                           | Type | Default |
++==============+=======================================+======+=========+
+| branch_level | Level of NodeFileRow to be returned   | int  | None    |
++--------------+---------------------------------------+------+---------+
 
 Returns: List[NodeFileRow]
 
