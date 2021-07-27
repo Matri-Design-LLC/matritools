@@ -37,6 +37,68 @@
 <h1><a class="reference external" href="dataexploration.html">dataexploration</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
 <section id="print-df-column-set">
 <h2>print_df_column_set<a class="headerlink" href="#print-df-column-set" title="Permalink to this headline">¶</a></h2>
+<p>Prints number of all unique values of a dataframe column. Optionally prints out all values.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><table class="docutils align-default">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 54%" />
+<col style="width: 21%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>df</p></td>
+<td><p>target dataframe</p></td>
+<td><p>pandas.DataFrame</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>column</p></td>
+<td><p>string value of the target column of df</p></td>
+<td><p>str</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p>print_sets</p></td>
+<td><p>Should all of the unique values be printed?</p></td>
+<td><p>bool</p></td>
+<td><p>False</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Returns: None</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matritools</span> <span class="kn">import</span> <span class="n">dataexploration</span> <span class="k">as</span> <span class="n">dex</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="c1"># example.csv</span>
+<span class="c1"># | A  | B  | C  |</span>
+<span class="c1"># ----------------</span>
+<span class="c1"># | a1 | b1 | c1 |</span>
+<span class="c1"># | a2 | b2 | c2 |</span>
+<span class="c1"># | a2 | b2 | c2 |</span>
+<span class="c1"># | a3 | b3 | c3 |</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;example.csv&quot;</span><span class="p">)</span>
+
+<span class="n">dex</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">df_column_set</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">)</span>
+<span class="c1"># output</span>
+<span class="c1"># A, Length: 3</span>
+
+<span class="n">dex</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">df_column_set</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="c1"># output</span>
+<span class="c1"># A, Length: 3</span>
+<span class="c1"># a1</span>
+<span class="c1"># a2</span>
+<span class="c1"># a3</span>
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -47,6 +109,9 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/matri_design_logo.png" alt="Logo"/>
+            </a></p>
 <h1 class="logo"><a href="index.html">Matritools</a></h1>
 
 

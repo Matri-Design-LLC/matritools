@@ -7,13 +7,13 @@ Returns -1 if value was not in the set
 
 Parameters:
 
-    +-----------+--------------+------+---------+
-    | Name      | Description  | Type | Default |
-    +===========+==============+======+=========+
-    | value_set | target set   | set  | None    |
-    +-----------+--------------+------+---------+
-    | value     | target value | any  | None    |
-    +-----------+--------------+------+---------+
++-----------+--------------+------+---------+
+| Name      | Description  | Type | Default |
++===========+==============+======+=========+
+| value_set | target set   | set  | None    |
++-----------+--------------+------+---------+
+| value     | target value | any  | None    |
++-----------+--------------+------+---------+
 
 Returns: int
 

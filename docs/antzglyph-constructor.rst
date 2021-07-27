@@ -5,18 +5,18 @@ Constructor
 
 Parameters:
 
-    +----------------------+----------------------------------------------+------+---------+
-    | Name                 | Description                                  | Type | Default |
-    +======================+==============================================+======+=========+
-    | csv_file_name        | string name of glyph template file generated |      |         |
-    |                      | in OpenANTz including ".csv"                 | str  | ""      |
-    +----------------------+----------------------------------------------+------+---------+
-    | remove_global_params | Should global parameter rows                 |      |         |
-    |                      | (IDs 1-6) be removed                         | bool | True    |
-    +----------------------+----------------------------------------------+------+---------+
-    | make_ids_consecutive | Should the IDs of the glyph template file be |      |         |
-    |                      | changed to be consecutive?                   | bool | True    |
-    +----------------------+----------------------------------------------+------+---------+
++----------------------+----------------------------------------------+------+---------+
+| Name                 | Description                                  | Type | Default |
++======================+==============================================+======+=========+
+| csv_file_name        | string name of glyph template file generated |      |         |
+|                      | in OpenANTz including ".csv"                 | str  | ""      |
++----------------------+----------------------------------------------+------+---------+
+| remove_global_params | Should global parameter rows                 |      |         |
+|                      | (IDs 1-6) be removed                         | bool | True    |
++----------------------+----------------------------------------------+------+---------+
+| make_ids_consecutive | Should the IDs of the glyph template file be |      |         |
+|                      | changed to be consecutive?                   | bool | True    |
++----------------------+----------------------------------------------+------+---------+
 
 Returns: List[NodeFileRow]
 

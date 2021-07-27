@@ -37,6 +37,60 @@
 <h1><a class="reference external" href="utils.html">utils</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
 <section id="set-to-list">
 <h2>set_to_list<a class="headerlink" href="#set-to-list" title="Permalink to this headline">¶</a></h2>
+<p>Use to create a list of data frames from a dataframe with embedded lists.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><table class="docutils align-default">
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 49%" />
+<col style="width: 19%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>df</p></td>
+<td><p>target DataFrame</p></td>
+<td><p>pandas.DataFrame</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>name_template</p></td>
+<td><p>individual data frame columns =
+lambda x: (name_template + “{}”).format(x + 1)</p></td>
+<td><p>str</p></td>
+<td><p>“”</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Returns: List[pandas.DataFrame]</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matritools</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">mu</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;example.csv)</span>
+
+<span class="n">df_list</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">separate_compound_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+<span class="n">I</span><span class="o">.</span><span class="n">E</span> <span class="n">when</span> <span class="n">a</span> <span class="n">data</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">form</span> <span class="n">of</span> <span class="p">:</span>
+
+<span class="p">[</span> <span class="p">[</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">],</span> <span class="p">[</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">16</span> <span class="p">],</span> <span class="p">[</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span> <span class="p">]</span> <span class="p">]</span>
+<span class="p">[</span> <span class="p">[</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">],</span> <span class="p">[</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">26</span> <span class="p">],</span> <span class="p">[</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">29</span> <span class="p">]</span> <span class="p">]</span>
+<span class="p">[</span> <span class="p">[</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">],</span> <span class="p">[</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">36</span> <span class="p">],</span> <span class="p">[</span> <span class="mi">37</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">39</span> <span class="p">]</span> <span class="p">]</span>
+
+<span class="n">returns</span>
+
+<span class="n">df1</span> <span class="p">[</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">]</span>  <span class="n">df2</span> <span class="p">[</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">16</span> <span class="p">]</span>  <span class="n">df3</span> <span class="p">[</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span> <span class="p">]</span>
+    <span class="p">[</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">]</span>      <span class="p">[</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">26</span> <span class="p">]</span>      <span class="p">[</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">29</span> <span class="p">]</span>
+    <span class="p">[</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">]</span>      <span class="p">[</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">36</span> <span class="p">]</span>      <span class="p">[</span> <span class="mi">37</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">39</span> <span class="p">]</span>
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -47,6 +101,9 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/matri_design_logo.png" alt="Logo"/>
+            </a></p>
 <h1 class="logo"><a href="index.html">Matritools</a></h1>
 
 

@@ -8,14 +8,14 @@ Changes the IDs, parent IDs and child IDs to appear sequentially with no gaps be
 
 Parameters:
 
-    +--------------------------------+---------------------------------------+------+---------+
-    | Name                           | Description                           | Type | Default |
-    +================================+=======================================+======+=========+
-    | starting_id                    | First ID in the sequence.             | int  | 8       |
-    +--------------------------------+---------------------------------------+------+---------+
-    | match_data_and_record_id_to_id | Should the rows update their          | bool | True    |
-    |                                | record ID and data to match their ID? |      |         |
-    +--------------------------------+---------------------------------------+------+---------+
++--------------------------------+---------------------------------------+------+---------+
+| Name                           | Description                           | Type | Default |
++================================+=======================================+======+=========+
+| starting_id                    | First ID in the sequence.             | int  | 8       |
++--------------------------------+---------------------------------------+------+---------+
+| match_data_and_record_id_to_id | Should the rows update their          | bool | True    |
+|                                | record ID and data to match their ID? |      |         |
++--------------------------------+---------------------------------------+------+---------+
 
 Returns: None
 

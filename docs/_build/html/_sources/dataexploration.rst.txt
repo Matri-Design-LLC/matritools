@@ -1,5 +1,6 @@
 dataexploration
 ===============
+Contains functions used to help identify potential patterns to explore in data sets
 
 .. toctree::
    :maxdepth: 1
