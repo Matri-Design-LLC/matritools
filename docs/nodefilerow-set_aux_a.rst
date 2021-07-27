@@ -1,5 +1,5 @@
-`NodeFileRow <nodefilerow>`_
-============================
+`NodeFileRow <nodefilerow.html>`_
+=================================
 
 set_aux_a
 ---------

@@ -1,4 +1,4 @@
-`Nodefile <nodefile>`_
-======================
+`Nodefile <nodefile.html>`_
+===========================
 Constructor
 -----------

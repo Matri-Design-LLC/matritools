@@ -1,5 +1,5 @@
-`dataexploration <dataexploration>`_
-====================================
+`dataexploration <dataexploration.html>`_
+=========================================
 
 explore_df
 ----------

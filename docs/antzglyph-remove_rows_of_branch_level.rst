@@ -1,5 +1,5 @@
-`AntzGlyph <antzglyph>`_
-========================
+`AntzGlyph <antzglyph.html>`_
+=============================
 remove_rows_of_branch_level
 ---------------------------
 Removes all NodeFileRow's of a given branch level

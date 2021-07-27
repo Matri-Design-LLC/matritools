@@ -1,5 +1,5 @@
-`AntzGlyph <antzglyph>`_
-========================
+`AntzGlyph <antzglyph.html>`_
+=============================
 Constructor
 -----------
 

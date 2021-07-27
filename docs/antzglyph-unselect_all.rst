@@ -1,5 +1,5 @@
-`AntzGlyph <antzglyph>`_
-========================
+`AntzGlyph <antzglyph.html>`_
+=============================
 unselect_all
 ------------
 Changes the selected property of all glyph node file rows to 0. When glyph template files are saved via "save selected",
