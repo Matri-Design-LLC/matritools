@@ -6,10 +6,8 @@ Attributes
 +----------------------+----------------------------------------------+-----------+---------+
 | Name                 | Description                                  | Type      | Default |
 +======================+==============================================+===========+=========+
-| node_file_rows       | list of NodeFileRows that make up the glyph  | List[str] | ""      |
+| node_file_rows       | list of NodeFileRows that make up the glyph  | List[str] | []      |
 +----------------------+----------------------------------------------+-----------+---------+
-
-Returns: List[NodeFileRow]
 
 Example::
 

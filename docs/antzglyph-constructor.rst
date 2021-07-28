@@ -18,8 +18,6 @@ Parameters:
 |                      | changed to be consecutive?                   | bool | True    |
 +----------------------+----------------------------------------------+------+---------+
 
-Returns: List[NodeFileRow]
-
 Example::
 
     from matritools import nodefile as nf

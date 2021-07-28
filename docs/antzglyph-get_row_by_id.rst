@@ -1,23 +1,27 @@
-`NodeFile <nodefile.html>`_
-===========================
-Constructor
------------
+`AntzGlyph <antzglyph.html>`_
+=============================
+get_row_by_id
+-------------
+Returns a NodeFileRow at the requested ID.
 
 Parameters:
 
 +------------+---------------------------------------------+------------------+---------+
 | Name       | Description                                 | Type             | Default |
 +============+=============================================+==================+=========+
-| file_name  | name of node and tag file                   | str              | None    |
+| row_id     | target ID                                   | int              | None    |
 +------------+---------------------------------------------+------------------+---------+
+
+Returns: matritools.nodefile.NodeFileRow
 
 Example::
 
     from matritools import nodefile as nf
 
     # create node file with 6 default node file rows
-    my_node_file = nf.NodeFile("my_file_name")
+    my_glyph = nf.AntzGlyph"example.csv")
 
-    my_node_file.write_to_csv()
-    # my_file_name_node.csv and my_file_name_tag.csv will be created
+    # edit first camera view position
+    camera_view = my_glyph.get_row_by_id(2)
+    camera_view.set_translate(0, 0, 0)
 

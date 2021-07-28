@@ -12,7 +12,7 @@ Parameters:
 | branch_level | Level of NodeFileRow to be returned   | int  | None    |
 +--------------+---------------------------------------+------+---------+
 
-Returns: List[NodeFileRow]
+Returns: List[matritools.nodefile.NodeFileRow]
 
 Example::
 

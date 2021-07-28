@@ -1,5 +1,6 @@
 NodeFileRow
 ===========
+Container of properties and property setters for node file rows.
 
 .. toctree::
    :maxdepth: 1
@@ -16,6 +17,7 @@ NodeFileRow
    set_aux_b <nodefilerow-set_aux_b>
    set_rotate_vec <nodefilerow-set_rotate_vec>
    set_scale <nodefilerow-set_scale>
+   set_u_scale <nodefilerow-set_u_scale>
    set_translate <nodefilerow-set_translate>
    set_tag_offset <nodefilerow-set_tag_offset>
    set_rotate <nodefilerow-set_rotate>

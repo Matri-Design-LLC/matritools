@@ -26,25 +26,25 @@ Returns: pandas.DataFrame
 
 Example::
 
-from matritools import utils as mu
-import pandas as pd
+    from matritools import utils as mu
+    import pandas as pd
 
-df = pandas.read_csv("example.csv")
+    df = pandas.read_csv("example.csv")
 
-# df before
-# | A  |
-# ------
-# | 10 |
-# | 20 |
-# | 30 |
+    # df before
+    # | A  |
+    # ------
+    # | 10 |
+    # | 20 |
+    # | 30 |
 
-# added column of interpolated values
-mu.interpolate_df_column(df, "A", 1, 3, "_interpolated")
+    # added column of interpolated values
+    mu.interpolate_df_column(df, "A", 1, 3, "_interpolated")
 
-# df after
-# | A  | A_interpolated |
-# -----------------------
-# | 10 | 1              |
-# | 20 | 2              |
-# | 30 | 3              |
+    # df after
+    # | A  | A_interpolated |
+    # -----------------------
+    # | 10 | 1              |
+    # | 20 | 2              |
+    # | 30 | 3              |
 
