@@ -29,21 +29,95 @@ def template_float(name):
             '\t\ttest_nfr.set_' + name + '("a", "b", "C")\n\n' + \
     '#endregion\n'
 
-print(template_int("aux_b"))
-print(template_int("rotate_rate"))
-print(template_int("scale_rate"))
-print(template_int("rotate_vec"))
-print(template_float("scale"))
-print(template_float("translate"))
-print(template_float("tag_offset"))
-print(template_float("rotate"))
-print(template_int("translate_rate"))
-print(template_int("translate_vec"))
-print(template_int("color"))
-print(template_int("auto_zoom"))
-print(template_int("trigger_hi"))
-print(template_int("trigger_lo"))
-print(template_int("set_hi"))
-print(template_int("set_lo"))
-print(template_int("proximity_mode"))
-print(template_int("segments"))
+def template_doc_int(name):
+    return '`NodeFileRow <nodefilerow.html>`_\n' + \
+            '=================================\n' + \
+            '' + name + '\n' + \
+            '---------\n' + \
+            'Sets the x, y, and z axis of ' + name + '.\n\n' + \
+            'Parameters:\n\n' + \
+            '+------+----------------------------+------------------+---------+\n' + \
+            '| Name | Description | Type | Default |\n' + \
+            '+======+============================+==================+=========+\n' + \
+            '| x    | ' + name + '_x | int | 0 |\n' + \
+            '+------+----------------------------+------------------+---------+\n' + \
+            '| y    | ' + name + '_y | int | 0 |\n' + \
+            '+------+----------------------------+------------------+---------+\n' + \
+            '| z    | ' + name + '_z | int | 0 |\n' + \
+            '+------+----------------------------+------------------+---------+\n\n' + \
+            'Returns: None\n\n' + \
+            'Example::\n\n' + \
+            '\tfrom matritools import nodefile as nf\n\n' + \
+            '\t# create node file with 6 default node file rows\n\n' + \
+            '\tmy_node_file = nf.NodeFile("My Node File")\n\n' + \
+            '\tmy_node_file.properties[0].set_' + name + '(1, 2, 3)\n\n' + \
+            '\t# same as\n\n' + \
+            '\tmy_node_file.properties[0].' + name + '_x = 1\n' + \
+            '\tmy_node_file.properties[0].' + name + '_x = 2\n' + \
+            '\tmy_node_file.properties[0].' + name + '_x = 3\n\n\n'
+
+
+def template_doc_float(name):
+    return '`NodeFileRow <nodefilerow.html>`_\n' + \
+            '=================================\n' + \
+            '' + name + '\n' + \
+            '---------\n' + \
+            'Sets the x, y, and z axis of ' + name + '.\n\n' + \
+           'Parameters:\n\n' + \
+           '+------+----------------------------+------------------+---------+\n' + \
+           '| Name | Description | Type | Default |\n' + \
+           '+======+============================+==================+=========+\n' + \
+           '| x    | ' + name + '_x | float | 0 |\n' + \
+           '+------+----------------------------+------------------+---------+\n' + \
+           '| y    | ' + name + '_y | float | 0 |\n' + \
+           '+------+----------------------------+------------------+---------+\n' + \
+           '| z    | ' + name + '_z | float | 0 |\n' + \
+           '+------+----------------------------+------------------+---------+\n\n' + \
+           'Returns: None\n\n' + \
+           'Example::\n\n' + \
+           '\tfrom matritools import nodefile as nf\n\n' + \
+           '\t# create node file with 6 default node file rows\n\n' + \
+           '\tmy_node_file = nf.NodeFile("My Node File")\n\n' + \
+           '\tmy_node_file.properties[0].set_' + name + '(1, 2, 3)\n\n' + \
+           '\t# same as\n\n' + \
+           '\tmy_node_file.properties[0].' + name + '_x = 1\n' + \
+           '\tmy_node_file.properties[0].' + name + '_x = 2\n' + \
+           '\tmy_node_file.properties[0].' + name + '_x = 3\n\n\n'
+
+print(template_doc_int("aux_b"))
+print(template_doc_int("rotate_rate"))
+print(template_doc_int("scale_rate"))
+print(template_doc_int("rotate_vec"))
+print(template_doc_float("scale"))
+print(template_doc_float("translate"))
+print(template_doc_float("tag_offset"))
+print(template_doc_float("rotate"))
+print(template_doc_int("translate_rate"))
+print(template_doc_int("translate_vec"))
+print(template_doc_int("color"))
+print(template_doc_int("auto_zoom"))
+print(template_doc_int("trigger_hi"))
+print(template_doc_int("trigger_lo"))
+print(template_doc_int("set_hi"))
+print(template_doc_int("set_lo"))
+print(template_doc_int("proximity_mode"))
+print(template_doc_int("segments"))
+
+#print(template_int("aux_b"))
+#print(template_int("rotate_rate"))
+#print(template_int("scale_rate"))
+#print(template_int("rotate_vec"))
+#print(template_float("scale"))
+#print(template_float("translate"))
+#print(template_float("tag_offset"))
+#print(template_float("rotate"))
+#print(template_int("translate_rate"))
+#print(template_int("translate_vec"))
+#print(template_int("color"))
+#print(template_int("auto_zoom"))
+#print(template_int("trigger_hi"))
+#print(template_int("trigger_lo"))
+#print(template_int("set_hi"))
+#print(template_int("set_lo"))
+#print(template_int("proximity_mode"))
+#print(template_int("segments"))

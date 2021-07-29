@@ -593,13 +593,13 @@ class NodeFileRow:
         if comma_string == "":
             return
         values = comma_string.split(",")
-        if len(values) != 94:
-            raise RuntimeError("Comma separated string has incorrect number of values.\n Values length = " +
-                               str(len(values)) + "\nInput: " + comma_string)
 
         self.set_properties_from_string_list(values)
 
     def set_properties_from_string_list(self, values: List[str]):
+        if len(values) != 94:
+            raise RuntimeError("Comma separated string has incorrect number of values.\n Values length = " +
+                               str(len(values)) + "\nInput: " + str(values))
         self.id = int(float(values[0]))
         self._type = int(float(values[1]))
         self.data = int(float(values[2]))
@@ -892,7 +892,7 @@ class NodeFileRow:
 
     def make_link(self, link_id_a: int, link_id_b: int):
         """
-        Creates a visable link between link_id_a, and link_id_b using these properties
+        Creates a visible link between link_id_a, and link_id_b using these properties
         :param link_id_a: id of NodeFileRow
         :param link_id_b: id of NodeFileRow
         :return: None
@@ -916,7 +916,7 @@ class NodeFileRow:
         self.record_id = row_id
         self.data = row_id
 
-    def set_tag(self, tag_text="", tag_mode: int = 0):
+    def set_tag(self, tag_text, tag_mode: int = 0):
         """
         Sets tag_text and tag_mode
         :param tag_text: (default "")
