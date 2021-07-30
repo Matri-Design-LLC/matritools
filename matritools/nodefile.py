@@ -42,6 +42,7 @@ class NodeFile:
              "format_id,table_id,record_id,size\n"
 
     def __init__(self, file_name: str):
+
         """
         :param file_name: name of node and tag file created on write_to_csv()
         """

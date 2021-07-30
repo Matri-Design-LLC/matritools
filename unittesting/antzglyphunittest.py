@@ -42,7 +42,7 @@ def test_construct_with_reservered_rows_with_removal():
 
 # region increment_node_file_rows()
 test_glyph4 = nf.AntzGlyph("Test4.csv")
-test_glyph4.increment_node_file_rows()
+test_glyph4.increment_ids()
 
 
 def test_id_properly_incremented():
