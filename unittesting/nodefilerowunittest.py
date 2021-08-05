@@ -288,7 +288,7 @@ def test_set_scale_bad_input():
 
 # endregion
 
-# region scale
+# region u scale
 
 def test_set_u_scale_correct_input_integrals():
     test_nfr.set_u_scale(100.1)
@@ -433,6 +433,26 @@ def test_set_color_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_color("a", "b", "C", "D")
 
+
+# endregion
+
+# region color
+
+def test_set_color_by_name_correct_input():
+    test_nfr.set_color_by_name("red")
+    assert test_nfr.color_r == 255 and test_nfr.color_g == 0 and test_nfr.color_b == 0 and test_nfr.color_a == 255
+
+def test_set_color_by_name_bad_input_none():
+    with pytest.raises(TypeError):
+        test_nfr.set_color_by_name()
+
+def test_set_color_by_name_bad_input_not_str():
+    with pytest.raises(KeyError):
+        test_nfr.set_color_by_name(5)
+
+def test_set_color_by_name_bad_input_invalid_color():
+    with pytest.raises(KeyError):
+        test_nfr.set_color_by_name("Some super specific color")
 
 # endregion
 
