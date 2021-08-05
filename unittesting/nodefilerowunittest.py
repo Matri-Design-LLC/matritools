@@ -288,6 +288,25 @@ def test_set_scale_bad_input():
 
 # endregion
 
+# region scale
+
+def test_set_u_scale_correct_input_integrals():
+    test_nfr.set_u_scale(100.1)
+    assert test_nfr.scale_x == 100.1 and test_nfr.scale_y == 100.1 and test_nfr.scale_z == 100.1
+
+
+def test_set_u_scale_correct_input_strings():
+    test_nfr.set_u_scale("400.4")
+    assert test_nfr.scale_x == 400.4 and test_nfr.scale_y == 400.4 and test_nfr.scale_z == 400.4
+
+
+def test_set_u_scale_bad_input():
+    with pytest.raises(Exception):
+        test_nfr.set_u_scale("a")
+
+
+# endregion
+
 # region translate
 
 def test_set_translate_correct_input_integrals():

@@ -41,12 +41,13 @@ class NodeFile:
              "proximity_mode_z,segments_x,segments_y,segments_z,tag_mode," \
              "format_id,table_id,record_id,size\n"
 
-    def __init__(self, file_name: str = ""):
+    def __init__(self, file_name: str):
+
         """
-        :param file_name: name of node and tag file created on write_to_csv() (default:"")
+        :param file_name: name of node and tag file created on write_to_csv()
         """
 
-        self.taginc = 1  # line number for a tag file row
+        self.__taginc__ = 1  # line number for a tag file row
         self.node_file_rows = []
 
         if file_name == "":
@@ -54,13 +55,6 @@ class NodeFile:
         self.properties = NodeFileRow()
         self.node_file_name = file_name
         self.__add_initial_rows__()
-
-    def get_row_by_index(self, index: int):
-        """
-        :param index: index of requested NodeFileRow
-        :return: requested NodeFileRow
-        """
-        return self.node_file_rows[index]
 
     def get_row_by_id(self, row_id: int):
         """
@@ -79,7 +73,9 @@ class NodeFile:
         :return: None
         """
 
-        self.check_for_duplicate_id()
+        ids = [row.id for row in self.node_file_rows]
+        if len(set(ids)) != len(self.node_file_rows):
+            raise RuntimeError("Node File contains duplicate IDs")
 
         node_file = open(self.node_file_name + "_node.csv", "w")
         tag_file = open(self.node_file_name + "_tag.csv", "w")
@@ -90,31 +86,27 @@ class NodeFile:
         for file_row in self.node_file_rows:
             node_file.write(file_row.to_string())
             if file_row.tag_text != "":
-                tag_text = str(self.taginc) + "," + \
+                tag_text = str(self.__taginc__) + "," + \
                            str(file_row.record_id) + ",0,\"" + \
                            str(file_row.tag_text) + "\",\"\"\n"
 
-                self.taginc += 1
+                self.__taginc__ += 1
                 tag_file.write(tag_text)
 
         node_file.close()
 
-    def check_for_duplicate_id(self):
-        ids = [row.id for row in self.node_file_rows]
-        if len(set(ids)) != len(self.node_file_rows):
-            raise RuntimeError("Node File contains duplicate IDs")
-
     def create_node_row(self, tag_text=""):
         """
-        Creates a node file row from node_file current properties and increments id by 1
+        Creates and returns a node file row from node_file current properties and increments id by 1
         :param tag_text: text that will be written in the tag file associated with this node file row (default "")
-        :return: None
+        :return: matritools.nodefile.NodeFileRow
         """
         node_row = copy.deepcopy(self.properties)
         self.node_file_rows.append(node_row)
         if tag_text != "":
             node_row.tag_text = tag_text
         self.properties.set_id(self.properties.id + 1)
+        return node_row
 
     def add_glyph(self, glyph):
         """
@@ -287,13 +279,23 @@ class AntzGlyph:
         else:
             raise RuntimeError("antz_glyph was constructed without a csv file name")
 
+    def get_row_by_id(self, row_id: int):
+        """
+        :param row_id: ID of requested NodeFileRow
+        :return: requested NodeFileRow
+        """
+        for row in self.node_file_rows:
+            if row.id == row_id:
+                return row
+
     def increment_ids(self, match_data_and_record_id_to_id: bool = True):
+
         self.make_ids_consecutive(self.node_file_rows[len(self.node_file_rows) - 1].id + 1,
                                       match_data_and_record_id_to_id)
 
     def unselect_all(self):
         """
-        Changes the selected property of all node file rows to 0.
+        Changes the selected property of all glyph node file rows to 0.
         :return: None
         """
 
@@ -301,6 +303,10 @@ class AntzGlyph:
             row.selected = 0
 
     def match_record_ids_and_data_to_ids(self):
+        """
+        Iterates over each NodeFileRow in the glyph and matches its record id and data to its id
+        :return: None
+        """
         for row in self.node_file_rows:
             row.set_id(row.id)
 
@@ -313,7 +319,11 @@ class AntzGlyph:
         return rows
 
     def remove_rows_of_branch_level(self, branch_level):
-        """ removes all NodeFileRow's of a given branch level"""
+        """
+        Removes all NodeFileRow's of a given branch level
+        :param branch level of all removed items (default: None)
+        :return: None
+        """
         rows = self.get_rows_of_branch_level(branch_level)
 
         for row in rows:
@@ -380,6 +390,46 @@ class AntzGlyph:
 class NodeFileRow:
     """ Container of properties and property setters for node file rows."""
 
+    geos = {
+                "z cube": 0,
+                "Cube": 1,
+                "z sphere": 2,
+                "sphere": 3,
+                "z cone": 4,
+                "cone": 5,
+                "z toroid": 6,
+                "toroid": 7,
+                "z dodecahedron": 8,
+                "dodecahedron": 9,
+                "z octahedron": 10,
+                "octahedron": 11,
+                "z tetrahedron": 12,
+                "tetrahedron": 13,
+                "z icosahedron": 14,
+                "icosahedron": 15,
+                "pin": 16,
+                "Z pin": 17,
+                "z cylinder": 18,
+                "cylinder": 19,
+                "plane": 20
+           }
+
+    topos = {
+                "cube": 1,
+                "sphere": 2,
+                "toroid": 3,
+                "cylinder": 4,
+                "pin": 5,
+                "rod": 6,
+                "point": 7,
+                "plane": 8,
+                "z cube": 9,
+                "z sphere": 10,
+                "z toroid": 11,
+                "z cylinder": 12,
+                "z rod": 13
+            }
+
     def __init__(self, comma_string: str = ""):
         """
         :param comma_string: a string with 94 comma seperated values in the order of an antz node file
@@ -389,10 +439,10 @@ class NodeFileRow:
 
         self.id = 8  # node ID used for pin tree relationship graph
         self._type = 5  # node type - 1: Camera; 2: video; 3: Surface; 4: Points, 5:Pin, 6:Grid
-        self.data = 0  # additional node specific type, defined by node type
+        self.data = 0  # node type - 1: Camera; 2: video; 3: Surface; 4: Points, 5:Pin, 6:Grid
 
         # selection set status, 1 if part of active set, 0 if not
-        # // Useful if you want the root nodes selected upon loading.
+        # Useful if you want the root nodes selected upon loading.
         self.selected = 0
 
         self.parent_id = 0  # ID of parent node
@@ -544,13 +594,13 @@ class NodeFileRow:
         if comma_string == "":
             return
         values = comma_string.split(",")
-        if len(values) != 94:
-            raise RuntimeError("Comma separated string has incorrect number of values.\n Values length = " +
-                               str(len(values)) + "\nInput: " + comma_string)
 
         self.set_properties_from_string_list(values)
 
     def set_properties_from_string_list(self, values: List[str]):
+        if len(values) != 94:
+            raise RuntimeError("Comma separated string has incorrect number of values.\n Values length = " +
+                               str(len(values)) + "\nInput: " + str(values))
         self.id = int(float(values[0]))
         self._type = int(float(values[1]))
         self.data = int(float(values[2]))
@@ -843,7 +893,7 @@ class NodeFileRow:
 
     def make_link(self, link_id_a: int, link_id_b: int):
         """
-        Creates a visable link between link_id_a, and link_id_b using these properties
+        Creates a visible link between link_id_a, and link_id_b using these properties
         :param link_id_a: id of NodeFileRow
         :param link_id_b: id of NodeFileRow
         :return: None
@@ -867,7 +917,7 @@ class NodeFileRow:
         self.record_id = row_id
         self.data = row_id
 
-    def set_tag(self, tag_text="", tag_mode: int = 0):
+    def set_tag(self, tag_text, tag_mode: int = 0):
         """
         Sets tag_text and tag_mode
         :param tag_text: (default "")
@@ -950,6 +1000,10 @@ class NodeFileRow:
         self.scale_x = x
         self.scale_y = y
         self.scale_z = z
+
+    def set_u_scale(self, scale: float = 1):
+        scale = float(scale)
+        self.set_scale(scale, scale, scale)
 
     def set_translate(self, x: float = 0, y: float = 0, z: float = 0):
         """

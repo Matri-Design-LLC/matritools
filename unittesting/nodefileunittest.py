@@ -2,7 +2,7 @@ import matritools.nodefile as nf
 import pytest
 
 def test_empty_constructor():
-    with pytest.raises(RuntimeError):
+    with pytest.raises(TypeError):
         nf.NodeFile()
 
 def test_constructor_row_count():
@@ -19,19 +19,15 @@ def test_constructor_initial_row_ids():
 
     assert results == [1,2,3,4,5,6]
 
-def test_get_row_by_index():
-    ntf = nf.NodeFile("Test")
-    assert ntf.get_row_by_index(0).id == 1
-
 def test_get_row_by_id():
     ntf = nf.NodeFile("Test")
     assert ntf.get_row_by_id(1).id == 1
 
 def test_duplicate_ids_and_add_glyph():
     ntf = nf.NodeFile("Test")
-    ntf.add_glyph_to_node_file_rows(nf.AntzGlyph('Test5.csv', False, False))
+    ntf.add_glyph(nf.AntzGlyph('Test5.csv', False, False))
     with pytest.raises(RuntimeError):
-        ntf.check_for_duplicate_id()
+        ntf.write_to_csv()
 
 def test_to_string():
     test_property_string = '1,2,3,4,5,6,7,8,9,10,' \
@@ -148,6 +144,7 @@ def test_to_string():
 
     ntf.create_node_row()
     test_values = test_property_string.split(',')
-    result_values = ntf.get_row_by_index(6).to_string().split(',')
-    ntf.get_row_by_index(6).print_properties()
+    result_values = ntf.node_file_rows[6].to_string().split(',')
+    ntf.node_file_rows[6].print_properties()
     assert [float(value) for value in test_values] == [float(value) for value in result_values]
+

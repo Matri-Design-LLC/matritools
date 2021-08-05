@@ -14,82 +14,17 @@ as well as commonly used data manipulation functions used by Matri Design LLC.
    * `OpenANTz <https://antzglyphs.com/>`_
    * `OpenANTz GitHub <https://github.com/openantz/antz>`_
 
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
 .. note::
 
    This project is under active development.
 
+.. toctree::
+   :maxdepth: 2
+
+   Nodefile <nodefile>
+   AntzGlyph <antzglyph>
+   NodeFileRow <nodefilerow>
+   utils
+   dataexploration
 
 
-API
-==================
-
-classes
--------
-* `NodeFile <>`_
-   * `Constructor <>`_
-   * `Attributes <>`_
-   * `get_row_by_index <>`_
-   * `get_row_by_id <>`_
-   * `write_to_csv <>`_
-   * `check_for_duplicate_id <>`_
-   * `create_node_row <>`_
-   * `add_glyph <>`_
-   * `to_dataframe <>`_
-   * __add_initial_rows__ <>`_
-* `AntzGlyph <>`_
-   * `Constructor <>`_
-   * `Attributes <>`_
-   * `increment_node_file <>`_
-   * `unselect_all <>`_
-   * `match_record_ids_and_data_to_ids <>`_
-   * `get_rows_of_branch_level <>`_
-   * `remove_rows_of_branch_level_ <>`_
-   * `make_ids_consecutive <>`_
-   * `__populate_glyph__ <>`_
-* `NodeFileRow <>`_
-   * `Constructor <>`_
-   * `Attributes <>`_
-   * `set_properties_from_string_list <>`_
-   * `print_properties <>`_
-   * `to_string <>`_
-   * `make_link <>`_
-   * `set_id <>`_
-   * `set_tag <>`_
-   * `set_aux_a <>`_
-   * `set_aux_b <>`_
-   * `set_rotate_vec <>`_
-   * `set_scale <>`_
-   * `set_translate <>`_
-   * `set_tag_offset <>`_
-   * `set_rotate <>`_
-   * `set_rotate_rate <>`_
-   * `set_translate_rate <>`_
-   * `set_translate_vec <>`_
-   * `set_color <>`_
-   * `set_auto_zoom <>`_
-   * `set_trigger_hi <>`_
-   * `set_trigger_lo <>`_
-   * `set_set_hi <>`_
-   * `set_set_lo <>`_
-   * `set_proximity <>`_
-   * `set_proximity_mode <>`_
-   * `set_segments <>`_
-
-utils
------
-   * `create_df_from_json <>`_
-   * `create_df_from_json_string <>`_
-   * `interpolate_df_column <>`_
-   * `make_interpolater <>`_
-   * `seperate_compound_dataframe <>`_
-   * `find_index_in_set <>`_
-   * `set_to_list <>`_
-dataexploration
----------------
-   * `print_df_column_set <>`_
-   * `explore_df <>`_
