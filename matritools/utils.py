@@ -146,6 +146,8 @@ def create_column_value_color_legend(column_series):
     result = {}
     i = 0
     for value in set(column_series):
+        if i == len(color_keys):
+            i = 0
         result[value] = color_keys[i]
         i += 1
     return result
