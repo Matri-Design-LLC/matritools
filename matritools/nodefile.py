@@ -65,6 +65,8 @@ class NodeFile:
             if row.id == row_id:
                 return row
 
+        return None
+
     def write_to_csv(self):
         """
         Write all node_file_rows to csv.
@@ -73,9 +75,27 @@ class NodeFile:
         :return: None
         """
 
-        ids = [row.id for row in self.node_file_rows]
-        if len(set(ids)) != len(self.node_file_rows):
-            raise RuntimeError("Node File contains duplicate IDs")
+        ids = {}
+        i = 0
+        for row in self.node_file_rows:
+            if row.id in ids.keys():
+                ids[row.id].append(i)
+            else:
+                ids[row.id] = [i]
+            i+=1
+
+        if len(set(ids.keys())) != len(self.node_file_rows):
+            temp_nf = NodeFile("temp")
+            result = ""
+            for key in ids.keys():
+                if len(ids[key]) > 1:
+                    result += str(key) + " | " + str(ids[key]) +  "\n"
+
+                    for index in ids[key]:
+                        temp_nf.node_file_rows.append(self.node_file_rows[index])
+            self.to_dataframe().to_csv("debug_node.csv")
+            raise RuntimeError("Node File contains duplicate IDs.\n\nID | Indexes:\n\n" +
+                               result + str(temp_nf.to_dataframe().to_string()))
 
         node_file = open(self.node_file_name + "_node.csv", "w")
         tag_file = open(self.node_file_name + "_tag.csv", "w")
@@ -126,10 +146,13 @@ class NodeFile:
         list_of_lists = []
         for row in self.node_file_rows:
             columns = []
-            for column in row.properties.to_string().split(","):
+            for column in row.to_string().split(","):
                 columns.append(column)
+            columns.append(row.tag_text)
             list_of_lists.append(columns)
-        return pd.DataFrame(list_of_lists)
+        column_labels = self.header.split(',')
+        column_labels.append("tag_text")
+        return pd.DataFrame(data=list_of_lists, columns=column_labels)
 
     def __add_initial_rows__(self):
         # Row for world parameters
@@ -391,44 +414,88 @@ class NodeFileRow:
     """ Container of properties and property setters for node file rows."""
 
     geos = {
-                "z cube": 0,
-                "Cube": 1,
-                "z sphere": 2,
-                "sphere": 3,
-                "z cone": 4,
-                "cone": 5,
-                "z toroid": 6,
-                "toroid": 7,
-                "z dodecahedron": 8,
-                "dodecahedron": 9,
-                "z octahedron": 10,
-                "octahedron": 11,
-                "z tetrahedron": 12,
-                "tetrahedron": 13,
-                "z icosahedron": 14,
-                "icosahedron": 15,
-                "pin": 16,
-                "Z pin": 17,
-                "z cylinder": 18,
-                "cylinder": 19,
-                "plane": 20
-           }
+        "z cube": 0,
+        "Cube": 1,
+        "z sphere": 2,
+        "sphere": 3,
+        "z cone": 4,
+        "cone": 5,
+        "z toroid": 6,
+        "toroid": 7,
+        "z dodecahedron": 8,
+        "dodecahedron": 9,
+        "z octahedron": 10,
+        "octahedron": 11,
+        "z tetrahedron": 12,
+        "tetrahedron": 13,
+        "z icosahedron": 14,
+        "icosahedron": 15,
+        "pin": 16,
+        "Z pin": 17,
+        "z cylinder": 18,
+        "cylinder": 19,
+        "plane": 20
+    }
 
     topos = {
-                "cube": 1,
-                "sphere": 2,
-                "toroid": 3,
-                "cylinder": 4,
-                "pin": 5,
-                "rod": 6,
-                "point": 7,
-                "plane": 8,
-                "z cube": 9,
-                "z sphere": 10,
-                "z toroid": 11,
-                "z cylinder": 12,
-                "z rod": 13
-            }
+        "cube": 1,
+        "sphere": 2,
+        "toroid": 3,
+        "cylinder": 4,
+        "pin": 5,
+        "rod": 6,
+        "point": 7,
+        "plane": 8,
+        "z cube": 9,
+        "z sphere": 10,
+        "z toroid": 11,
+        "z cylinder": 12,
+        "z rod": 13
+    }
+
+    colors = {
+        "red": [255, 0, 0],
+        "blue": [0, 0, 255],
+        "green": [0, 128, 0],
+        "yellow": [255, 255, 0],
+        "cyan": [0, 255, 255],
+        "magenta": [255, 255, 0],
+        "hot pink": [255, 105, 180],
+        "orange": [255, 128, 0],
+        "white": [255, 255, 255],
+        "black": [0, 0, 0],
+        "grey": [128, 128, 128],
+        "lime": [0, 255, 0],
+        "maroon": [128, 0, 0],
+        "navy": [0, 0, 128],
+        "teal": [0, 128, 128],
+        "crimson": [220, 20, 60],
+        "purple": [128, 0, 128],
+        "olive": [128, 128, 0],
+        "brown": [139, 69, 19],
+        "silver": [192, 192, 192],
+        "gold": [255, 215, 0],
+        "tan": [210, 180, 140],
+        "olive drab": [107, 142, 35],
+        "dark green": [0, 100, 0],
+        "aqua marine": [127, 255, 212],
+        "dodger blue": [30, 144, 255],
+        "deep sky blue": [0, 192, 255],
+        "indian red": [205, 92, 92],
+        "cadet blue": [95, 158, 160],
+        "indigo": [75, 0, 130],
+        "pink": [255, 192, 203],
+        "beige": [245, 245, 220],
+        "honeydew": [240, 255, 240],
+        "azure": [240, 255, 255],
+        "lavender": [230, 230, 250],
+        "peach": [255, 218, 185],
+        "rosy brown": [188, 143, 143],
+        "chcolate": [210, 105, 30],
+        "medium spring green": [0, 250, 154],
+        "golden rod": [218, 165, 32],
+        "coral": [255, 127, 80]
+    }
 
     def __init__(self, comma_string: str = ""):
         """
@@ -1143,6 +1210,15 @@ class NodeFileRow:
         self.color_g = g
         self.color_b = b
         self.color_a = a
+
+    def set_color_by_name(self, color: str):
+        #if not isinstance(color, str)
+            #raise TypeError("color must be of type string")
+
+        self.color_r = self.colors[color][0]
+        self.color_g = self.colors[color][1]
+        self.color_b = self.colors[color][2]
+        self.color_a = 255
 
     def set_auto_zoom(self, x: int = 0, y: int = 0, z: int = 0):
         """

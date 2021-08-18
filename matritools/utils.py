@@ -1,4 +1,5 @@
 import pandas as pd
+from matritools import nodefile as nf
 from ast import literal_eval
 import json
 
@@ -48,7 +49,10 @@ def make_interpolator(old_min, old_max, new_min, new_max):
     new_span = new_max - new_min
 
     # Compute the scale factor between old and new values
-    scale_factor = float(new_span) / float(old_span)
+    if old_span == 0:
+        scale_factor = 1
+    else:
+        scale_factor = float(new_span) / float(old_span)
 
     # create interpolation function using pre-calculated scaleFactor
     def interp_fn(value):
@@ -120,4 +124,30 @@ def set_to_list(value_set):
     result = []
     for value in value_set:
         result.append(value)
+    return result
+
+def dict_to_multilined_str(dictionary: dict, indent_level = 0):
+    result = ""
+    for key in dictionary.keys():
+        result += ('\t' * indent_level) + str(key) + " : "
+        if isinstance(dictionary[key], dict):
+            result += "\n" + dict_to_multilined_str(dictionary[key], indent_level + 1)
+        else:
+            result += str(dictionary[key]) + '\n'
+    return result
+
+
+def create_column_value_color_legend(column_series):
+    color_keys = []
+
+    for color in nf.NodeFileRow.colors.keys():
+        color_keys.append(color)
+
+    result = {}
+    i = 0
+    for value in set(column_series):
+        if i == len(color_keys):
+            i = 0
+        result[value] = color_keys[i]
+        i += 1
     return result

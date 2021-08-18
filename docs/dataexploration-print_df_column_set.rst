@@ -6,15 +6,13 @@ Prints number of all unique values of a dataframe column. Optionally prints out 
 
 Parameters:
 
-+------------+---------------------------------------------+------------------+---------+
-| Name       | Description                                 | Type             | Default |
-+============+=============================================+==================+=========+
-| df         | target dataframe                            | pandas.DataFrame | None    |
-+------------+---------------------------------------------+------------------+---------+
-| column     | string value of the target column of df     | str              | None    |
-+------------+---------------------------------------------+------------------+---------+
-| print_sets | Should all of the unique values be printed? | bool             | False   |
-+------------+---------------------------------------------+------------------+---------+
++---------------+---------------------------------------------+------------------+---------+
+| Name          | Description                                 | Type             | Default |
++===============+=============================================+==================+=========+
+| column_series | target series from a data frame column      | pandas.Series    | None    |
++---------------+---------------------------------------------+------------------+---------+
+| print_sets    | Should all of the unique values be printed? | bool             | False   |
++---------------+---------------------------------------------+------------------+---------+
 
 Returns: None
 

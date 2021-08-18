@@ -13,3 +13,4 @@ Class used to duplicate and edit individual instances glyphs to be rendered in O
    get_rows_of_branch_level <antzglyph-get_rows_of_branch_level>
    remove_rows_of_branch_level <antzglyph-remove_rows_of_branch_level>
    make_ids_consecutive <antzglyph-make_ids_consecutive>
+   get_row_by_id <antzglyph-get_row_by_id>
