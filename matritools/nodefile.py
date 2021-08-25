@@ -56,6 +56,12 @@ class NodeFile:
         self.node_file_name = file_name
         self.__add_initial_rows__()
 
+    def length(self):
+        return (len(self.node_file_rows))
+
+    def get_last_row(self):
+        return self.node_file_rows[self.length() - 1]
+
     def get_row_by_id(self, row_id: int):
         """
         :param row_id: ID of requested NodeFileRow
@@ -82,14 +88,14 @@ class NodeFile:
                 ids[row.id].append(i)
             else:
                 ids[row.id] = [i]
-            i+=1
+            i += 1
 
         if len(set(ids.keys())) != len(self.node_file_rows):
             temp_nf = NodeFile("temp")
             result = ""
             for key in ids.keys():
                 if len(ids[key]) > 1:
-                    result += str(key) + " | " + str(ids[key]) +  "\n"
+                    result += str(key) + " | " + str(ids[key]) + "\n"
 
                     for index in ids[key]:
                         temp_nf.node_file_rows.append(self.node_file_rows[index])
@@ -302,6 +308,12 @@ class AntzGlyph:
         else:
             raise RuntimeError("antz_glyph was constructed without a csv file name")
 
+    def length(self):
+        return (len(self.node_file_rows))
+
+    def get_last_row(self):
+        return self.node_file_rows[self.length() - 1]
+
     def get_row_by_id(self, row_id: int):
         """
         :param row_id: ID of requested NodeFileRow
@@ -414,44 +426,45 @@ class NodeFileRow:
     """ Container of properties and property setters for node file rows."""
 
     geos = {
-        "z cube": 0,
-        "Cube": 1,
-        "z sphere": 2,
-        "sphere": 3,
-        "z cone": 4,
-        "cone": 5,
-        "z toroid": 6,
-        "toroid": 7,
-        "z dodecahedron": 8,
-        "dodecahedron": 9,
-        "z octahedron": 10,
-        "octahedron": 11,
-        "z tetrahedron": 12,
-        "tetrahedron": 13,
-        "z icosahedron": 14,
-        "icosahedron": 15,
-        "pin": 16,
-        "Z pin": 17,
-        "z cylinder": 18,
-        "cylinder": 19,
-        "plane": 20
-    }
+                "z cube": 0,
+                "cube": 1,
+                "z sphere": 2,
+                "sphere": 3,
+                "z cone": 4,
+                "cone": 5,
+                "z toroid": 6,
+                "toroid": 7,
+                "z dodecahedron": 8,
+                "dodecahedron": 9,
+                "z octahedron": 10,
+                "octahedron": 11,
+                "z tetrahedron": 12,
+                "tetrahedron": 13,
+                "z icosahedron": 14,
+                "icosahedron": 15,
+                "pin": 16,
+                "Z pin": 17,
+                "z cylinder": 18,
+                "cylinder": 19,
+                "z plane": 20,
+                "plane": 21
+           }
 
     topos = {
-        "cube": 1,
-        "sphere": 2,
-        "toroid": 3,
-        "cylinder": 4,
-        "pin": 5,
-        "rod": 6,
-        "point": 7,
-        "plane": 8,
-        "z cube": 9,
-        "z sphere": 10,
-        "z toroid": 11,
-        "z cylinder": 12,
-        "z rod": 13
-    }
+                "cube": 1,
+                "sphere": 2,
+                "toroid": 3,
+                "cylinder": 4,
+                "pin": 5,
+                "rod": 6,
+                "point": 7,
+                "plane": 8,
+                "z cube": 9,
+                "z sphere": 10,
+                "z toroid": 11,
+                "z cylinder": 12,
+                "z rod": 13
+            }
 
     colors = {
         "red": [255, 0, 0],
@@ -972,6 +985,7 @@ class NodeFileRow:
         if (link_id_a == link_id_b) or link_id_a == self.id or link_id_b == self.id:
             raise RuntimeError("link_id_a and link_id_b cannot be equal to eachother and neither can be equal to id")
 
+        self._type = 7
         self.parent_id = link_id_a
         self.child_id = link_id_b
 
@@ -1212,8 +1226,8 @@ class NodeFileRow:
         self.color_a = a
 
     def set_color_by_name(self, color: str):
-        #if not isinstance(color, str)
-            #raise TypeError("color must be of type string")
+        if not isinstance(color, str):
+            raise TypeError("color must be of type string")
 
         self.color_r = self.colors[color][0]
         self.color_g = self.colors[color][1]
