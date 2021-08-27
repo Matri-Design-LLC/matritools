@@ -26,12 +26,12 @@ def test_improperly_formatted_csv_construction():
         nf.AntzGlyph("Test2.csv")
 
 
-def test_construct_with_reservered_rows_without_removal():
+def test_construct_with_reserved_rows_without_removal():
     with pytest.raises(Exception):
         nf.AntzGlyph("Test3.csv", False)
 
 
-def test_construct_with_reservered_rows_with_removal():
+def test_construct_with_reserved_rows_with_removal():
     try:
         nf.AntzGlyph("Test3.csv")
     except Exception as exc:
@@ -72,6 +72,20 @@ def test_child_id_properly_incremented():
     assert results == [0, 0, 0, 0, 0, 0, 0, 16]
 
 # endregion
+
+
+def test_length():
+    glyph = nf.AntzGlyph("Test1.csv")
+    assert glyph.length() == 2
+
+
+def test_get_last_row():
+    glyph = nf.AntzGlyph("Test1.csv")
+    assert glyph.get_last_row().id == 9
+
+def test_get_row_by_id():
+    glyph = nf.AntzGlyph("Test1.csv")
+    assert glyph.get_row_by_id(8).id == 8
 
 def test_unselect_all():
     for row in test_glyph4.node_file_rows:

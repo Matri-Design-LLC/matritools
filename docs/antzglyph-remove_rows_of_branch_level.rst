@@ -2,7 +2,8 @@
 =============================
 remove_rows_of_branch_level
 ---------------------------
-Removes all NodeFileRow's of a given branch level
+Removes gaps in ids. i.e IDs 1,2,4 become 1,2,3.
+Can also be used to change the ID's of the glyph to start from a specified index
 
 Parameters:
 

@@ -1,4 +1,4 @@
-`AntzGlyph <AntzGlyph.html>`_
+`NodeFile <nodefile.html>`_
 ===========================
 get_last_row
 ------------
@@ -15,9 +15,12 @@ Example::
     from matritools import nodefile as nf
 
     # create a node file
-    glyph = nf.NodeFile("template.csv")
+    my_node_file = nf.NodeFile("My Node File")
 
-    last_id = glyph.get_last_row().id
+    last_id = my_node_file.get_last_row().id
 
     print(last_id)
+
+    # output:
+    # 6
 

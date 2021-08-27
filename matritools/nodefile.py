@@ -19,6 +19,11 @@ class NodeFile:
       Create an AntzGlyph, modify its rows and use NodeFile.add_glyph_to_rows.
       Then call AntzGlyph.increment_glyph, modify rows again accordingly, then use NodeFile.add_glyph_to_rows.
       Repeat as necessary.
+
+    Attributes:
+        node_file_rows (list[NodeFileRow]) - list of NodeFileRows that make up a node file.
+        properties (NodeFileRow) - list of NodeFileRows that make up a node file.
+
     """
 
     header = "id,type,data,selected,parent_id," \
@@ -44,28 +49,41 @@ class NodeFile:
     def __init__(self, file_name: str):
 
         """
-        :param file_name: name of node and tag file created on write_to_csv()
+        Parameters:
+            file_name (str: None) - name of node and tag file created on write_to_csv()
+
+        Raises:
+            TypeError
+            RuntimeError
         """
+
+        file_name = str(file_name)
+
+        if file_name == "" or file_name is None:
+            raise RuntimeError("NodeFile constructed without a name")
 
         self.__taginc__ = 1  # line number for a tag file row
         self.node_file_rows = []
-
-        if file_name == "":
-            raise RuntimeError("NodeFile constructed without a name")
         self.properties = NodeFileRow()
-        self.node_file_name = file_name
+        self.__node_file_name__ = file_name
         self.__add_initial_rows__()
 
     def length(self):
+        """ Returns the number of NodeFileRows in this file. (int) """
         return (len(self.node_file_rows))
 
     def get_last_row(self):
+        """ Returns the last NodeFileRow of the file. (NodeFileRow) """
         return self.node_file_rows[self.length() - 1]
 
     def get_row_by_id(self, row_id: int):
         """
-        :param row_id: ID of requested NodeFileRow
-        :return: requested NodeFileRow
+        Returns the row with the given ID, None if no row found
+
+        Parameters:
+            row_id (int: None) - ID of requested NodeFileRow
+
+        Returns: NodeFileRow, None
         """
         for row in self.node_file_rows:
             if row.id == row_id:
@@ -75,10 +93,13 @@ class NodeFile:
 
     def write_to_csv(self):
         """
-        Write all node_file_rows to csv.
-        Creates a tag file.
-        This will overwrite the node and tag file.
-        :return: None
+        Writes all the parameters of each NodeFileRow into a node csv file as well as
+        creates a corresponding tag file.
+
+        Returns: None
+
+        Raises:
+            RuntimeError
         """
 
         ids = {}
@@ -100,11 +121,11 @@ class NodeFile:
                     for index in ids[key]:
                         temp_nf.node_file_rows.append(self.node_file_rows[index])
             self.to_dataframe().to_csv("debug_node.csv")
-            raise RuntimeError("Node File contains duplicate IDs.\n\nID | Indexes:\n\n" +
+            raise RuntimeError("Created debug_node.csv. Node File contains duplicate IDs.\n\nID | Indexes:\n\n" +
                                result + str(temp_nf.to_dataframe().to_string()))
 
-        node_file = open(self.node_file_name + "_node.csv", "w")
-        tag_file = open(self.node_file_name + "_tag.csv", "w")
+        node_file = open(self.__node_file_name__ + "_node.csv", "w")
+        tag_file = open(self.__node_file_name__ + "_tag.csv", "w")
         tag_file.write("id,record_id,table_id,title,description\n")
 
         node_file.write(self.header)
@@ -121,34 +142,91 @@ class NodeFile:
 
         node_file.close()
 
-    def create_node_row(self, tag_text=""):
+    def make_link(self, link_id_a: int, link_id_b: int, link_object_id: int = 0):
+        """
+        Creates a visible link between two NodeFileRows with IDs of link_id_a, and link_id_b.
+        Returns the created NodeFileRow.
+
+        Parameters:
+            link_id_a (int: None) - id of NodeFileRow
+            link_id_b (int: None) - id of NodeFileRow
+            link_object_id: 0) - id of created NodeFileRow, leave as default to generate a unique ID
+
+        Returns: NodeFileRow
+
+        Raises: RuntimeError
+        """
+
+        link_id_a = int(link_id_a)
+        link_id_b = int(link_id_b)
+        link_object_id = int(link_object_id)
+
+        if (link_id_a == link_id_b) or link_id_a == self.properties.id or link_id_b == self.properties.id:
+            raise RuntimeError("link_id_a and link_id_b cannot be equal to eachother and neither can be equal to id")
+
+        if (link_object_id == link_id_a) or link_object_id == link_id_b:
+            raise RuntimeError("link_object_id must be different from link_id_a, and link_id_b")
+
+        if self.get_row_by_id(link_id_a) is None:
+            raise RuntimeError("link_id_a (" + str(link_id_a) + ") must be the id of an existing NodeFileRow.")
+
+        if self.get_row_by_id(link_id_b) is None:
+            raise RuntimeError("link_id_b (" + str(link_id_b) + ") must be the id of an existing NodeFileRow.")
+
+        if self.get_row_by_id(link_object_id) is not None:
+            raise RuntimeError("link_object_id (" + str(link_object_id) + ") must not be the id of an existing NodeFileRow.")
+
+        link = NodeFileRow()
+        if link_object_id == 0:
+            link_id = self.get_last_row().id + 1
+            while self.get_row_by_id(link_id) is not None:
+                link_id += 1
+            link.set_id(link_id)
+        else:
+            link.set_id(link_object_id)
+
+        link._type = 7
+        link.parent_id = link_id_a
+        link.child_id = link_id_b
+
+        self.node_file_rows.append(link)
+
+        return link
+
+    def create_node_row(self, tag_text: str=""):
         """
         Creates and returns a node file row from node_file current properties and increments id by 1
-        :param tag_text: text that will be written in the tag file associated with this node file row (default "")
-        :return: matritools.nodefile.NodeFileRow
+
+        Parameters:
+            tag_text - text that will be written in the tag file associated with this node file row (default "")
+
+        Returns: NodeFileRow
         """
         node_row = copy.deepcopy(self.properties)
         self.node_file_rows.append(node_row)
         if tag_text != "":
-            node_row.tag_text = tag_text
+            node_row.tag_text = str(tag_text)
         self.properties.set_id(self.properties.id + 1)
         return node_row
 
     def add_glyph(self, glyph):
         """
         Appends all rows of a glyph to node_file_rows and increments glyph template id, parent_id, data, and record_id
-        :param glyph:
-        :return: None
+
+        Parameters:
+            glyph (AntzGlyph) - AntzGlyph that has its NodeFileRows copied and incremented
+
+        Returns: None
         """
 
         if not isinstance(glyph, AntzGlyph):
-            raise RuntimeError("glyph must be of type AntzGlyph")
+            raise TypeError("glyph must be of type AntzGlyph")
         for row in glyph.node_file_rows:
             self.node_file_rows.append(copy.deepcopy(row))
         glyph.increment_ids()
 
     def to_dataframe(self):
-        """ returns a data frame with all node file rows """
+        """ Returns a data frame with all node file rows (DataFrame) """
         list_of_lists = []
         for row in self.node_file_rows:
             columns = []
@@ -287,14 +365,19 @@ class AntzGlyph:
     """
     Used to represent a antz_glyph.
     Construct using node file generated from antz that contains only one glyph.
-    node_file_rows[0] is the root object.
+
+    Attributes:
+        node_file_rows (List[NodeFileRow]) -  list of NodeFileRows that make up a node file
     """
 
     def __init__(self, csv_file_name: str = "", remove_global_params: bool = True, make_ids_consecutive: bool = True):
         """
-        :param csv_file_name: name of the glyph template csv file (default: "")
-        :param remove_global_params: remove rows with an IDs that are 1-7 (default: True)
-        :param make_IDs_consecutive: remove gaps in between row IDs. i.e 1,2,4 becomes 1,2,3 (default: True)
+        Parameters:
+            csv_file_name (str: "") - name of the glyph template csv file (default: "")
+            remove_global_params (bool: True) - remove rows with an IDs that are 1-7 (default: True)
+            make_IDs_consecutive (bool: True) - remove gaps in between row IDs. i.e 1,2,4 becomes 1,2,3 (default: True)
+
+        Raises: RuntimeError
         """
 
         self.node_file_rows = []
@@ -309,29 +392,47 @@ class AntzGlyph:
             raise RuntimeError("antz_glyph was constructed without a csv file name")
 
     def length(self):
-        return (len(self.node_file_rows))
+        """ Returns the number of NodeFileRows in this file. (int) """
+        return len(self.node_file_rows)
 
     def get_last_row(self):
+        """ Returns the last NodeFileRow of the file. (NodeFileRow) """
         return self.node_file_rows[self.length() - 1]
 
     def get_row_by_id(self, row_id: int):
         """
-        :param row_id: ID of requested NodeFileRow
-        :return: requested NodeFileRow
+        Returns the row with the given ID, None if no row found
+
+        Parameters:
+            row_id (int: None) - ID of requested NodeFileRow
+
+        Returns: NodeFileRow, None
         """
         for row in self.node_file_rows:
             if row.id == row_id:
                 return row
 
     def increment_ids(self, match_data_and_record_id_to_id: bool = True):
+        """
+        Iterates over each NodeFileRow in the glyph and updates its ID, parent ID, and child ID reflect as a new glyph in a node
+        file starting with the highest ID + 1. This is called automatically when adding glyph to NodeFile
 
+        Parameters:
+            match_data_and_record_id_to_id (bool: True) - Should the rows update their record ID and data to match their ID?
+
+        Returns: None
+
+        """
         self.make_ids_consecutive(self.node_file_rows[len(self.node_file_rows) - 1].id + 1,
                                       match_data_and_record_id_to_id)
 
     def unselect_all(self):
         """
         Changes the selected property of all glyph node file rows to 0.
-        :return: None
+        When glyph template files are saved via "save selected",
+        each row is marked selected, use this to reverse this effect
+
+        Returns: None
         """
 
         for row in self.node_file_rows:
@@ -340,7 +441,8 @@ class AntzGlyph:
     def match_record_ids_and_data_to_ids(self):
         """
         Iterates over each NodeFileRow in the glyph and matches its record id and data to its id
-        :return: None
+
+        Returns: None
         """
         for row in self.node_file_rows:
             row.set_id(row.id)
@@ -356,8 +458,11 @@ class AntzGlyph:
     def remove_rows_of_branch_level(self, branch_level):
         """
         Removes all NodeFileRow's of a given branch level
-        :param branch level of all removed items (default: None)
-        :return: None
+
+        Parameters:
+            branch_level - branch level of all removed items (default: None)
+
+        Returns: None
         """
         rows = self.get_rows_of_branch_level(branch_level)
 
@@ -368,10 +473,12 @@ class AntzGlyph:
         """
         Removes gaps in ids. i.e IDs 1,2,4 become 1,2,3
         Can also be used to change the ID's of the glyph to start from a specified index
-        :param starting_id: first id of the glyph (default 8)
-        :param match_data_and_record_id_to_id: set true to set the data and record id of each row to match its id
-        (default: true)
-        :return:
+
+        Parameters:
+            starting_id (int: 8) - first id of the glyph
+            match_data_and_record_id_to_id (bool: True) - set true to set the data and record id of each row to match its id
+
+        Returns: None
         """
         # keys = old IDs, values = new IDs
         ids = {0:0}
@@ -423,7 +530,121 @@ class AntzGlyph:
 
 
 class NodeFileRow:
-    """ Container of properties and property setters for node file rows."""
+    """
+    Container of properties and property setters for node file rows.
+
+    Attributes:
+        geos             - dictionary mapping names of shapes to IDs
+        topos            - dictionary mapping names of topos to IDs
+        colors           - dictionary mapping names of color names to int list
+        id               - node ID used for pin tree relationship graph
+        _type            - node type - 1: Camera; 2: video; 3: Surface;
+                         - 4: Points, 5:Pin, 6:Grid
+        data             - additional node specific type, defined by node type
+        selected         - selection set status, 1 if part of active set, 0 if not
+                         - Useful if you want the root nodes selected upon loading
+        parent_id        - ID of parent node
+        branch_level     - root node is 0, each sub-level is 1, 2, 3, … n
+        child_id         - When used as to represent a link, parent_id is one
+                         - end and child_id is the other.
+                         - This object is a link between parent_id and child_id
+        child_index      - currently selected child node
+        pallete_id       - hard coded palettes.
+                         - 0: distinct set of 20 original colors/
+                         - 1: same as 0 but inverted/
+                         - 2: Rainbow Heatmap a composite of gradients/
+                         - 3 Rainbow Heatmap inverted/
+                         - 4-25 are gradients with 256 index's each (0-256)
+                         - odd palette_id's are inverted of their mirrors -
+                         - even numbered pallete_id's
+        ch_input_id      - channel number
+        ch_output_id     - channel number
+        ch_last_updated  - previous data update time-stamp (last read)
+        average          - type of averaging applied to channel data
+        samples          - number of samples to average
+        aux_a_x          - size of grid segments, x axis
+        aux_a_y          - size of grid segments, y axis
+        aux_a_z          - size of grid segments, z axis
+        aux_b_x          - size of grid segments, x axis
+        aux_b_y          - size of grid segments, y axis
+        aux_b_z          - size of grid segments, z axis
+        color_shift      - ?
+        rotate_vec_x     - reserved - unit vector calculated from rotate_x/y/z
+        rotate_vec_y     - reserved - unit vector calculated from rotate_x/y/z
+        rotate_vec_z     - reserved - unit vector calculated from rotate_x/y/z
+        rotate_vec_s     - reserved - unit vector calculated from rotate_x/y/z
+        scale_x          - 1.0 for no scaling, negative value inverts geometry
+        scale_y          - 1.0 for no scaling, negative value inverts geometry
+        scale_z          - 1.0 for no scaling, negative value inverts geometry
+        translate_x      - longitude, relative to parent coordinate system
+        translate_y      - atitude, relative to parent coordinate system
+        translate_z      - altitude, relative to parent coordinate system
+        tag_offset_x     - ?
+        tag_offset_y     - ?
+        tag_offset_z     - ?
+        rotate_rate_x    - angular velocity rate applied per cycle
+        rotate_rate_y    - angular velocity rate applied per cycle
+        rotate_rate_z    - angular velocity rate applied per cycle
+        rotate_x         - heading, 0 to 360 deg
+        rotate_y         - tilt, 0 to 180 deg
+        rotate_z         - roll, -180 to 180
+        scale_rate_x     - scaling rate applied per cycle
+        scale_rate_y     - scaling rate applied per cycle
+        scale_rate_z     - scaling rate applied per cycle
+        translate_rate_x - velocity rate applied per cycle
+        translate_rate_y - velocity rate applied per cycle
+        translate_rate_z - velocity rate applied per cycle
+        translate_vec_x  - reserved
+        translate_vec_y  - reserved
+        translate_vec_z  - reserved
+        shader           - shader type: 1: Wire / 2: Flat/ 3: Gouraud/ 4:
+                         - Phong/ 5: Reflection/ 6: Raytrace
+        geometry         - primitive type - the shape visible
+        line_width       - line width used for wireframes and line plots
+        point_size       - vertex point size used for plots
+        ratio            - ratio effects geometry such as inner radius of a torus
+        color_index      - color index from color palette
+        color_r          - 8bit RGBA color value
+        color_g          - 8bit RGBA color value
+        color_b          - 8bit RGBA color value
+        color_a          - 8bit RGBA color value
+        color_fade       - fades older data points over time
+        texture_id       - texture map ID, none-0, starts at 1, 2, 3, …n
+        hide             - hides the plot if set to 1
+        freeze           - freezes the plot if set to 1
+        topo             - topology type …uses KML coordinates
+        facet            - facet node belongs to, such as which side of a cube
+        auto_zoom_x      - auto-zooms plots to keep in bounds of the screen
+        auto_zoom_y      - auto-zooms plots to keep in bounds of the screen
+        auto_zoom_z      - auto-zooms plots to keep in bounds of the screen
+        trigger_hi_x     - if 1 then turn on upper limit
+        trigger_hi_y     - if 1 then turn on upper limit
+        trigger_hi_z     - if 1 then turn on upper limit
+        trigger_lo_x     - if 1 then turn on lower limit
+        trigger_lo_y     - if 1 then turn on lower limit
+        trigger_lo_z     - if 1 then turn on lower limit
+        set_hi_x         - upper limit
+        set_hi_y         - upper limit
+        set_hi_z         - upper limit
+        set_lo_x         - lower limit
+        set_lo_y         - lower limit
+        set_lo_z         - lower limit
+        proximity_x      - reserved for future proximity and collision detection
+        proximity_y      - reserved for future proximity and collision detection
+        proximity_z      - reserved for future proximity and collision detection
+        proximity_mode_x - reserved for future proximity and collision detection
+        proximity_mode_y - reserved for future proximity and collision detection
+        proximity_mode_z - reserved for future proximity and collision detection
+        segments_x       - number of segments, 0 for none
+        segments_y       - number of segments, 0 for none
+        segments_z       - number of segments, 0 for none
+        tag_mode         - type of tag (color, font , size)
+        format_id        - draw the label by id
+        table_id         - table id maps external DB used by record id and format
+        record_id        - record id is external source DB record key
+        size             - size in bytes of memory used per node
+        tag_text         - tag associated with this node object
+    """
 
     geos = {
                 "z cube": 0,
@@ -512,7 +733,10 @@ class NodeFileRow:
 
     def __init__(self, comma_string: str = ""):
         """
-        :param comma_string: a string with 94 comma seperated values in the order of an antz node file
+        Parameters:
+             comma_string (str: "") - a string with 94 comma seperated values in the order of an antz node file.
+
+        Raise: RuntimeError
         """
 
         # region properties
@@ -678,6 +902,16 @@ class NodeFileRow:
         self.set_properties_from_string_list(values)
 
     def set_properties_from_string_list(self, values: List[str]):
+        """
+
+        Parameters:
+            values (List[str]) - list of strings that can be cast as integrals
+
+        Returns: None
+
+        Raises: RuntimeError
+
+        """
         if len(values) != 94:
             raise RuntimeError("Comma separated string has incorrect number of values.\n Values length = " +
                                str(len(values)) + "\nInput: " + str(values))
@@ -777,6 +1011,11 @@ class NodeFileRow:
         self.size = int(float(values[93]))
 
     def print_properties(self):
+        """
+        Prints the label and value of each property.
+
+        Returns: None
+        """
         print("id: " + str(self.id))
         print("type: " + str(self._type))
         print("data: " + str(self.data))
@@ -971,26 +1210,17 @@ class NodeFileRow:
 
     # region setters for x, y , z properties
 
-    def make_link(self, link_id_a: int, link_id_b: int):
-        """
-        Creates a visible link between link_id_a, and link_id_b using these properties
-        :param link_id_a: id of NodeFileRow
-        :param link_id_b: id of NodeFileRow
-        :return: None
-        """
-
-        link_id_a = int(link_id_a)
-        link_id_b = int(link_id_b)
-
-        if (link_id_a == link_id_b) or link_id_a == self.id or link_id_b == self.id:
-            raise RuntimeError("link_id_a and link_id_b cannot be equal to eachother and neither can be equal to id")
-
-        self._type = 7
-        self.parent_id = link_id_a
-        self.child_id = link_id_b
-
     def set_id(self, row_id: int):
-        """ Sets id, record_id, and data to row_id """
+        """
+        Sets id, record_id, and data to row_id
+
+        Parameters:
+            row_id (int: None) - number to set id, record_id and row_id to
+
+        Returns: None
+
+        Raises: TypeError
+        """
 
         row_id = int(row_id)
 
@@ -1001,9 +1231,15 @@ class NodeFileRow:
     def set_tag(self, tag_text, tag_mode: int = 0):
         """
         Sets tag_text and tag_mode
+
+        Parameters:
+
         :param tag_text: (default "")
         :param tag_mode: (default 0)
-        :return: None
+
+        Returns: None
+
+        Raises: TypeError
         """
         tag_mode = int(tag_mode)
         self.tag_text = tag_text
@@ -1013,10 +1249,14 @@ class NodeFileRow:
         """
         Sets aux_a_x, y, and z
 
-        :param x: (default 30)
-        :param y: (default 30)
-        :param z: (default 30)
-        :return: None
+        Parameters:
+            x (int: 30)
+            y (int: 30)
+            z (int: 30)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = int(x)
@@ -1031,10 +1271,14 @@ class NodeFileRow:
         """
         Sets aux_b_x,y, and z
 
-        :param x: (default 30)
-        :param y: (default 30)
-        :param z: (default 30)
-        :return: None
+        Parameters:
+            x (int: 30)
+            y (int: 30)
+            z (int: 30)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = int(x)
@@ -1048,11 +1292,16 @@ class NodeFileRow:
     def set_rotate_vec(self, x: int = 0, y: int = 0, z: int = 0, s: int = 0):
         """
         Sets rotate_vec_x, y, z, and s
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :param s: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+            s (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = int(x)
@@ -1068,10 +1317,15 @@ class NodeFileRow:
     def set_scale(self, x: float = 1, y: float = 1, z: float = 1):
         """
         Sets scale_x, y, z
-        :param x: (default 1)
-        :param y: (default 1)
-        :param z: (default 1)
-        :return: None
+
+        Parameters:
+            x (int: 1)
+            y (int: 1)
+            z (int: 1)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = float(x)
@@ -1089,10 +1343,15 @@ class NodeFileRow:
     def set_translate(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets translate_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = float(x)
@@ -1106,10 +1365,15 @@ class NodeFileRow:
     def set_tag_offset(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets tag_offset_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = float(x)
@@ -1123,10 +1387,15 @@ class NodeFileRow:
     def set_rotate(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets rotate_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = float(x)
@@ -1140,10 +1409,15 @@ class NodeFileRow:
     def set_rotate_rate(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets rotate_rate_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = int(x)
@@ -1157,10 +1431,15 @@ class NodeFileRow:
     def set_scale_rate(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets scale_rate_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = int(x)
@@ -1174,10 +1453,15 @@ class NodeFileRow:
     def set_translate_rate(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets translate_rate_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = int(x)
@@ -1191,10 +1475,15 @@ class NodeFileRow:
     def set_translate_vec(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets translate_vec_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = int(x)
@@ -1208,11 +1497,17 @@ class NodeFileRow:
     def set_color(self, r: int = 0, g: int = 0, b: int = 0, a: int = 255):
         """
         Sets color values
-        :param r: red (int) 0-255 (default 0)
-        :param g: green (int) 0-255 (default 0)
-        :param b: blue (int) 0-255 (default 0)
-        :param a: transparency 0-255 (default 255)
-        :return: None
+
+        Parameters:
+
+        r (int: 0) - red (int) 0-255 (default 0)
+        g (int: 0) - green (int) 0-255 (default 0)
+        b (int: 0) - blue (int) 0-255 (default 0)
+        a (int: 255) - transparency 0-255 (default 255)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         r = int(r)
@@ -1226,6 +1521,15 @@ class NodeFileRow:
         self.color_a = a
 
     def set_color_by_name(self, color: str):
+        """
+
+        Parameters:
+            color:
+
+        Returns: None
+
+        Raises: TypeError
+        """
         if not isinstance(color, str):
             raise TypeError("color must be of type string")
 
@@ -1237,10 +1541,15 @@ class NodeFileRow:
     def set_auto_zoom(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets auto_zoom_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = int(x)
@@ -1254,10 +1563,15 @@ class NodeFileRow:
     def set_trigger_hi(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets trigger_hi_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
         x = int(x)
         y = int(y)
@@ -1270,10 +1584,15 @@ class NodeFileRow:
     def set_trigger_lo(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets trigger_low_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
         x = int(x)
         y = int(y)
@@ -1286,10 +1605,15 @@ class NodeFileRow:
     def set_set_hi(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets hi_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = int(x)
@@ -1303,10 +1627,15 @@ class NodeFileRow:
     def set_set_lo(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets lo_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = int(x)
@@ -1320,10 +1649,15 @@ class NodeFileRow:
     def set_proximity(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets proximity_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = float(x)
@@ -1337,10 +1671,15 @@ class NodeFileRow:
     def set_proximity_mode(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets proximity_mode_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 0)
+            y (int: 0)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = int(x)
@@ -1354,10 +1693,15 @@ class NodeFileRow:
     def set_segments(self, x: int = 20, y: int = 12, z: int = 0):
         """
         Sets segments_x, y, z
-        :param x: (default 0)
-        :param y: (default 0)
-        :param z: (default 0)
-        :return: None
+
+        Parameters:
+            x (int: 20)
+            y (int: 12)
+            z (int: 0)
+
+        Returns: None
+
+        Raises: TypeError
         """
 
         x = int(x)
@@ -1369,3 +1713,4 @@ class NodeFileRow:
         self.segments_z = z
 
     # endregion
+

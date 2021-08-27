@@ -10,10 +10,12 @@ Parameters:
 +------------+---------------------------------------------+-------------------------------+---------+
 | Name       | Description                                 | Type                          | Default |
 +============+=============================================+===============================+=========+
-| glyph      | glyph template to be added to node file     | matritools.nodefile.AntzGlyph | None    |
+| glyph      | glyph template to be added to node file     | AntzGlyph                     | None    |
 +------------+---------------------------------------------+-------------------------------+---------+
 
 Returns: None
+
+Raises: TypeError
 
 Example::
 

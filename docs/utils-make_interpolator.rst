@@ -18,7 +18,13 @@ Parameters:
 | new_max     | new maximum value                    | float            | None           |
 +-------------+--------------------------------------+------------------+----------------+
 
-Returns: pandas.DataFrame
+Returns:
+    Function (interpolates a value based on predefined scale factors:
+        Parameters:
+            value (float: None)
+        Returns:
+            Float
+
 
 Example::
 

@@ -10,7 +10,6 @@ Container of properties and property setters for node file rows.
    set_properties_from_string_list <nodefilerow-set_properties_from_string_list>
    print_properties <nodefilerow-print_properties>
    to_string <nodefilerow-to_string>
-   make_link <nodefilerow-make_link>
    set_id <nodefilerow-set_id>
    set_tag <nodefilerow-set_tag>
    set_aux_a <nodefilerow-set_aux_a>
