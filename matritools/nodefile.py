@@ -97,10 +97,6 @@ class NodeFile:
             raise RuntimeError("Node File contains duplicate IDs.\n\nID | Indexes:\n\n" +
                                result + str(temp_nf.to_dataframe().to_string()))
 
-
-        node_file = open(self.node_file_name + "_node.csv", "w")
-        tag_file = open(self.node_file_name + "_tag.csv", "w")
-
         node_file = open(self.__node_file_name__ + "_node.csv", "w", encoding="utf-8")
         tag_file = open(self.__node_file_name__ + "_tag.csv", "w", encoding="utf-8")
 
