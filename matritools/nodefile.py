@@ -464,7 +464,7 @@ class NodeFileRow:
         "hot pink": [255, 105, 180],
         "orange": [255, 128, 0],
         "white": [255, 255, 255],
-        "black": [0, 0, 0],
+        "black": [1, 1, 1],
         "grey": [128, 128, 128],
         "lime": [0, 255, 0],
         "maroon": [128, 0, 0],

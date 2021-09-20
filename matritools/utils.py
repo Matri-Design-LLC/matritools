@@ -45,8 +45,8 @@ def make_interpolator(old_min, old_max, new_min, new_max):
     """
 
     # Figure out how 'wide' each range is
-    old_span = old_max - old_min
-    new_span = new_max - new_min
+    old_span = float(old_max) - float(old_min)
+    new_span = float(new_max) - float(new_min)
 
     # Compute the scale factor between old and new values
     if old_span == 0:
