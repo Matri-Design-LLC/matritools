@@ -124,8 +124,9 @@ class NodeFile:
             raise RuntimeError("Created debug_node.csv. Node File contains duplicate IDs.\n\nID | Indexes:\n\n" +
                                result + str(temp_nf.to_dataframe().to_string()))
 
-        node_file = open(self.__node_file_name__ + "_node.csv", "w")
-        tag_file = open(self.__node_file_name__ + "_tag.csv", "w")
+        node_file = open(self.node_file_name + "_node.csv", "w", encoding="utf-8")
+        tag_file = open(self.node_file_name + "_tag.csv", "w", encoding="utf-8")
+    
         tag_file.write("id,record_id,table_id,title,description\n")
 
         node_file.write(self.header)
@@ -697,7 +698,7 @@ class NodeFileRow:
         "hot pink": [255, 105, 180],
         "orange": [255, 128, 0],
         "white": [255, 255, 255],
-        "black": [0, 0, 0],
+        "black": [1, 1, 1],
         "grey": [128, 128, 128],
         "lime": [0, 255, 0],
         "maroon": [128, 0, 0],
