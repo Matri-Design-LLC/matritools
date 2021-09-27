@@ -2,14 +2,14 @@
 ===========================
 get_row_by_id
 -------------
-Returns a NodeFileRow at the requested ID.
+Returns the row with the given ID, None if no row found.
 
 Parameters:
 
 +------------+---------------------------------------------------------+------------------+---------+
 | Name       | Description                                             | Type             | Default |
 +============+=========================================================+==================+=========+
-| row_id     | Returns the row with the given ID, None if no row found | int              | None    |
+| row_id     | ID of requested NodeFileRow                             | int              | None    |
 +------------+---------------------------------------------------------+------------------+---------+
 
 Returns: NodeFileRow, None

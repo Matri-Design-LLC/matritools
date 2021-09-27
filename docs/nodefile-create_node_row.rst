@@ -7,13 +7,15 @@ After the new NodeFileRow is added, id is incremented by one.
 
 Parameters:
 
-+------------+---------------------------------------------+------------------+---------+
-| Name       | Description                                 | Type             | Default |
-+============+=============================================+==================+=========+
-| tag_text   | tag associated with created Node File Row   | str              | ""      |
-+------------+---------------------------------------------+------------------+---------+
++------------+-------------------------------------------------------------+------+---------+
+| Name       | Description                                                 | Type | Default |
++============+=============================================================+======+=========+
+| tag_text   | tag associated with created Node File Row                   | str  | ""      |
++------------+-------------------------------------------------------------+------+---------+
+| tag_mode   | int representing how the tag should be displayed by default | int  | 0       |
++------------+-------------------------------------------------------------+------+---------+
 
-Returns: matritools.nodefile.NodeFileRow
+Returns: NodeFileRow
 
 Example::
 
@@ -29,7 +31,7 @@ Example::
     # create snow man base
     my_node_file.properties.set_translate(0,0,0)
     my_node_file.properties.set_u_scale(3)
-    row = my_node_file.create_node_row("Base")
+    row = my_node_file.create_node_row("Base", 1)
     print(row.to_string())
 
     # create object snow man body

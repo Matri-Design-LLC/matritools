@@ -1,4 +1,4 @@
-`AntzGlyph <AntzGlyph.html>`_
+`AntzGlyph <antzglyph.html>`_
 =============================
 get_last_row
 ------------
@@ -20,4 +20,7 @@ Example::
     last_id = glyph.get_last_row().id
 
     print(last_id)
+
+    # output:
+    # 6
 

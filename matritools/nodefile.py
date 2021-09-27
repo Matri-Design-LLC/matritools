@@ -124,8 +124,8 @@ class NodeFile:
             raise RuntimeError("Created debug_node.csv. Node File contains duplicate IDs.\n\nID | Indexes:\n\n" +
                                result + str(temp_nf.to_dataframe().to_string()))
 
-        node_file = open(self.node_file_name + "_node.csv", "w", encoding="utf-8")
-        tag_file = open(self.node_file_name + "_tag.csv", "w", encoding="utf-8")
+        node_file = open(self.__node_file_name__ + "_node.csv", "w", encoding="utf-8")
+        tag_file = open(self.__node_file_name__ + "_tag.csv", "w", encoding="utf-8")
     
         tag_file.write("id,record_id,table_id,title,description\n")
 
@@ -194,19 +194,20 @@ class NodeFile:
 
         return link
 
-    def create_node_row(self, tag_text: str=""):
+    def create_node_row(self, tag_text: str="", tag_mode: int=0):
         """
         Creates and returns a node file row from node_file current properties and increments id by 1
 
         Parameters:
             tag_text - text that will be written in the tag file associated with this node file row (default "")
+            tag_mode - int representing how the tag should be displayed by default (default 0)
 
         Returns: NodeFileRow
         """
         node_row = copy.deepcopy(self.properties)
         self.node_file_rows.append(node_row)
         if tag_text != "":
-            node_row.tag_text = str(tag_text)
+            node_row.set_tag(tag_text, tag_mode)
         self.properties.set_id(self.properties.id + 1)
         return node_row
 
@@ -364,11 +365,11 @@ class NodeFile:
 
 class AntzGlyph:
     """
-    Used to represent a antz_glyph.
+    Class used to duplicate and edit individual instances glyphs to be rendered in OpenAntz
     Construct using node file generated from antz that contains only one glyph.
 
     Attributes:
-        node_file_rows (List[NodeFileRow]) -  list of NodeFileRows that make up a node file
+        node_file_rows (List[NodeFileRow]) -  list of NodeFileRows that make up the glyph
     """
 
     def __init__(self, csv_file_name: str = "", remove_global_params: bool = True, make_ids_consecutive: bool = True):
@@ -694,7 +695,7 @@ class NodeFileRow:
         "green": [0, 128, 0],
         "yellow": [255, 255, 0],
         "cyan": [0, 255, 255],
-        "magenta": [255, 255, 0],
+        "magenta": [255, 0, 255],
         "hot pink": [255, 105, 180],
         "orange": [255, 128, 0],
         "white": [255, 255, 255],
@@ -744,7 +745,7 @@ class NodeFileRow:
 
         self.id = 8  # node ID used for pin tree relationship graph
         self._type = 5  # node type - 1: Camera; 2: video; 3: Surface; 4: Points, 5:Pin, 6:Grid
-        self.data = 0  # node type - 1: Camera; 2: video; 3: Surface; 4: Points, 5:Pin, 6:Grid
+        self.data = 8  # node type - 1: Camera; 2: video; 3: Surface; 4: Points, 5:Pin, 6:Grid
 
         # selection set status, 1 if part of active set, 0 if not
         # Useful if you want the root nodes selected upon loading.
@@ -887,7 +888,7 @@ class NodeFileRow:
         self.tag_mode = 0  # type of tag (color, font , size)
         self.format_id = 0  # draw the label by id
         self.table_id = 0  # table id maps external DB used by record id and format
-        self.record_id = 0  # record id is external source DB record key
+        self.record_id = 8  # record id is external source DB record key
         self.size = 420  # size in bytes of memory used per node
 
         self.tag_text = ""

@@ -1,7 +1,7 @@
 `NodeFileRow <nodefilerow.html>`_
 =================================
 set_scale_rate
----------
+--------------
 Sets the x, y, and z axis of scale_rate.
 
 Parameters:

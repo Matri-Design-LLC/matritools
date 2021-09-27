@@ -1,7 +1,7 @@
 `NodeFileRow <nodefilerow.html>`_
 =================================
 set_translate_rate
------------------
+------------------
 Sets the x, y, and z axis of translate_vec.
 
 Parameters:

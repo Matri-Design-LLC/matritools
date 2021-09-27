@@ -16,7 +16,6 @@ def create_df_from_json(json_file_name: str):
     with open(json_file_name) as json_data:
         return pd.DataFrame(json.load(json_data))
 
-
 def create_df_from_json_string(json_string):
     """
     Crates a dataframe from a json formatted string.
@@ -28,7 +27,6 @@ def create_df_from_json_string(json_string):
 
     """
     return pd.DataFrame(json.load(json_string))
-
 
 def interpolate_df_column(df, column: str, new_min: float, new_max: float, column_tail: str = "_interpolated"):
     """
@@ -51,7 +49,6 @@ def interpolate_df_column(df, column: str, new_min: float, new_max: float, colum
     scalar = make_interpolator(col_min + .0002, col_max, float(new_min), float(new_max))
     col_interp = [scalar(x) for x in col_list]
     df[(str(column) + str(column_tail))] = col_interp
-
 
 def make_interpolator(old_min: float, old_max: float, new_min: float, new_max: float):
     """
@@ -185,7 +182,6 @@ def dict_to_multilined_str(dictionary: dict, indent_level = 0):
             result += str(dictionary[key]) + '\n'
     return result
 
-
 def create_column_value_color_legend(column_series):
     """
     Creates a dictionary mapping values of a data frame column to names of colors. Used to set NodeFileRow colors by name.
@@ -208,4 +204,20 @@ def create_column_value_color_legend(column_series):
             i = 0
         result[value] = color_keys[i]
         i += 1
+    return result
+
+def split_df_by_value(df, column):
+    """
+    Seperates all the rows of a dataframe by unique value and returns them as a list of dataframes.
+
+    Parametes:
+        df (Dataframe: None) - dataframe to be extracted from
+        column (str: None) - column name to be extracted from.
+    """
+
+    values = set(df[column].tolist())
+    result = []
+    for value in values:
+        result.append(df.loc[df[column] == value])
+
     return result

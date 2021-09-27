@@ -12,10 +12,10 @@ Parameters:
 |                      | in OpenANTz including ".csv"                 | str  | ""      |
 +----------------------+----------------------------------------------+------+---------+
 | remove_global_params | Should global parameter rows                 |      |         |
-|                      | (IDs 1-6) be removed                         | bool | True    |
+|                      | (IDs 1-7) be removed                         | bool | True    |
 +----------------------+----------------------------------------------+------+---------+
-| make_ids_consecutive | Should the IDs of the glyph template file be |      |         |
-|                      | changed to be consecutive?                   | bool | True    |
+| make_ids_consecutive | remove gaps in between row IDs.              |      |         |
+|                      | i.e 1,2,4 becomes 1,2,3                      | bool | True    |
 +----------------------+----------------------------------------------+------+---------+
 
 Raises: RuntimeError

@@ -21,6 +21,7 @@ as well as commonly used data manipulation functions used by Matri Design LLC.
 .. toctree::
    :maxdepth: 2
 
+   Getting Started <gettingstarted>
    Nodefile <nodefile>
    AntzGlyph <antzglyph>
    NodeFileRow <nodefilerow>
