@@ -71,6 +71,7 @@ Creating Nodes::
         # set the x, y, and z scale of the node uniformally
         node.set_u_scale((row['Weight']))
 
+    # create csv file to use in Antz
     ntf.write_to_csv()
 
 After running all of the above code, you should have two files named "Example 1_node.csv" and
@@ -151,6 +152,7 @@ Final Code::
         # set the x, y, and z scale of the node uniformly
         node.set_u_scale(weight_scalar(row['Weight']))
 
+    # create csv file to use in Antz
     ntf.write_to_csv()
 
 Now lets pop these into Antz and see the final result.
