@@ -51,52 +51,6 @@ def test_to_string():
 
 # region setters
 
-# region make link
-
-def test_make_link_correct_input_ints():
-    test_nfr.make_link(100, 200)
-    assert test_nfr.parent_id == 100 and test_nfr.child_id == 200
-
-
-def test_make_link_correct_input_strings():
-    test_nfr.make_link("300", "400")
-    assert test_nfr.parent_id == 300 and test_nfr.child_id == 400
-
-
-def test_make_link_correct_input_floats():
-    test_nfr.make_link(500.0, 600.0)
-    assert test_nfr.parent_id == 500 and test_nfr.child_id == 600
-
-
-def test_make_link_bad_input_strings():
-    with pytest.raises(Exception):
-        test_nfr.make_link("a", "b")
-
-
-def test_make_link_bad_input_floats():
-    with pytest.raises(Exception):
-        test_nfr.make_link(1.1, 2.1)
-
-
-def test_make_link_with_equal_parameters():
-    with pytest.raises(Exception):
-        test_nfr.make_link(1, 1)
-
-
-def test_make_link_parameters_equal_id_1():
-    with pytest.raises(Exception):
-        test_nfr.id = 1000
-        test_nfr.make_link(1000, 2000)
-
-
-def test_make_link_parameters_equal_id_1():
-    with pytest.raises(Exception):
-        test_nfr.id = 2000
-        test_nfr.make_link(1000, 2000)
-
-
-# endregion
-
 # region set id
 
 def test_set_id_correct_input_int():
@@ -447,7 +401,7 @@ def test_set_color_by_name_bad_input_none():
         test_nfr.set_color_by_name()
 
 def test_set_color_by_name_bad_input_not_str():
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         test_nfr.set_color_by_name(5)
 
 def test_set_color_by_name_bad_input_invalid_color():

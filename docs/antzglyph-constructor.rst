@@ -18,6 +18,8 @@ Parameters:
 |                      | changed to be consecutive?                   | bool | True    |
 +----------------------+----------------------------------------------+------+---------+
 
+Raises: RuntimeError
+
 Example::
 
     from matritools import nodefile as nf

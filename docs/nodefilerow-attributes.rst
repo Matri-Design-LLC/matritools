@@ -15,6 +15,7 @@ Attributes
 | topos            | dictionary mapping names of topos to IDs                | DICT[str, int]       | None    |
 +------------------+---------------------------------------------------------+----------------------+---------+
 | colors           | dictionary mapping names of color names to int list     | DICT[str, List[int]] | None    |
+|                  | `set_color_by_name <nodefilerow-set_color_by_name.html>`|                      |         |
 +------------------+---------------------------------------------------------+----------------------+---------+
 | id               | node ID used for pin tree relationship graph            | int                  | None    |
 +------------------+---------------------------------------------------------+----------------------+---------+

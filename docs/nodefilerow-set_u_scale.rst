@@ -14,6 +14,8 @@ Parameters:
 
 Returns: None
 
+Raises: TypeError
+
 Example::
 
 	from matritools import nodefile as nf

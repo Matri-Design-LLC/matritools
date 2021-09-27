@@ -19,6 +19,15 @@ def test_constructor_initial_row_ids():
 
     assert results == [1,2,3,4,5,6]
 
+def test_length():
+    ntf = nf.NodeFile("Test")
+    assert ntf.length() == 6
+
+
+def test_get_last_row():
+    ntf = nf.NodeFile("Test")
+    assert ntf.get_last_row().id == 6
+
 def test_get_row_by_id():
     ntf = nf.NodeFile("Test")
     assert ntf.get_row_by_id(1).id == 1
@@ -147,4 +156,54 @@ def test_to_string():
     result_values = ntf.node_file_rows[6].to_string().split(',')
     ntf.node_file_rows[6].print_properties()
     assert [float(value) for value in test_values] == [float(value) for value in result_values]
+
+# region make link
+
+def test_make_link_correct_input_ints():
+    ntf = nf.NodeFile("Test")
+    row1 = ntf.create_node_row()
+    row2 = ntf.create_node_row()
+    original_length = ntf.length()
+    last_id = row2.id
+    link = ntf.make_link(row1.id, row2.id)
+    assert link.parent_id == row1.id and\
+           link.child_id == row2.id and\
+           original_length + 1 == ntf.length() and\
+           last_id + 1 == link.id
+
+def test_make_link_correct_input_a_b_are_same():
+    ntf = nf.NodeFile("Test")
+    row1 = ntf.create_node_row()
+    with pytest.raises(RuntimeError):
+        ntf.make_link(row1.id, row1.id)
+
+def test_make_link_correct_input_id_in_rows():
+    ntf = nf.NodeFile("Test")
+    row1 = ntf.create_node_row()
+    row2 = ntf.create_node_row()
+    with pytest.raises(RuntimeError):
+        ntf.make_link(row1.id, row2.id, row1.id)
+
+def test_make_link_correct_input_a_not_in_rows():
+    ntf = nf.NodeFile("Test")
+    row1 = ntf.create_node_row()
+    with pytest.raises(RuntimeError):
+        ntf.make_link(50, row1.id)
+
+def test_make_link_correct_input_b_not_in_rows():
+    ntf = nf.NodeFile("Test")
+    row1 = ntf.create_node_row()
+    row2 = ntf.create_node_row()
+    with pytest.raises(RuntimeError):
+        ntf.make_link(row1.id, 50, row1.id)
+
+def test_make_link_correct_input_obj_id_in_rows():
+    ntf = nf.NodeFile("Test")
+    row1 = ntf.create_node_row()
+    row2 = ntf.create_node_row()
+    row3 = ntf.create_node_row()
+    with pytest.raises(RuntimeError):
+        ntf.make_link(row1.id, row2.id, row3.id)
+
+# endregion
 

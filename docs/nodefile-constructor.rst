@@ -8,8 +8,12 @@ Parameters:
 +------------+---------------------------------------------+------------------+---------+
 | Name       | Description                                 | Type             | Default |
 +============+=============================================+==================+=========+
-| file_name  | name of node and tag file                   | str              | None    |
+| file_name  | name of node and tag file.                  | str              | None    |
 +------------+---------------------------------------------+------------------+---------+
+
+Raises:
+    TypeError
+    RuntimeError
 
 Example::
 

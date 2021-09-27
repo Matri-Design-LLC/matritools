@@ -3,12 +3,30 @@ from matritools import nodefile as nf
 from ast import literal_eval
 import json
 
-def create_df_from_json(json_file_name):
+def create_df_from_json(json_file_name: str):
+    """
+    Crates a dataframe from a json file name.
+
+    Parameters:
+        json_file_name (str: None) - file name of .json file
+
+    Returns: DataFrame
+
+    """
     with open(json_file_name) as json_data:
         return pd.DataFrame(json.load(json_data))
 
 
 def create_df_from_json_string(json_string):
+    """
+    Crates a dataframe from a json formatted string.
+
+    Parameters:
+        json_string (str: None) - string in json format
+
+    Returns: Dataframe
+
+    """
     return pd.DataFrame(json.load(json_string))
 
 
@@ -18,30 +36,40 @@ def interpolate_df_column(df, column: str, new_min: float, new_max: float, colum
     Adds the interpolated data into a new column labeled (original column name) + (column_tail) and preserves original
     un-interpolated data.
 
-    :param df:
-    :param column:
-    :param obj_scale_min:
-    :param obj_scale_max:
-    :param column_tail:
-    :return:
+    Parameters:
+        df (DataFrame: None) - target DataFrame
+        column (str: None) - string column to be interpolated
+        obj_scale_min (float: None) - new minimum value
+        obj_scale_max (float: None) -  new maximum value
+        column_tail (str: "_interpolated") - string to be appended to column name
+
+    Returns: None
     """
     col_min = df[column].min()
     col_max = df[column].max()
     col_list = df[column].tolist()
-    scalar = make_interpolater(col_min + .0002, col_max, float(new_min), float(new_max))
+    scalar = make_interpolator(col_min + .0002, col_max, float(new_min), float(new_max))
     col_interp = [scalar(x) for x in col_list]
     df[(str(column) + str(column_tail))] = col_interp
 
 
-def make_interpolator(old_min, old_max, new_min, new_max):
+def make_interpolator(old_min: float, old_max: float, new_min: float, new_max: float):
     """
     Creates a reusable interpolation function to scale a value in between a new min and new max.
 
-    :param old_min:
-    :param old_max:
-    :param new_min:
-    :param new_max:
-    :return: interpolation function
+    Parameters:
+        old_min (float: None) - old minimum value
+        old_max (float: None) - old maximum value
+        new_min (float: None) - new minimum value
+        new_max (float: None) - new maximum value
+
+    Returns: interpolation function
+        Scale a value in between a set min and  max
+
+        Paramaters:
+            value (float: None) - value to be interpolated
+
+        Returns: float
     """
 
     # Figure out how 'wide' each range is
@@ -55,11 +83,14 @@ def make_interpolator(old_min, old_max, new_min, new_max):
         scale_factor = float(new_span) / float(old_span)
 
     # create interpolation function using pre-calculated scaleFactor
-    def interp_fn(value):
+    def interp_fn(value: float):
         """
         Scale a value in between a set min and  max
-        :param value: value to be interpolated
-        :return: float
+
+        Paramaters:
+            value (float: None) - value to be interpolated
+
+        Returns: float
         """
         return new_min + (value - old_min) * scale_factor
 
@@ -69,9 +100,11 @@ def separate_compound_dataframe(df,  name_template=""):
     """
     Use to create a list of data frames from a dataframe with embedded lists.
 
-    :param df: a data frame that has lists of data contained in individual cells
-    :param name_template: individual data frame columns = lambda x: (name_template + "{}").format(x + 1) (default "")
-    :return: list of data frames
+    Parameters:
+        df (DataFrame) - a data frame that has lists of data contained in individual cells
+        name_template: individual data frame columns = lambda x: (name_template + "{}").format(x + 1) (default "")
+
+    Returns: list of data frames
 
 
     I.E when a data frame is in the form of :
@@ -103,10 +136,13 @@ def separate_compound_dataframe(df,  name_template=""):
 
 def find_index_in_set(value_set, value):
     """
-    returns the index of a value in a set as if it were a list
-    :param value_set: target set
-    :param value: target value
-    :return: (int) index of value in value_set, returns -1 if value is not in value_set
+    Returns the index of a value in a set as if it were a list
+
+    Parameters:
+        value_set (set: None) - target set
+        value (any: None) target value
+
+    Returns: (int) index of value in value_set, returns -1 if value is not in value_set
     """
     index = 0
     for i in value_set:
@@ -117,9 +153,12 @@ def find_index_in_set(value_set, value):
 
 def set_to_list(value_set):
     """
-    Converts a set to a list
-    :param value_set: target set
-    :return: list
+    Converts a set to a list.
+
+    Parameters:
+        value_set (set: None) target set
+
+    Returns: list
     """
     result = []
     for value in value_set:
@@ -127,6 +166,16 @@ def set_to_list(value_set):
     return result
 
 def dict_to_multilined_str(dictionary: dict, indent_level = 0):
+    """
+    Converts a dict into a formatted string with a line for each key value pair
+
+    Parameters:
+        dictionary (dict: None) - dict to be converted to string
+        indent_level (int: 0) - used for recursion for formatting the string in the case of nested dicts
+
+    Returns: str
+
+    """
     result = ""
     for key in dictionary.keys():
         result += ('\t' * indent_level) + str(key) + " : "
@@ -138,6 +187,15 @@ def dict_to_multilined_str(dictionary: dict, indent_level = 0):
 
 
 def create_column_value_color_legend(column_series):
+    """
+    Creates a dictionary mapping values of a data frame column to names of colors. Used to set NodeFileRow colors by name.
+
+    Parameters:
+        column_series (Series: None) - target series from a data frame column
+
+    Returns: Dict[any, str]
+
+    """
     color_keys = []
 
     for color in nf.NodeFileRow.colors.keys():

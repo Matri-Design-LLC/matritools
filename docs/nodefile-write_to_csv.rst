@@ -2,11 +2,14 @@
 ===========================
 write_to_csv
 ------------
-Writes all the parameters of each NodeFileRow into a node csv file as well as creates a corresponding tag file.
+Writes all the parameters of each NodeFileRow into a node csv file as well as
+creates a corresponding tag file.
 
 Parameters: None
 
 Returns: None
+
+Raises: RuntimeError
 
 Example::
 
