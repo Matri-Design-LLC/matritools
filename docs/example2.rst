@@ -1,3 +1,4 @@
+.. include:: .special.rst
 Example 1
 =========
 
@@ -8,7 +9,8 @@ Import::
     import pandas as pd
     from matritools import nodefile as nf, utils as mu
 
-Next, we can create some data, load it into a pandas DataFrame, and establish a node file.
+Next, we can create some data, load it into a :variable:`pandas DataFrame` and establish a
+:variable:`NodeFile`.
 
 Create Data::
 
@@ -30,59 +32,60 @@ Let's make a simple 3D bar graph to show the data of each person.
 
 .. image:: Example_2_Glyph_Template.png
 
-Let us represent a data values by adjusting the length of each of the colored rods, sticking out of
-the side.
+Let us represent a data values by adjusting the :variable:`length` of each of the colored rods,
+sticking out of the side.
 
-Let the green rod represent height, red represent weight, blue represent age, and yellow represent
-bank account balance.
+Let the green rod represent :green:`height`, red represent :red:`weight`, blue represent :blue:`age`,
+and yellow represent :yellow:`bank account balance`.
 
 In order to use this template, we need to get the csv file created from saving our template in Antz
-and place it in the same directory as our script. Lets name it "Example_2_Template.csv".
+and place it in the same directory as our script. Lets name it :filename:`"Example_2_Template.csv"`.
 
-Now, in order for us to change the length of our rods, we need to know which row in
-"Example_2_Template.csv" is which rod. The easiest way to identify them is know how they are the
-same, and know how they are different.
+Now, in order for us to change the :variable:`length` of our rods, we need to know which row in
+:filename:`"Example_2_Template.csv"` is which rod. The easiest way to identify them
+is know how they are the same, and know how they are different.
 
 Below is a condensed version of the node file template.
 
-+-----+----+------+---------+---------+---------+
-| Row | ID | topo | color_r | color_g | color_b |
-+=====+====+======+=========+=========+=========+
-| 0   | 38 | 5    | 50      | 101     | 101     |
-+-----+----+------+---------+---------+---------+
-| 1   | 39 | 6    | 50      | 101     | 101     |
-+-----+----+------+---------+---------+---------+
-| 2   | 40 | 6    | 255     | 0       | 0       |
-+-----+----+------+---------+---------+---------+
-| 3   | 41 | 6    | 0       | 0       | 255     |
-+-----+----+------+---------+---------+---------+
-| 4   | 42 | 6    | 255     | 255     | 0       |
-+-----+----+------+---------+---------+---------+
-| 5   | 43 | 6    | 0       | 255     | 0       |
-+-----+----+------+---------+---------+---------+
++-----+----+------+----------------+------------------+-----------------+
+| Row | ID | topo | :red:`color_r` | :green:`color_g` | :blue:`color_b` |
++=====+====+======+================+==================+=================+
+| 0   | 38 | 5    | 50             | 101              | 101             |
++-----+----+------+----------------+------------------+-----------------+
+| 1   | 39 | 6    | 50             | 101              | 101             |
++-----+----+------+----------------+------------------+-----------------+
+| 2   | 40 | 6    | 255            | 0                | 0               |
++-----+----+------+----------------+------------------+-----------------+
+| 3   | 41 | 6    | 0              | 0                | 255             |
++-----+----+------+----------------+------------------+-----------------+
+| 4   | 42 | 6    | 255            | 255              | 0               |
++-----+----+------+----------------+------------------+-----------------+
+| 5   | 43 | 6    | 0              | 255              | 0               |
++-----+----+------+----------------+------------------+-----------------+
 
 In this case, they are all rods and know they are all
-different colors. So lets look in file and search under the column "topo" and notice that all of
-numbers are 6 except 1. We know that our template is made of all rods except for one peice so we
-can assume a topo of 6 means rod, if we didn't know that already.
+different colors. So lets look in file and search under the column :variable:`"topo"` and
+notice that all of numbers are 6 except 1. We know that our template is made of all rods
+except for one piece so we can assume a :variable:`topo` of 6 means rod,
+if we didn't know that already.
 
-Next we can look for the columns color_r, color_g, and color_b. We can see that the rows 2 - 5
-are the rows that are colored differently. Lets write this down
+Next we can look for the columns :red:`color_r`, :green:`color_g`, and :blue:`color_b`.
+We can see that the rows 2 - 5 are the rows that are colored differently. Lets write this down.
 
-+---+--------+
-| 2 | red    |
-+---+--------+
-| 3 | green  |
-+---+--------+
-| 4 | yellow |
-+---+--------+
-| 5 | blue   |
-+---+--------+
++---+------------------+
+| 2 | :red:`red`       |
++---+------------------+
+| 3 | :green:`green`   |
++---+------------------+
+| 4 | :yellow:`yellow` |
++---+------------------+
+| 5 | :blue:`blue`     |
++---+------------------+
 
-Now that we are familiar with our node file. Lets establish our AntzGlyph object, make some scalars
-and define how far apart we want to space our glyphs.
+Now that we are familiar with our node file. Lets establish our :variable:`AntzGlyph` object,
+make some scalars and define how far apart we want to space our glyphs.
 
-Set up AntzGlyph, scalars and unit distance::
+Set up :variable:`AntzGlyph`, scalars and unit distance::
 
     glyph = nf.AntzGlyph("Example_2_Glyph_Template.csv")
 

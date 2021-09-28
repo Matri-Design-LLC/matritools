@@ -1,0 +1,6 @@
+.. role:: filename
+.. role:: variable
+.. role:: green
+.. role:: red
+.. role:: blue
+.. role:: yellow

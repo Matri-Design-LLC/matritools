@@ -1,3 +1,5 @@
+.. include:: .special.rst
+
 Example 1
 =========
 
@@ -8,7 +10,8 @@ Import::
     import pandas as pd
     from matritools import nodefile as nf, utils as mu
 
-Next, we can create some data, load it into a pandas DataFrame, and establish a node file.
+Next, we can create some data, load it into a :variable:`pandas DataFrame` and establish a
+:variable:`NodeFile`.
 
 Create Data::
 
@@ -26,18 +29,20 @@ Create Data::
 
 Then, think about how you want to display data within Antz.
 
-The easiest way to demonstrate the power of 3D is to use the x, y, and z position to represent
-data values. We could also represent data values with color and the scale of an object.
+The easiest way to demonstrate the power of 3D is to use the :variable:`x, y, and z` position to
+represent data values. We could also represent data values with :variable:`color`
+and the :variable:`scale` of an object.
 
-Lets plot some spheres. Each spehere will represent a person from our data.
+Lets plot some spheres. Each sphere will represent a person from our data.
 
-First we use the x coordinate to represent the age of a person, the y coordinate to represent
-the amount of money they have, and the z coordinate to represent how tall they are.
+First we use the :variable:`x coordinate` to represent the age of a person, the
+:variable:`y coordinate` to represent the amount of money they have, and the
+:variable:`z coordinate` to represent how tall they are.
 
-Next we can represent how much they weigh by adjusting the scale of the person's sphere.
+Next we can represent how much they weigh by adjusting the :variable:`scale` of the person's sphere.
 
-Lastly, we can distinguish what sphere belongs to which person by changing its color and giving it a
-tag.
+Lastly, we can distinguish what sphere belongs to which person by changing its :variable:`color`
+and giving it a tag.
 
 Lets iterate through our data with a for loop and create and modify nodes based on the data.
 
@@ -74,14 +79,14 @@ Creating Nodes::
     # create csv file to use in Antz
     ntf.write_to_csv()
 
-After running all of the above code, you should have two files named "Example 1_node.csv" and
-"Example 1_tag.csv". Load those into Antz
+After running all of the above code, you should have two files named :filename:`"Example 1_node.csv"` and
+:filename:`"Example 1_tag.csv"`. Load those into Antz
 
 .. image:: Example_1_Unscaled.png
 
-Uh oh...the nodes are too big or too close together. We can use linear interpolation to scale the
-values of our data within a reasonable range. Luckily matritools has some utility functions to do
-just that.
+Uh oh...the nodes are too big or too close together. We can use :variable:`linear interpolation`
+to scale the values of our data within a reasonable range. Luckily matritools has some utility
+functions to do just that.
 
 Create scalar functions::
 

@@ -1,0 +1,26 @@
+@import '../alabaster.css';
+
+.filename {
+    color: green;
+    font-style: italic;
+}
+
+.variable {
+    color: #b300b3;
+}
+
+.green {
+    color: green;
+}
+
+.red {
+    color: red;
+}
+
+.blue {
+    color: blue;
+}
+
+.yellow {
+    color: darkgoldenrod;
+}
