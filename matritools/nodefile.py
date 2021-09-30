@@ -226,6 +226,7 @@ class NodeFile:
         for row in glyph.node_file_rows:
             self.node_file_rows.append(copy.deepcopy(row))
         glyph.increment_ids()
+        self.properties.set_id(self.get_last_row().id + 1)
 
     def to_dataframe(self):
         """ Returns a data frame with all node file rows (DataFrame) """
@@ -484,6 +485,8 @@ class AntzGlyph:
         """
         # keys = old IDs, values = new IDs
         ids = {0:0}
+        if self.node_file_rows[0].parent_id != 0:
+            ids[self.node_file_rows[0].parent_id] = self.node_file_rows[0].parent_id
         current_id = starting_id
 
 

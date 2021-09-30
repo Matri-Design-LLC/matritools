@@ -9,5 +9,8 @@ position_colors = {
     'Right Defence': 'orange',
     'Center/L.Wing': 'grey',
     'Wing': 'green',
-    'Left Defence': 'lime'
+    'Left Defence': 'lime',
+    'D': 'blue',
+    'F': 'red',
+    'G': 'green'
 }
