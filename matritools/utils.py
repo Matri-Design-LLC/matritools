@@ -93,6 +93,25 @@ def make_interpolator(old_min: float, old_max: float, new_min: float, new_max: f
 
     return interp_fn
 
+def make_df_column_interpolator(column_series, new_min: float, new_max: float):
+    """
+        Creates a reusable interpolation function to scale a value in between a new min and new max.
+
+        Parameters:
+            column_series (Series: None) - old minimum value
+            new_min (float: None) - new minimum value
+            new_max (float: None) - new maximum value
+
+        Returns: interpolation function
+            Scale a value in between a set min and  max
+
+            Paramaters:
+                value (float: None) - value to be interpolated
+
+            Returns: float
+    """
+    return make_interpolator(column_series.min(), column_series.max(), new_min, new_max)
+
 def separate_compound_dataframe(df,  name_template=""):
     """
     Use to create a list of data frames from a dataframe with embedded lists.
