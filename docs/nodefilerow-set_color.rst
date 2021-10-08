@@ -30,12 +30,12 @@ Example::
 
 	my_node_file = nf.NodeFile("My Node File")
 
-	my_node_file.properties[0].set_color(1, 2, 3, 4)
+	my_node_file.properties.set_color(1, 2, 3, 4)
 
 	# same as
 
-	my_node_file.properties[0].color_r = 1
-	my_node_file.properties[0].color_g = 2
-	my_node_file.properties[0].color_b = 3
-	my_node_file.properties[0].color_a = 4
+	my_node_file.properties.color_r = 1
+	my_node_file.properties.color_g = 2
+	my_node_file.properties.color_b = 3
+	my_node_file.properties.color_a = 4
 

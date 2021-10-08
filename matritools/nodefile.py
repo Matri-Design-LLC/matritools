@@ -1543,6 +1543,14 @@ class NodeFileRow:
         self.color_b = self.colors[color][2]
         self.color_a = 255
 
+    def color_to_list(self):
+        """
+        Returns a list with rgba values of the nodes current color
+
+        Returns: List
+        """
+        return [self.color_r, self.color_g, self.color_b, self.color_a]
+
     def set_auto_zoom(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets auto_zoom_x, y, z
