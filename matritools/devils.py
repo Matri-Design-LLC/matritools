@@ -10,7 +10,10 @@ position_colors = {
     'Center/L.Wing': 'grey',
     'Wing': 'green',
     'Left Defence': 'lime',
-    'D': 'blue',
-    'F': 'red',
-    'G': 'green'
+    'D': 'cyan',
+    'F': 'yellow',
+    'G': 'white',
+    'C': 'magenta',
+    'R': 'red',
+    'L': 'blue',
 }
