@@ -441,6 +441,14 @@ class AntzGlyph:
         for row in self.node_file_rows:
             row.selected = 0
 
+    def freeze_all(self, freeze=True):
+        if freeze:
+            for row in self.node_file_rows:
+                row.freeze = 1
+        else:
+            for row in self.node_file_rows:
+                row.freeze = 1
+
     def match_record_ids_and_data_to_ids(self):
         """
         Iterates over each NodeFileRow in the glyph and matches its record id and data to its id

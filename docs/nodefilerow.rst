@@ -26,6 +26,7 @@ Container of properties and property setters for node file rows.
    set_translate_vec <nodefilerow-set_translate_vec>
    set_color <nodefilerow-set_color>
    set_color_by_name <nodefilerow-set_color_by_name>
+   color_to_list <nodefilerow-color_to_list>
    set_auto_zoom <nodefilerow-set_auto_zoom>
    set_trigger_hi <nodefilerow-set_trigger_hi>
    set_trigger_lo <nodefilerow-set_trigger_lo>

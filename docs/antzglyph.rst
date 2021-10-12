@@ -12,6 +12,7 @@ Construct using node file generated from antz that contains only one glyph.
    get_last_row <antzglyph-get_last_row>
    increment_ids <antzglyph-increment_ids>
    unselect_all <antzglyph-unselect_all>
+   freeze_all <antzglyph-freeze_all>
    match_record_ids_and_data_to_ids <antzglyph-match_record_ids_and_data_to_ids>
    get_rows_of_branch_level <antzglyph-get_rows_of_branch_level>
    remove_rows_of_branch_level <antzglyph-remove_rows_of_branch_level>
