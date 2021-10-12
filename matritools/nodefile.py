@@ -447,7 +447,7 @@ class AntzGlyph:
                 row.freeze = 1
         else:
             for row in self.node_file_rows:
-                row.freeze = 1
+                row.freeze = 0
 
     def match_record_ids_and_data_to_ids(self):
         """
