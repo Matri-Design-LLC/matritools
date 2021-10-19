@@ -82,6 +82,16 @@ We can see that the rows 2 - 5 are the rows that are colored differently. Lets w
 | 5 | :blue:`blue`     |
 +---+------------------+
 
+We can even save references to individual NodeFileRow's in our code.
+
+Define key nodes from your glyph::
+
+    root = glyph.node_file_rows[0]
+    weight_rod = glyph.node_file_rows[2]
+    height_rod = glyph.node_file_rows[3]
+    bank_rod = glyph.node_file_rows[4]
+    age_rod = glyph.node_file_rows[5]
+
 Now that we are familiar with our node file. Lets establish our :variable:`AntzGlyph` object,
 make some scalars and define how far apart we want to space our glyphs.
 
@@ -109,28 +119,28 @@ Modify the glyph::
     for index, row in df.iterrows():
 
         # set the tag and tag mode of the root node row
-        glyph.node_file_rows[0].set_tag(row["Name"], 1)
+        root.set_tag(row["Name"], 1)
 
         # set x position
-        glyph.node_file_rows[0].translate_x = index * unit_distance
+        root.translate_x = index * unit_distance
 
         # set weight rod length
-        glyph.node_file_rows[2].scale_z = weight_scalar(row['Weight'])
+        weight_rod.scale_z = weight_scalar(row['Weight'])
 
         # set height rod length
-        glyph.node_file_rows[3].scale_z = height_scalar(row['Height'])
+        height_rod.scale_z = height_scalar(row['Height'])
 
         # set bank rod length
-        glyph.node_file_rows[4].scale_z = bank_scalar(row['Bank Balance'])
+        bank_rod.scale_z = bank_scalar(row['Bank Balance'])
 
         # set age rod length
-        glyph.node_file_rows[5].scale_z = age_scalar(row['Age'])
+        age_rod.scale_z = age_scalar(row['Age'])
 
         # set the tag and tag mode to display the un-interpolated value
-        glyph.node_file_rows[2].set_tag(row['Weight'], 8)
-        glyph.node_file_rows[3].set_tag(row['Height'], 8)
-        glyph.node_file_rows[4].set_tag(row['Bank Balance'], 8)
-        glyph.node_file_rows[5].set_tag(row['Age'], 8)
+        weight_rod.set_tag(row['Weight'], 8)
+        height_rod.set_tag(row['Height'], 8)
+        bank_rod.set_tag(row['Bank Balance'], 8)
+        age_rod.set_tag(row['Age'], 8)
 
         # add all NodeFileRows of glyph to the NodeFile and increment all of the IDs of the glyph
         ntf.add_glyph(glyph)
@@ -168,33 +178,41 @@ Final Code::
     age_scalar = mu.make_interpolator(min(my_data['Age']), max(my_data['Age']), 0.1, 1)
     bank_scalar = mu.make_interpolator(min(my_data['Bank Balance']), max(my_data['Bank Balance']), 0.1, 1)
 
+    # used to space glyphs apart
     unit_distance = 20
+
+    # define key nodes from your glyph
+    root = glyph.node_file_rows[0]
+    weight_rod = glyph.node_file_rows[2]
+    height_rod = glyph.node_file_rows[3]
+    bank_rod = glyph.node_file_rows[4]
+    age_rod = glyph.node_file_rows[5]
 
     for index, row in df.iterrows():
 
         # set the tag and tag mode of the root node row
-        glyph.node_file_rows[0].set_tag(row["Name"], 1)
+        root.set_tag(row["Name"], 1)
 
         # set x position
-        glyph.node_file_rows[0].translate_x = index * unit_distance
+        root.translate_x = index * unit_distance
 
         # set weight rod length
-        glyph.node_file_rows[2].scale_z = weight_scalar(row['Weight'])
+        weight_rod.scale_z = weight_scalar(row['Weight'])
 
         # set height rod length
-        glyph.node_file_rows[3].scale_z = height_scalar(row['Height'])
+        height_rod.scale_z = height_scalar(row['Height'])
 
         # set bank rod length
-        glyph.node_file_rows[4].scale_z = bank_scalar(row['Bank Balance'])
+        bank_rod.scale_z = bank_scalar(row['Bank Balance'])
 
         # set age rod length
-        glyph.node_file_rows[5].scale_z = age_scalar(row['Age'])
+        age_rod.scale_z = age_scalar(row['Age'])
 
         # set the tag and tag mode to display the un-interpolated value
-        glyph.node_file_rows[2].set_tag(row['Weight'], 8)
-        glyph.node_file_rows[3].set_tag(row['Height'], 8)
-        glyph.node_file_rows[4].set_tag(row['Bank Balance'], 8)
-        glyph.node_file_rows[5].set_tag(row['Age'], 8)
+        weight_rod.set_tag(row['Weight'], 8)
+        height_rod.set_tag(row['Height'], 8)
+        bank_rod.set_tag(row['Bank Balance'], 8)
+        age_rod.set_tag(row['Age'], 8)
 
         # add all NodeFileRows of glyph to the NodeFile and increment all of the IDs of the glyph
         ntf.add_glyph(glyph)

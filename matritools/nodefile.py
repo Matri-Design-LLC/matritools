@@ -36,7 +36,7 @@ class NodeFile:
              "rotate_rate_y,rotate_rate_z,rotate_x,rotate_y,rotate_z," \
              "scale_rate_x,scale_rate_y,scale_rate_z,translate_rate_x,translate_rate_y," \
              "translate_rate_z,translate_vec_x,translate_vec_y,translate_vec_z,shader," \
-             "geometry,line_width,point_size,ratio,color_index," \
+             "geometry,line_width,point_size,ratio,color_id," \
              "color_r,color_g,color_b,color_a,color_fade," \
              "texture_id,hide,freeze,topo,facet," \
              "auto_zoom_x,auto_zoom_y,auto_zoom_z,trigger_hi_x,trigger_hi_y," \
@@ -186,7 +186,7 @@ class NodeFile:
         else:
             link.set_id(link_object_id)
 
-        link._type = 7
+        link.type = 7
         link.parent_id = link_id_a
         link.child_id = link_id_b
 
@@ -442,6 +442,14 @@ class AntzGlyph:
             row.selected = 0
 
     def freeze_all(self, freeze=True):
+        """
+
+        Parameters:
+            freeze:
+
+        Returns:
+
+        """
         if freeze:
             for row in self.node_file_rows:
                 row.freeze = 1
@@ -551,7 +559,7 @@ class NodeFileRow:
         topos            - dictionary mapping names of topos to IDs
         colors           - dictionary mapping names of color names to int list
         id               - node ID used for pin tree relationship graph
-        _type            - node type - 1: Camera; 2: video; 3: Surface;
+        type            - node type - 1: Camera; 2: video; 3: Surface;
                          - 4: Points, 5:Pin, 6:Grid
         data             - additional node specific type, defined by node type
         selected         - selection set status, 1 if part of active set, 0 if not
@@ -616,7 +624,7 @@ class NodeFileRow:
         line_width       - line width used for wireframes and line plots
         point_size       - vertex point size used for plots
         ratio            - ratio effects geometry such as inner radius of a torus
-        color_index      - color index from color palette
+        color_id      - color index from color palette
         color_r          - 8bit RGBA color value
         color_g          - 8bit RGBA color value
         color_b          - 8bit RGBA color value
@@ -755,7 +763,7 @@ class NodeFileRow:
         # region properties
 
         self.id = 8  # node ID used for pin tree relationship graph
-        self._type = 5  # node type - 1: Camera; 2: video; 3: Surface; 4: Points, 5:Pin, 6:Grid
+        self.type = 5  # node type - 1: Camera; 2: video; 3: Surface; 4: Points, 5:Pin, 6:Grid
         self.data = 8  # node type - 1: Camera; 2: video; 3: Surface; 4: Points, 5:Pin, 6:Grid
 
         # selection set status, 1 if part of active set, 0 if not
@@ -841,7 +849,7 @@ class NodeFileRow:
         self.line_width = 1  # line width used for wireframes and line plots
         self.point_size = 0  # vertex point size used for plots
         self.ratio = 0.1  # ratio effects geometry such as inner radius of a torus
-        self.color_index = 0  # color index from color palette
+        self.color_id = 0  # color index from color palette
 
         # 8bit RGBA color value
         self.color_r = 0
@@ -929,7 +937,7 @@ class NodeFileRow:
             raise RuntimeError("Comma separated string has incorrect number of values.\n Values length = " +
                                str(len(values)) + "\nInput: " + str(values))
         self.id = int(float(values[0]))
-        self._type = int(float(values[1]))
+        self.type = int(float(values[1]))
         self.data = int(float(values[2]))
         self.selected = int(float(values[3]))
         self.parent_id = int(float(values[4]))
@@ -982,7 +990,7 @@ class NodeFileRow:
         self.line_width = int(float(values[51]))
         self.point_size = int(float(values[52]))
         self.ratio = float(values[53])
-        self.color_index = int(float(values[54]))
+        self.color_id = int(float(values[54]))
         self.color_r = int(float(values[55]))
         self.color_g = int(float(values[56]))
         self.color_b = int(float(values[57]))
@@ -1030,7 +1038,7 @@ class NodeFileRow:
         Returns: None
         """
         print("id: " + str(self.id))
-        print("type: " + str(self._type))
+        print("type: " + str(self.type))
         print("data: " + str(self.data))
         print("selected: " + str(self.selected))
         print("parent_id: " + str(self.parent_id))
@@ -1083,7 +1091,7 @@ class NodeFileRow:
         print("line_width: " + str(self.line_width))
         print("point_size: " + str(self.point_size))
         print("ratio: " + str(self.ratio))
-        print("color_index: " + str(self.color_index))
+        print("color_id: " + str(self.color_id))
         print("color_r: " + str(self.color_r))
         print("color_g: " + str(self.color_g))
         print("color_b: " + str(self.color_b))
@@ -1126,100 +1134,100 @@ class NodeFileRow:
 
     def to_string(self):
         """ Returns a string of all node properties seperated by commas """
-        return str(self.id) + "," + \
-               str(self._type) + "," + \
-               str(self.data) + "," + \
-               str(self.selected) + "," + \
-               str(self.parent_id) + "," + \
-               str(self.branch_level) + "," + \
-               str(self.child_id) + "," + \
-               str(self.child_index) + "," + \
-               str(self.palette_id) + "," + \
-               str(self.ch_input_id) + "," + \
-               str(self.ch_output_id) + "," + \
-               str(self.ch_last_updated) + "," + \
-               str(self.average) + "," + \
-               str(self.samples) + "," + \
-               str(self.aux_a_x) + "," + \
-               str(self.aux_a_y) + "," + \
-               str(self.aux_a_z) + "," + \
-               str(self.aux_b_x) + "," + \
-               str(self.aux_b_y) + "," + \
-               str(self.aux_b_z) + "," + \
-               str(self.color_shift) + "," + \
-               str(self.rotate_vec_x) + "," + \
-               str(self.rotate_vec_y) + "," + \
-               str(self.rotate_vec_z) + "," + \
-               str(self.rotate_vec_s) + "," + \
-               str(self.scale_x) + "," + \
-               str(self.scale_y) + "," + \
-               str(self.scale_z) + "," + \
-               str(self.translate_x) + "," + \
-               str(self.translate_y) + "," + \
-               str(self.translate_z) + "," + \
-               str(self.tag_offset_x) + "," + \
-               str(self.tag_offset_y) + "," + \
-               str(self.tag_offset_z) + "," + \
-               str(self.rotate_rate_x) + "," + \
-               str(self.rotate_rate_y) + "," + \
-               str(self.rotate_rate_z) + "," + \
-               str(self.rotate_x) + "," + \
-               str(self.rotate_y) + "," + \
-               str(self.rotate_z) + "," + \
-               str(self.scale_rate_x) + "," + \
-               str(self.scale_rate_y) + "," + \
-               str(self.scale_rate_z) + "," + \
-               str(self.translate_rate_x) + "," + \
-               str(self.translate_rate_y) + "," + \
-               str(self.translate_rate_z) + "," + \
-               str(self.translate_vec_x) + "," + \
-               str(self.translate_vec_y) + "," + \
-               str(self.translate_vec_z) + "," + \
-               str(self.shader) + "," + \
-               str(self.geometry) + "," + \
-               str(self.line_width) + "," + \
-               str(self.point_size) + "," + \
-               str(self.ratio) + "," + \
-               str(self.color_index) + "," + \
-               str(self.color_r) + "," + \
-               str(self.color_g) + "," + \
-               str(self.color_b) + "," + \
-               str(self.color_a) + "," + \
-               str(self.color_fade) + "," + \
-               str(self.texture_id) + "," + \
-               str(self.hide) + "," + \
-               str(self.freeze) + "," + \
-               str(self.topo) + "," + \
-               str(self.facet) + "," + \
-               str(self.auto_zoom_x) + "," + \
-               str(self.auto_zoom_y) + "," + \
-               str(self.auto_zoom_z) + "," + \
-               str(self.trigger_hi_x) + "," + \
-               str(self.trigger_hi_y) + "," + \
-               str(self.trigger_hi_z) + "," + \
-               str(self.trigger_lo_x) + "," + \
-               str(self.trigger_lo_y) + "," + \
-               str(self.trigger_lo_z) + "," + \
-               str(self.set_hi_x) + "," + \
-               str(self.set_hi_y) + "," + \
-               str(self.set_hi_z) + "," + \
-               str(self.set_lo_x) + "," + \
-               str(self.set_lo_y) + "," + \
-               str(self.set_lo_z) + "," + \
-               str(self.proximity_x) + "," + \
-               str(self.proximity_y) + "," + \
-               str(self.proximity_z) + "," + \
-               str(self.proximity_mode_x) + "," + \
-               str(self.proximity_mode_y) + "," + \
-               str(self.proximity_mode_z) + "," + \
-               str(self.segments_x) + "," + \
-               str(self.segments_y) + "," + \
-               str(self.segments_z) + "," + \
-               str(self.tag_mode) + "," + \
-               str(self.format_id) + "," + \
-               str(self.table_id) + "," + \
-               str(self.record_id) + "," + \
-               str(self.size) + "\n"
+        return str(int(float(self.id))) + "," + \
+               str(int(float(self.type))) + "," + \
+               str(int(float(self.data))) + "," + \
+               str(int(float(self.selected))) + "," + \
+               str(int(float(self.parent_id))) + "," + \
+               str(int(float(self.branch_level))) + "," + \
+               str(int(float(self.child_id))) + "," + \
+               str(int(float(self.child_index))) + "," + \
+               str(int(float(self.palette_id))) + "," + \
+               str(int(float(self.ch_input_id))) + "," + \
+               str(int(float(self.ch_output_id))) + "," + \
+               str(int(float(self.ch_last_updated))) + "," + \
+               str(int(float(self.average))) + "," + \
+               str(int(float(self.samples))) + "," + \
+               str(int(float(self.aux_a_x))) + "," + \
+               str(int(float(self.aux_a_y))) + "," + \
+               str(int(float(self.aux_a_z))) + "," + \
+               str(int(float(self.aux_b_x))) + "," + \
+               str(int(float(self.aux_b_y))) + "," + \
+               str(int(float(self.aux_b_z))) + "," + \
+               str(int(float(self.color_shift))) + "," + \
+               str(float(self.rotate_vec_x)) + "," + \
+               str(float(self.rotate_vec_y)) + "," + \
+               str(float(self.rotate_vec_z)) + "," + \
+               str(float(self.rotate_vec_s)) + "," + \
+               str(float(self.scale_x)) + "," + \
+               str(float(self.scale_y)) + "," + \
+               str(float(self.scale_z)) + "," + \
+               str(float(self.translate_x)) + "," + \
+               str(float(self.translate_y)) + "," + \
+               str(float(self.translate_z)) + "," + \
+               str(float(self.tag_offset_x)) + "," + \
+               str(float(self.tag_offset_y)) + "," + \
+               str(float(self.tag_offset_z)) + "," + \
+               str(int(float(self.rotate_rate_x))) + "," + \
+               str(int(float(self.rotate_rate_y))) + "," + \
+               str(int(float(self.rotate_rate_z))) + "," + \
+               str(float(self.rotate_x)) + "," + \
+               str(float(self.rotate_y)) + "," + \
+               str(float(self.rotate_z)) + "," + \
+               str(int(float(self.scale_rate_x))) + "," + \
+               str(int(float(self.scale_rate_y))) + "," + \
+               str(int(float(self.scale_rate_z))) + "," + \
+               str(int(float(self.translate_rate_x))) + "," + \
+               str(int(float(self.translate_rate_y))) + "," + \
+               str(int(float(self.translate_rate_z))) + "," + \
+               str(int(float(self.translate_vec_x))) + "," + \
+               str(int(float(self.translate_vec_y))) + "," + \
+               str(int(float(self.translate_vec_z))) + "," + \
+               str(int(float(self.shader))) + "," + \
+               str(int(float(self.geometry))) + "," + \
+               str(int(float(self.line_width))) + "," + \
+               str(int(float(self.point_size))) + "," + \
+               str(float(self.ratio)) + "," + \
+               str(int(float(self.color_id))) + "," + \
+               str(int(float(self.color_r))) + "," + \
+               str(int(float(self.color_g))) + "," + \
+               str(int(float(self.color_b))) + "," + \
+               str(int(float(self.color_a))) + "," + \
+               str(int(float(self.color_fade))) + "," + \
+               str(int(float(self.texture_id))) + "," + \
+               str(int(float(self.hide))) + "," + \
+               str(int(float(self.freeze))) + "," + \
+               str(int(float(self.topo))) + "," + \
+               str(int(float(self.facet))) + "," + \
+               str(int(float(self.auto_zoom_x))) + "," + \
+               str(int(float(self.auto_zoom_y))) + "," + \
+               str(int(float(self.auto_zoom_z))) + "," + \
+               str(int(float(self.trigger_hi_x))) + "," + \
+               str(int(float(self.trigger_hi_y))) + "," + \
+               str(int(float(self.trigger_hi_z))) + "," + \
+               str(int(float(self.trigger_lo_x))) + "," + \
+               str(int(float(self.trigger_lo_y))) + "," + \
+               str(int(float(self.trigger_lo_z))) + "," + \
+               str(int(float(self.set_hi_x))) + "," + \
+               str(int(float(self.set_hi_y))) + "," + \
+               str(int(float(self.set_hi_z))) + "," + \
+               str(int(float(self.set_lo_x))) + "," + \
+               str(int(float(self.set_lo_y))) + "," + \
+               str(int(float(self.set_lo_z))) + "," + \
+               str(float(self.proximity_x)) + "," + \
+               str(float(self.proximity_y)) + "," + \
+               str(float(self.proximity_z)) + "," + \
+               str(int(float(self.proximity_mode_x))) + "," + \
+               str(int(float(self.proximity_mode_y))) + "," + \
+               str(int(float(self.proximity_mode_z))) + "," + \
+               str(int(float(self.segments_x))) + "," + \
+               str(int(float(self.segments_y))) + "," + \
+               str(int(float(self.segments_z))) + "," + \
+               str(int(float(self.tag_mode))) + "," + \
+               str(int(float(self.format_id))) + "," + \
+               str(int(float(self.table_id))) + "," + \
+               str(int(float(self.record_id))) + "," + \
+               str(int(float(self.size))) + "\n"
 
     # region setters for x, y , z properties
 

@@ -15,3 +15,4 @@ In a terminal, navigate to the root directory and run the following command
 
    Example 1 <example1>
    Example 2 <example2>
+   Example 3 <example3>
