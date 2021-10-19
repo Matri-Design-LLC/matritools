@@ -1,7 +1,7 @@
 Getting Started
 ===============
-Installation
-------------
+Installation:
+
 To install package in "development mode"
 
 Clone repo:

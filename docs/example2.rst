@@ -224,3 +224,5 @@ Final Result:
 
 .. image:: Example_2_result.png
 
+“Standards are always out of date.  That’s what makes them standards.”
+— Alan Bennett

@@ -179,3 +179,6 @@ the more they have in their bank.
 
 In all of the images you can see the scale of spheres change based on weight and the color base
 on their name.
+
+“A computer once beat me at chess, but it was no match for me at kick boxing.”
+— Emo Philips
