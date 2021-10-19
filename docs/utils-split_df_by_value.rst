@@ -1,18 +1,18 @@
 `utils <utils.html>`_
 =====================
-create_df_from_json_string
---------------------------
-Crates a dataframe from a json formatted string.
+split_df_by_value
+-----------------
+Seperates all the rows of a dataframe by unique value and returns them as a list of dataframes.
 
 Parameters:
 
-+------- +----------------------------------+------------------+---------+
++--------+----------------------------------+------------------+---------+
 | Name   | Description                      | Type             | Default |
 +========+==================================+==================+=========+
 | df     | dataframe to be extracted from   | pandas.DataFrame | None    |
-+------- +----------------------------------+------------------+---------+
++--------+----------------------------------+------------------+---------+
 | column | column name to be extracted from | pandas.DataFrame | None    |
-+------- +----------------------------------+------------------+---------+
++--------+----------------------------------+------------------+---------+
 
 Returns: pandas.DataFrame
 
