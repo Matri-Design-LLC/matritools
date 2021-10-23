@@ -373,12 +373,18 @@ class AntzGlyph:
         node_file_rows (List[NodeFileRow]) -  list of NodeFileRows that make up the glyph
     """
 
-    def __init__(self, csv_file_name: str = "", remove_global_params: bool = True, make_ids_consecutive: bool = True):
+    def __init__(self, csv_file_name: str = "",
+                 remove_global_params: bool = True,
+                 make_ids_consecutive: bool = True,
+                 unselect_all: bool = True,
+                 untag_all: bool = True):
         """
         Parameters:
             csv_file_name (str: "") - name of the glyph template csv file (default: "")
             remove_global_params (bool: True) - remove rows with an IDs that are 1-7 (default: True)
             make_IDs_consecutive (bool: True) - remove gaps in between row IDs. i.e 1,2,4 becomes 1,2,3 (default: True)
+            unselect_all (bool: True) - sets all NodeFileRows selected mode to 0
+            untag_all (bool: True) - sets all NodeFileRows tag mode to 0
 
         Raises: RuntimeError
         """
@@ -393,6 +399,12 @@ class AntzGlyph:
             self.__populate_glyph__(csv_file_name, remove_global_params, make_ids_consecutive)
         else:
             raise RuntimeError("antz_glyph was constructed without a csv file name")
+
+        if unselect_all:
+            self.unselect_all()
+
+        if untag_all:
+            self.untag_all()
 
     def length(self):
         """ Returns the number of NodeFileRows in this file. (int) """
@@ -443,11 +455,12 @@ class AntzGlyph:
 
     def freeze_all(self, freeze=True):
         """
+        Sets all rows in glyph to be frozen or unfrozen
 
         Parameters:
-            freeze:
+            freeze: Should all rows in glyph be frozen
 
-        Returns:
+        Returns: None
 
         """
         if freeze:
@@ -456,6 +469,15 @@ class AntzGlyph:
         else:
             for row in self.node_file_rows:
                 row.freeze = 0
+
+    def untag_all(self):
+        """
+        Sets the tag mode all NodeFileRows to 0
+        Returns: None
+        """
+
+        for row in self.node_file_rows:
+            row.tag_mode = 0
 
     def match_record_ids_and_data_to_ids(self):
         """

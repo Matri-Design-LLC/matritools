@@ -28,7 +28,7 @@ def create_df_from_json_string(json_string):
     """
     return pd.DataFrame(json.load(json_string))
 
-def interpolate_df_column(df, column: str, new_min: float, new_max: float, column_tail: str = "_interpolated"):
+def interpolate_df_column(df, column: str, new_min: float, new_max: float, column_tail: str = "_interpolated", handle_error: bool = False, default_value: float = None):
     """
     Scales the values of a data frame column between obj_scale_min and obj_scale_max.
     Adds the interpolated data into a new column labeled (original column name) + (column_tail) and preserves original
@@ -40,17 +40,19 @@ def interpolate_df_column(df, column: str, new_min: float, new_max: float, colum
         obj_scale_min (float: None) - new minimum value
         obj_scale_max (float: None) -  new maximum value
         column_tail (str: "_interpolated") - string to be appended to column name
+        handle_error (bool: False) - if value passed in isn't a number, should the function return default_value instead of raising error?
+        default_value (float: None) - value that gets returned if non number is passed and handle_error == True
 
     Returns: None
     """
     col_min = df[column].min()
     col_max = df[column].max()
     col_list = df[column].tolist()
-    scalar = make_interpolator(col_min + .0002, col_max, float(new_min), float(new_max))
+    scalar = make_interpolator(col_min + .0002, col_max, float(new_min), float(new_max), handle_error, default_value)
     col_interp = [scalar(x) for x in col_list]
     df[(str(column) + str(column_tail))] = col_interp
 
-def make_interpolator(old_min: float, old_max: float, new_min: float, new_max: float):
+def make_interpolator(old_min: float, old_max: float, new_min: float, new_max: float, handle_error: bool = False, default_value: float = None):
     """
     Creates a reusable interpolation function to scale a value in between a new min and new max.
 
@@ -59,6 +61,8 @@ def make_interpolator(old_min: float, old_max: float, new_min: float, new_max: f
         old_max (float: None) - old maximum value
         new_min (float: None) - new minimum value
         new_max (float: None) - new maximum value
+        handle_error (bool: False) - if value passed in isn't a number, should the function return default_value instead of raising error?
+        default_value (float: None) - value that gets returned if non number is passed and handle_error == True
 
     Returns: interpolation function
         Scale a value in between a set min and  max
@@ -89,11 +93,17 @@ def make_interpolator(old_min: float, old_max: float, new_min: float, new_max: f
 
         Returns: float
         """
-        return new_min + (value - old_min) * scale_factor
+        result = value
+        if handle_error:
+            try:
+                result = float(value)
+            except:
+                return default_value
+        return new_min + (result - old_min) * scale_factor
 
     return interp_fn
 
-def make_df_column_interpolator(column_series, new_min: float, new_max: float):
+def make_df_column_interpolator(column_series, new_min: float, new_max: float, handle_error: bool = False, default_value: float = None):
     """
         Creates a reusable interpolation function to scale a value in between a new min and new max.
 
@@ -101,6 +111,8 @@ def make_df_column_interpolator(column_series, new_min: float, new_max: float):
             column_series (Series: None) - old minimum value
             new_min (float: None) - new minimum value
             new_max (float: None) - new maximum value
+            handle_error (bool: False) - if value passed in isn't a number, should the function return default_value instead of raising error?
+            default_value (float: None) - value that gets returned if non number is passed and handle_error == True
 
         Returns: interpolation function
             Scale a value in between a set min and  max
@@ -110,7 +122,7 @@ def make_df_column_interpolator(column_series, new_min: float, new_max: float):
 
             Returns: float
     """
-    return make_interpolator(column_series.min(), column_series.max(), new_min, new_max)
+    return make_interpolator(column_series.min(), column_series.max(), new_min, new_max, handle_error, default_value)
 
 def separate_compound_dataframe(df,  name_template=""):
     """

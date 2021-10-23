@@ -17,6 +17,10 @@ Parameters:
 | make_ids_consecutive | remove gaps in between row IDs.              |      |         |
 |                      | i.e 1,2,4 becomes 1,2,3                      | bool | True    |
 +----------------------+----------------------------------------------+------+---------+
+| unselect all         | sets all NodeFileRows selected mode to 0     | bool | True    |
++----------------------+----------------------------------------------+------+---------+
+| untag all         | sets all NodeFileRows tag mode to 0          | bool | True    |
++----------------------+----------------------------------------------+------+---------+
 
 Raises: RuntimeError
 

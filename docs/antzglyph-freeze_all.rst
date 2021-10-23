@@ -12,7 +12,7 @@ Parameters:
 | freeze       | Should all rows in glyph be frozen    | bool | True    |
 +--------------+---------------------------------------+------+---------+
 
-Returns: NodeFileRow
+Returns: None
 
 Raises: None
 
