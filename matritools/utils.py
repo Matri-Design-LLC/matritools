@@ -124,7 +124,7 @@ def make_df_column_interpolator(column_series, new_min: float, new_max: float, h
     """
     return make_interpolator(column_series.min(), column_series.max(), new_min, new_max, handle_error, default_value)
 
-def make_default_scalar(min_value):
+def make_default_scalar(returned_value):
     """
     Creates a reusable place holder interpolation function that takes in a value and returns min_value
     (the value the function was built with).
@@ -142,7 +142,7 @@ def make_default_scalar(min_value):
                 what ever value it was built with (min_value)
     """
     def scalar(value):
-        return min_value
+        return returned_value
 
     return scalar
 
