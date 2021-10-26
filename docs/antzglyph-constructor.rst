@@ -19,7 +19,7 @@ Parameters:
 +----------------------+----------------------------------------------+------+---------+
 | unselect all         | sets all NodeFileRows selected mode to 0     | bool | True    |
 +----------------------+----------------------------------------------+------+---------+
-| untag all         | sets all NodeFileRows tag mode to 0          | bool | True    |
+| untag all            | sets all NodeFileRows tag mode to 0          | bool | True    |
 +----------------------+----------------------------------------------+------+---------+
 
 Raises: RuntimeError

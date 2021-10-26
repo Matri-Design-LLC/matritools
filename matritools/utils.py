@@ -108,7 +108,7 @@ def make_df_column_interpolator(column_series, new_min: float, new_max: float, h
         Creates a reusable interpolation function to scale a value in between a new min and new max.
 
         Parameters:
-            column_series (Series: None) - old minimum value
+            column_series (Series: None) - column_series that you want to derive old_min and old_max from
             new_min (float: None) - new minimum value
             new_max (float: None) - new maximum value
             handle_error (bool: False) - if value passed in isn't a number, should the function return default_value instead of raising error?
@@ -123,6 +123,67 @@ def make_df_column_interpolator(column_series, new_min: float, new_max: float, h
             Returns: float
     """
     return make_interpolator(column_series.min(), column_series.max(), new_min, new_max, handle_error, default_value)
+
+def make_default_scalar(min_value):
+    """
+    Creates a reusable place holder interpolation function that takes in a value and returns min_value
+    (the value the function was built with).
+    Paramaters:
+        min_value: the value that will be returned when calling the returned function
+
+    Returns:
+        interpolation function
+            Function that returns what ever value it was built with (min_value)
+
+            Parameters:
+                value: (any: None) doesn't matter
+
+            Returns:
+                what ever value it was built with (min_value)
+    """
+    def scalar(value):
+        return min_value
+
+    return scalar
+
+def make_set_scalar(column_series, min_value: float, max_value: float):
+    """
+    Creates a resabule psudo-interpolation function to scale non numeric values. This function essentially creates a
+    dictionary, using each unique value in the column_series and assigns numeric values at equal increments between
+    min_value and max_value.
+    Parameters:
+        column_series: (Series : None) column series whos values you want the function to interpolate
+        min_value: (float : None) The smallest value you want mapped to the column_series values
+        max_value: (float : None) The largest value you want mapped to the column_series values
+
+    Returns:
+        interpolation function
+            Returns a float that was mapped to the value passed.
+
+            Parameters:
+                value: (any: None) A value that belongs to the column_series the function was built with.
+
+            Returns:
+                (float) the value that was mapped to value.
+
+            Raises:
+                KeyError
+    """
+    value_dict = {}
+    for value in set(column_series):
+        value_dict[value] = 0
+
+    value_range = max_value - min_value
+    increments = value_range / len(value_dict.keys())
+    i = 0
+    for key in value_dict.keys():
+        value_dict[key] = (i * increments) + min_value
+
+    def position_scalar(value):
+        return value_dict[value]
+
+    return position_scalar
+
 
 def separate_compound_dataframe(df,  name_template=""):
     """

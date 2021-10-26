@@ -17,9 +17,14 @@ Parameters:
 +---------------+--------------------------------------+------------------+----------------+
 | new_max       | new maximum value                    | float            | None           |
 +---------------+--------------------------------------+------------------+----------------+
-| handle_error  | new maximum value                    | float            | None           |
+| handle_error  | if value passed in isn't a number,   |                  |                |
+|               | should the function return           |                  |                |
+|               | default_value instead of raising     |                  |                |
+|               | error?                               | bool             | False          |
 +---------------+--------------------------------------+------------------+----------------+
-| default_value | new maximum value                    | float            | None           |
+| default_value | value that gets returned if non      |                  |                |
+|               | number is passed and handle_error    |                  |                |
+|               | == True                              | float            | None           |
 +---------------+--------------------------------------+------------------+----------------+
 
 
