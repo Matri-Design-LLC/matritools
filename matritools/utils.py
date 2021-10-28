@@ -178,6 +178,7 @@ def make_set_scalar(column_series, min_value: float, max_value: float):
     i = 0
     for key in value_dict.keys():
         value_dict[key] = (i * increments) + min_value
+        i += 1
 
     def position_scalar(value):
         return value_dict[value]
