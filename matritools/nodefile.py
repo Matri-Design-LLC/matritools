@@ -768,7 +768,7 @@ class NodeFileRow:
         "lavender": [230, 230, 250],
         "peach": [255, 218, 185],
         "rosy brown": [188, 143, 143],
-        "chcolate": [210, 105, 30],
+        "chocolate": [210, 105, 30],
         "medium spring green": [0, 250, 154],
         "golden rod": [218, 165, 32],
         "coral": [255, 127, 80]
