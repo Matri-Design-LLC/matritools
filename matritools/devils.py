@@ -290,8 +290,6 @@ class Player:
                 self.puck_handling = puck_handling_total / puck_handling_count
 
     def __set_total_skills(self):
-        if self.nhl_rating is not None:
-            self.total_skills += self.nhl_rating
         if self.skating is not None:
             self.total_skills += self.skating
         if self.hockey_sense is not None:
@@ -320,6 +318,8 @@ class PlayerReport():
             self.__build_from_dict__(df)
         else:
             self.__build_from_df__(df)
+        self.total_skills = 0
+        self.__set_total_skills()
 
     def __str__(self):
         return  'Report Date: ' + self.date + \
@@ -433,6 +433,28 @@ class PlayerReport():
                 self.shot = self.__sanitize_stat__(row['rating'])
             if row['rating_type'] == 'Puck Handling':
                 self.puck_handling = self.__sanitize_stat__(row['rating'])
+
+    def __set_total_skills(self):
+        if self.skating is not None:
+            self.total_skills += self.skating
+        if self.hockey_sense is not None:
+            self.total_skills += self.hockey_sense
+        if self.compete is not None:
+            self.total_skills += self.compete
+        if self.hockey_strength is not None:
+            self.total_skills += self.hockey_strength
+        if self.puck_skills is not None:
+            self.total_skills += self.puck_skills
+        if self.technical is not None:
+            self.total_skills += self.technical
+        if self.athleticism is not None:
+            self.total_skills += self.athleticism
+        if self.low_post_play is not None:
+            self.total_skills += self.low_post_play
+        if self.shot is not None:
+            self.total_skills += self.shot
+        if self.puck_handling is not None:
+            self.total_skills += self.puck_handling
 
     def __sanitize_stat__(self, stat):
         try:
