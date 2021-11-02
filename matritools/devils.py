@@ -334,7 +334,12 @@ class PlayerReport():
                 "\n\tatheticism: " + str(self.athleticism) + "\n" + \
                 "\n\tshot: " + str(self.shot) + "\n" + \
                 "\n\ttechnical: " + str(self.technical) + "\n" + \
-                "\n\tlow / post play: " + str(self.low_post_play) + "\n"
+                "\n\tlow / post play: " + str(self.low_post_play) + "\n" + \
+                "\n\twas tournament: " + str(self.tournament) + "\n" + \
+                "\n\tscout: " + str(self.scout) + "\n" + \
+                "\n\tscout type: " + str(self.scout_type) + "\n" + \
+                "\n\thome / away: " + str(self.home_away) + "\n" + \
+                "\n\tgame_won: " + str(self.game_won) + "\n"
 
 
     def to_dict(self):
@@ -354,6 +359,10 @@ class PlayerReport():
         result['Shot'] = self.shot
         result['Date'] = str(self.date)
         result['Scout'] = self.scout
+        result['Game_Won'] = self.game_won
+        result['Home / Away'] = self.home_away
+        result['Scout Type'] = self.scout_type
+        result['Tournament'] = self.tournament
 
         return result
 
@@ -372,6 +381,10 @@ class PlayerReport():
         self.puck_handling = None
         self.scout = None
         self.date = df.iloc[0]['report_date']
+        self.game_won = str(df.iloc[0]['game_won'])
+        self.home_away = df.iloc[0]['home_or_away_team']
+        self.tournament = "N/A" if df.iloc[0]['tournamentname'] is None else df.iloc[0]['tournamentname']
+        self.scout_type = df.iloc[0]['scouttype']
 
         self.__get_stats__(df)
 
@@ -390,6 +403,10 @@ class PlayerReport():
         self.shot = player_dict['Shot']
         self.date = player_dict['Date']
         self.scout = player_dict['Scout']
+        self.game_won = player_dict['Game_Won']
+        self.home_away = player_dict['Home / Away']
+        self.tournament = player_dict['Tournament']
+        self.scout_type = player_dict['Scout Type']
 
     def __get_stats__(self, df):
         nhl_grade_to_number = {
