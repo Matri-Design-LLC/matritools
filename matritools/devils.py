@@ -1,5 +1,6 @@
 from matritools import utils as mu
 import json
+import datetime
 
 position_colors = {
     'Goalie': 'white',
@@ -45,8 +46,10 @@ class Player:
 
         return  "fname: " + self.fname + "\n" + \
                 "lname: " + self.lname + "\n" + \
+                "age: " + str(self.age) + "\n" + \
                 "height: " + str(self.height) + "\n" + \
                 "weight: " + str(self.weight) + "\n" + \
+                "shot side: " + self.shot_side + "\n" + \
                 "total skills: " + str(self.total_skills) + "\n" + \
                 "nhl rating: " + str(self.nhl_rating) + "\n" + \
                 "hockey sense: " + str(self.hockey_sense) + "\n" + \
@@ -70,8 +73,10 @@ class Player:
 
         result['First Name'] = self.fname
         result['Last Name'] = self.lname
+        result['Age'] = self.age
         result['Height'] = self.height
         result['Weight'] = self.weight
+        result['Shot Side'] = self.shot_side
         result['Position'] = self.position
         result['League'] = self.league
         result['Team'] = self.team
@@ -114,12 +119,14 @@ class Player:
 
         self.fname = player_dict['First Name'].lower()
         self.lname = player_dict['Last Name'].lower()
+        self.age = player_dict['Age']
         self.height = player_dict['Height']
         self.weight = player_dict['Weight']
         if self.weight > 400:
             self.weight = 400
         if self.weight < 70:
             self.weight = 70
+        self.shot_side = player_dict['Shot Side']
         self.position = player_dict['Position']
         self.league = player_dict['League']
         self.team = player_dict['Team']
@@ -130,13 +137,13 @@ class Player:
             self.reports.append(PlayerReport(player_dict['Reports'][key]))
 
         self.__set_stats__(number_of_reports)
-        self.__set_total_skills()
+        self.__set_total_skills__()
 
 
     def __build_from_df__(self, df, number_of_reports):
         self.fname = df.iloc[0]['firstname']
         self.lname = df.iloc[0]['lastname']
-
+        self.age = round(int( df.iloc[0]['age'].days) / 365, 2)
         try:
             temp_height = str(df.iloc[0]['height']).split('.')
             self.height = (int(temp_height[0]) * 12) + int(temp_height[1])
@@ -144,6 +151,7 @@ class Player:
             self.height = 0
 
         self.weight = df.iloc[0]['weight']
+        self.shot_side = df.iloc[0]['shotside']
         self.position = df.iloc[0]['positionname']
         self.league = df.iloc[0]['league_name']
         self.team = df.iloc[0]['currentteamname']
@@ -169,7 +177,7 @@ class Player:
                 self.reports.append(PlayerReport(report_df))
 
         self.__set_stats__(number_of_reports)
-        self.__set_total_skills()
+        self.__set_total_skills__()
 
     def __set_stats__(self, number_of_reports):
         nhl_total = 0
@@ -289,7 +297,8 @@ class Player:
             else:
                 self.puck_handling = puck_handling_total / puck_handling_count
 
-    def __set_total_skills(self):
+    def __set_total_skills__(self):
+        self.total_skills = 0
         if self.skating is not None:
             self.total_skills += self.skating
         if self.hockey_sense is not None:
@@ -319,7 +328,7 @@ class PlayerReport():
         else:
             self.__build_from_df__(df)
         self.total_skills = 0
-        self.__set_total_skills()
+        self.__set_total_skills__()
 
     def __str__(self):
         return  'Report Date: ' + self.date + \
@@ -379,7 +388,7 @@ class PlayerReport():
         self.athleticism = None
         self.shot = None
         self.puck_handling = None
-        self.scout = None
+        self.scout = df.iloc[0]['scoutname']
         self.date = df.iloc[0]['report_date']
         self.game_won = str(df.iloc[0]['game_won'])
         self.home_away = df.iloc[0]['home_or_away_team']
@@ -451,7 +460,7 @@ class PlayerReport():
             if row['rating_type'] == 'Puck Handling':
                 self.puck_handling = self.__sanitize_stat__(row['rating'])
 
-    def __set_total_skills(self):
+    def __set_total_skills__(self):
         if self.skating is not None:
             self.total_skills += self.skating
         if self.hockey_sense is not None:
