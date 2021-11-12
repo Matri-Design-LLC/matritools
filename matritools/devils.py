@@ -24,6 +24,14 @@ position_colors = {
 
 class Player:
     def __init__(self, df, number_of_reports = 0, less_than_function=None):
+        self.bta_individual = None
+        self.bta_teammate = None
+        self.bta_learner = None
+        self.bta_leader = None
+        self.bta_competitor = None
+
+        self.rank = None
+        self.change = None
         if isinstance(df, dict):
             self.__build_from_dict__(df, number_of_reports)
         else:
@@ -49,6 +57,8 @@ class Player:
                 "age: " + str(self.age) + "\n" + \
                 "height: " + str(self.height) + "\n" + \
                 "weight: " + str(self.weight) + "\n" + \
+                "rank: " + str(self.rank) + "\n" + \
+                "change: " + str(self.change) + "\n" + \
                 "shot side: " + self.shot_side + "\n" + \
                 "total skills: " + str(self.total_skills) + "\n" + \
                 "nhl rating: " + str(self.nhl_rating) + "\n" + \
@@ -63,6 +73,11 @@ class Player:
                 "technical: " + str(self.technical) + "\n" + \
                 "shot: " + str(self.shot) + "\n" + \
                 "low / post play: " + str(self.low_post_play) + "\n" + \
+                "bta individual:" + str(self.bta_individual) + "\n" + \
+                "bta teammate: " + str(self.bta_teammate) + "\n" + \
+                "bta learner: " + str(self.bta_learner) + "\n" + \
+                "bta leader: " + str(self.bta_leader) + "\n" + \
+                "bta competitor: " + str(self.bta_competitor) + "\n" + \
                 report_str + "\n"
 
     def __lt__(self, other):
@@ -76,6 +91,8 @@ class Player:
         result['Age'] = self.age
         result['Height'] = self.height
         result['Weight'] = self.weight
+        result['Rank'] = self.rank
+        result['Change'] = self.change
         result['Shot Side'] = self.shot_side
         result['Position'] = self.position
         result['League'] = self.league
@@ -93,6 +110,11 @@ class Player:
         result['Puck Handling'] = self.puck_handling
         result['Shot'] = self.shot
         result['Total Skills'] = self.total_skills
+        result['BTA Individual'] = self.bta_individual
+        result['BTA Teammate'] = self.bta_teammate
+        result['BTA Learner'] = self.bta_learner
+        result['BTA Leader'] = self.bta_leader
+        result['BTA Competitor'] = self.bta_competitor
 
         report_dict = {}
         for report in self.reports:
@@ -117,6 +139,12 @@ class Player:
         self.shot = player_dict['Shot']
         self.total_skills = player_dict['Total Skills']
 
+        self.bta_individual = player_dict['BTA Individual']
+        self.bta_teammate = player_dict['BTA Teammate']
+        self.bta_learner = player_dict['BTA Learner']
+        self.bta_leader = player_dict['BTA Leader']
+        self.bta_competitor = player_dict['BTA Competitor']
+
         self.fname = player_dict['First Name'].lower()
         self.lname = player_dict['Last Name'].lower()
         self.age = player_dict['Age']
@@ -126,6 +154,8 @@ class Player:
             self.weight = 400
         if self.weight < 70:
             self.weight = 70
+        self.rank = player_dict['Rank']
+        self.change = player_dict['Change']
         self.shot_side = player_dict['Shot Side']
         self.position = player_dict['Position']
         self.league = player_dict['League']
@@ -446,7 +476,7 @@ class PlayerReport():
             if row['rating_type'] == 'Hockey Strength':
                 self.hockey_strength = self.__sanitize_stat__(row['rating'])
             if row['rating_type'] == 'Puck Skills':
-                self.puck_skils = self.__sanitize_stat__(row['rating'])
+                self.puck_skills = self.__sanitize_stat__(row['rating'])
             if row['rating_type'] == 'Game Rating':
                 self.game_rating = self.__sanitize_stat__(row['rating'])
             if row['rating_type'] == 'Low/Post Play':
