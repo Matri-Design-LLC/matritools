@@ -950,7 +950,7 @@ class NodeFileRow:
         Parameters:
             values (List[str]) - list of strings that can be cast as integrals
 
-        Returns: None
+        Returns: self
 
         Raises: RuntimeError
 
@@ -1053,6 +1053,8 @@ class NodeFileRow:
         self.record_id = int(float(values[92]))
         self.size = int(float(values[93]))
 
+        return self
+
     def print_properties(self):
         """
         Prints the label and value of each property.
@@ -1153,6 +1155,8 @@ class NodeFileRow:
         print("table_id: " + str(self.table_id))
         print("record_id: " + str(self.record_id))
         print("size: " + str(self.size))
+
+        return self
 
     def to_string(self):
         """ Returns a string of all node properties seperated by commas """
@@ -1260,7 +1264,7 @@ class NodeFileRow:
         Parameters:
             row_id (int: None) - number to set id, record_id and row_id to
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1271,6 +1275,8 @@ class NodeFileRow:
         self.record_id = row_id
         self.data = row_id
 
+        return self
+
     def set_tag(self, tag_text, tag_mode: int = 0):
         """
         Sets tag_text and tag_mode
@@ -1280,13 +1286,15 @@ class NodeFileRow:
         :param tag_text: (default "")
         :param tag_mode: (default 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
         tag_mode = int(tag_mode)
         self.tag_text = tag_text
         self.tag_mode = tag_mode
+
+        return self
 
     def set_aux_a(self, x: int = 30, y: int = 30, z: int = 30):
         """
@@ -1297,7 +1305,7 @@ class NodeFileRow:
             y (int: 30)
             z (int: 30)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1310,6 +1318,8 @@ class NodeFileRow:
         self.aux_a_y = y
         self.aux_a_z = z
 
+        return self
+
     def set_aux_b(self, x: int = 30, y: int = 30, z=30):
         """
         Sets aux_b_x,y, and z
@@ -1319,7 +1329,7 @@ class NodeFileRow:
             y (int: 30)
             z (int: 30)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1331,6 +1341,8 @@ class NodeFileRow:
         self.aux_b_x = x
         self.aux_b_y = y
         self.aux_b_z = z
+
+        return self
 
     def set_rotate_vec(self, x: int = 0, y: int = 0, z: int = 0, s: int = 0):
         """
@@ -1357,6 +1369,8 @@ class NodeFileRow:
         self.rotate_vec_z = z
         self.rotate_vec_s = s
 
+        return self
+
     def set_scale(self, x: float = 1, y: float = 1, z: float = 1):
         """
         Sets scale_x, y, z
@@ -1366,7 +1380,7 @@ class NodeFileRow:
             y (int: 1)
             z (int: 1)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1379,9 +1393,13 @@ class NodeFileRow:
         self.scale_y = y
         self.scale_z = z
 
+        return self
+
     def set_u_scale(self, scale: float = 1):
         scale = float(scale)
         self.set_scale(scale, scale, scale)
+
+        return self
 
     def set_translate(self, x: float = 0, y: float = 0, z: float = 0):
         """
@@ -1405,6 +1423,8 @@ class NodeFileRow:
         self.translate_y = y
         self.translate_z = z
 
+        return self
+
     def set_tag_offset(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets tag_offset_x, y, z
@@ -1414,7 +1434,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1427,6 +1447,8 @@ class NodeFileRow:
         self.tag_offset_y = y
         self.tag_offset_z = z
 
+        return self
+
     def set_rotate(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets rotate_x, y, z
@@ -1436,7 +1458,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1449,6 +1471,8 @@ class NodeFileRow:
         self.rotate_y = y
         self.rotate_z = z
 
+        return self
+
     def set_rotate_rate(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets rotate_rate_x, y, z
@@ -1458,7 +1482,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1471,6 +1495,8 @@ class NodeFileRow:
         self.rotate_rate_y = y
         self.rotate_rate_z = z
 
+        return self
+
     def set_scale_rate(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets scale_rate_x, y, z
@@ -1480,7 +1506,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1493,6 +1519,8 @@ class NodeFileRow:
         self.scale_rate_y = y
         self.scale_rate_z = z
 
+        return self
+
     def set_translate_rate(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets translate_rate_x, y, z
@@ -1502,7 +1530,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1515,6 +1543,8 @@ class NodeFileRow:
         self.translate_rate_y = y
         self.translate_rate_z = z
 
+        return self
+
     def set_translate_vec(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets translate_vec_x, y, z
@@ -1524,7 +1554,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1537,6 +1567,8 @@ class NodeFileRow:
         self.translate_vec_y = y
         self.translate_vec_z = z
 
+        return self
+
     def set_color(self, r: int = 0, g: int = 0, b: int = 0, a: int = 255):
         """
         Sets color values
@@ -1548,7 +1580,7 @@ class NodeFileRow:
         b (int: 0) - blue (int) 0-255 (default 0)
         a (int: 255) - transparency 0-255 (default 255)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1563,23 +1595,22 @@ class NodeFileRow:
         self.color_b = b
         self.color_a = a
 
+        return self
+
     def set_color_by_name(self, color: str):
         """
 
         Parameters:
             color: (str: None) name of a color i.e 'red'
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
         if not isinstance(color, str):
             raise TypeError("color must be of type string")
 
-        self.color_r = self.colors[color][0]
-        self.color_g = self.colors[color][1]
-        self.color_b = self.colors[color][2]
-        self.color_a = 255
+        return self.set_color(self.colors[color][0], self.colors[color][1], self.colors[color][2])
 
     def set_color_by_hex(self, hex_code: str):
         """
@@ -1587,7 +1618,7 @@ class NodeFileRow:
         Parameters:
             hex_code: (str: None) hex_code of a color i.e '#FF0000', Can contain '#' but doesn't have to
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError, ValueError
         """
@@ -1627,7 +1658,8 @@ class NodeFileRow:
         b_hex = hex[4:6:]
         b = (hex_digits[b_hex[0].upper()] * 16) + hex_digits[b_hex[1].upper()]
 
-        self.set_color(r, g, b)
+        return self.set_color(r, g, b)
+
 
     def color_to_list(self):
         """
@@ -1646,7 +1678,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1659,6 +1691,8 @@ class NodeFileRow:
         self.auto_zoom_y = y
         self.auto_zoom_z = z
 
+        return self
+
     def set_trigger_hi(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets trigger_hi_x, y, z
@@ -1668,7 +1702,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1680,6 +1714,8 @@ class NodeFileRow:
         self.trigger_hi_y = y
         self.trigger_hi_z = z
 
+        return self
+
     def set_trigger_lo(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets trigger_low_x, y, z
@@ -1689,7 +1725,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1701,6 +1737,8 @@ class NodeFileRow:
         self.trigger_lo_y = y
         self.trigger_lo_z = z
 
+        return self
+
     def set_set_hi(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets hi_x, y, z
@@ -1710,7 +1748,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1723,6 +1761,8 @@ class NodeFileRow:
         self.set_hi_y = y
         self.set_hi_z = z
 
+        return self
+
     def set_set_lo(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets lo_x, y, z
@@ -1732,7 +1772,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1745,6 +1785,8 @@ class NodeFileRow:
         self.set_lo_y = y
         self.set_lo_z = z
 
+        return self
+
     def set_proximity(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets proximity_x, y, z
@@ -1754,7 +1796,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1767,6 +1809,8 @@ class NodeFileRow:
         self.proximity_y = y
         self.proximity_z = z
 
+        return self
+
     def set_proximity_mode(self, x: int = 0, y: int = 0, z: int = 0):
         """
         Sets proximity_mode_x, y, z
@@ -1776,7 +1820,7 @@ class NodeFileRow:
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1789,6 +1833,8 @@ class NodeFileRow:
         self.proximity_mode_y = y
         self.proximity_mode_z = z
 
+        return self
+
     def set_segments(self, x: int = 20, y: int = 12, z: int = 0):
         """
         Sets segments_x, y, z
@@ -1798,7 +1844,7 @@ class NodeFileRow:
             y (int: 12)
             z (int: 0)
 
-        Returns: None
+        Returns: self
 
         Raises: TypeError
         """
@@ -1810,6 +1856,8 @@ class NodeFileRow:
         self.segments_x = x
         self.segments_y = y
         self.segments_z = z
+
+        return self
 
     # endregion
 

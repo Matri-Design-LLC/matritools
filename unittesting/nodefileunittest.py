@@ -55,7 +55,7 @@ def test_to_string():
     # region set properties
 
     ntf.properties.id = 1
-    ntf.properties._type = 2
+    ntf.properties.type = 2
     ntf.properties.data = 3
     ntf.properties.selected = 4
     ntf.properties.parent_id = 5
@@ -108,7 +108,7 @@ def test_to_string():
     ntf.properties.line_width = 52
     ntf.properties.point_size = 53
     ntf.properties.ratio = 54
-    ntf.properties.color_index = 55
+    ntf.properties.color_id = 55
     ntf.properties.color_r = 56
     ntf.properties.color_g = 57
     ntf.properties.color_b = 58

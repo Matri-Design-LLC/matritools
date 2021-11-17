@@ -72,6 +72,9 @@ def test_set_id_bad_input():
     test_nfr.set_id(100)
     assert test_nfr.id == test_nfr.data == test_nfr.record_id == 100
 
+def test_set_id_return_self():
+    assert test_nfr.set_id(100) == test_nfr
+
 
 # endregion
 
@@ -90,6 +93,9 @@ def test_set_tag_correct_input_string():
 def test_set_tag_correct_input_float():
     test_nfr.set_tag("Test", 5.0)
     assert test_nfr.tag_text == "Test" and test_nfr.tag_mode == 5
+
+def test_set_tag_return_self():
+    assert test_nfr.set_tag("Test", 5.0) == test_nfr
 
 
 # endregion
@@ -115,6 +121,8 @@ def test_set_aux_a_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_aux_a("a", "b", "C")
 
+def test_set_aux_a_return_self():
+    assert test_nfr.set_aux_a(700.0, 800.0, 900.0) == test_nfr
 
 # endregion
 
@@ -139,6 +147,8 @@ def test_set_aux_b_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_aux_b("a", "b", "C")
 
+def test_set_aux_b_return_self():
+    assert test_nfr.set_aux_b(700.0, 800.0, 900.0) == test_nfr
 
 # endregion
 
@@ -163,6 +173,8 @@ def test_set_rotate_rate_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_rotate_rate("a", "b", "C")
 
+def test_set_rotate_rate_return_self():
+    assert test_nfr.set_rotate_rate(700.0, 800.0, 900.0) == test_nfr
 
 # endregion
 
@@ -187,7 +199,8 @@ def test_set_scale_rate_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_scale_rate("a", "b", "C")
 
-
+def test_set_scale_rate_return_self():
+    assert test_nfr.set_scale_rate(700.0, 800.0, 900.0) == test_nfr
 # endregion
 
 # region rotate_vec
@@ -220,7 +233,8 @@ def test_set_rotate_vec_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_rotate_vec("a", "b", "C", "D")
 
-
+def test_set_rotate_vec_return_self():
+    assert test_nfr.set_rotate_vec(700.0, 800.0, 900.0, 130.0) == test_nfr
 # endregion
 
 # region scale
@@ -239,6 +253,8 @@ def test_set_scale_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_scale("a", "b", "C")
 
+def test_set_scale_return_self():
+    assert test_nfr.set_scale(100.1, 200.2, 300.3) == test_nfr
 
 # endregion
 
@@ -258,6 +274,8 @@ def test_set_u_scale_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_u_scale("a")
 
+def test_set_u_scale_return_self():
+    assert test_nfr.set_u_scale(100.1) == test_nfr
 
 # endregion
 
@@ -277,6 +295,8 @@ def test_set_translate_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_translate("a", "b", "C")
 
+def test_set_translate_return_self():
+    assert test_nfr.set_translate(100.1, 200.2, 300.3) == test_nfr
 
 # endregion
 
@@ -296,6 +316,8 @@ def test_set_tag_offset_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_tag_offset("a", "b", "C")
 
+def test_set_tag_offset_return_self():
+    assert test_nfr.set_tag_offset(100.1, 200.2, 300.3) == test_nfr
 
 # endregion
 
@@ -315,6 +337,8 @@ def test_set_rotate_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_rotate("a", "b", "C")
 
+def test_set_rotate_return_self():
+    assert test_nfr.set_rotate(100.1, 200.2, 300.3) == test_nfr
 
 # endregion
 
@@ -339,6 +363,8 @@ def test_set_translate_rate_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_translate_rate("a", "b", "C")
 
+def test_set_translate_rate_return_self():
+    assert test_nfr.set_translate_rate(100, 200, 300) == test_nfr
 
 # endregion
 
@@ -363,6 +389,8 @@ def test_set_translate_vec_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_translate_vec("a", "b", "C")
 
+def test_set_translate_vec_return_self():
+    assert test_nfr.set_translate_vec(100, 200, 300) == test_nfr
 
 # endregion
 
@@ -387,6 +415,8 @@ def test_set_color_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_color("a", "b", "C", "D")
 
+def test_set_color_return_self():
+    assert test_nfr.set_color(100, 200, 300, 430) == test_nfr
 
 # endregion
 
@@ -408,6 +438,8 @@ def test_set_color_by_name_bad_input_invalid_color():
     with pytest.raises(KeyError):
         test_nfr.set_color_by_name("Some super specific color")
 
+def test_set_color_by_name_return_self():
+    assert test_nfr.set_color_by_name("red") == test_nfr
 # endregion
 
 # region color
@@ -440,6 +472,8 @@ def test_set_color_by_hex_bad_input_too_many_digits():
     with pytest.raises(ValueError):
         test_nfr.set_color_by_hex("#FF00000")
 
+def test_set_color_by_hex_return_self():
+    assert test_nfr.set_color_by_hex("#FF0000") == test_nfr
 # endregion
 
 # region auto_zoom
@@ -463,6 +497,8 @@ def test_set_auto_zoom_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_auto_zoom("a", "b", "C")
 
+def test_set_auto_zoom_return_self():
+    assert test_nfr.set_auto_zoom(700.0, 800.0, 900.0) == test_nfr
 
 # endregion
 
@@ -487,6 +523,8 @@ def test_set_trigger_hi_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_trigger_hi("a", "b", "C")
 
+def test_set_trigger_hi_return_self():
+    assert test_nfr.set_trigger_hi(700.0, 800.0, 900.0) == test_nfr
 
 # endregion
 
@@ -511,6 +549,8 @@ def test_set_trigger_lo_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_trigger_lo("a", "b", "C")
 
+def test_set_trigger_lo_return_self():
+    assert test_nfr.set_trigger_lo(700.0, 800.0, 900.0) == test_nfr
 
 # endregion
 
@@ -535,6 +575,8 @@ def test_set_set_hi_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_set_hi("a", "b", "C")
 
+def test_set_set_hi_return_self():
+    assert test_nfr.set_set_hi(700.0, 800.0, 900.0) == test_nfr
 
 # endregion
 
@@ -559,6 +601,8 @@ def test_set_set_lo_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_set_lo("a", "b", "C")
 
+def test_set_set_lo_return_self():
+    assert test_nfr.set_set_lo(700.0, 800.0, 900.0) == test_nfr
 
 # endregion
 
@@ -583,6 +627,8 @@ def test_set_proximity_mode_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_proximity_mode("a", "b", "C")
 
+def test_set_proximity_mode_self():
+    assert test_nfr.set_proximity_mode(700.0, 800.0, 900.0) == test_nfr
 
 # endregion
 
@@ -607,6 +653,8 @@ def test_set_segments_bad_input():
     with pytest.raises(Exception):
         test_nfr.set_segments("a", "b", "C")
 
+def test_set_segments_self():
+    assert test_nfr.set_segments(700.0, 800.0, 900.0) == test_nfr
 # endregion
 
 # endregion
