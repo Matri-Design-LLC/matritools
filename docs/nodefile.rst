@@ -22,6 +22,7 @@ Advanced usage:
    Attributes <nodefile-attributes>
    length <nodefile-length>
    get_last_row <nodefile-get_last_row>
+   get_next_id <nodefile-get_next_id>
    get_row_by_id <nodefile-get_row_by_id>
    make_link <nodefile-make_link>
    write_to_csv <nodefile-write_to_csv>

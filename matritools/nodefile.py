@@ -76,6 +76,16 @@ class NodeFile:
         """ Returns the last NodeFileRow of the file. (NodeFileRow) """
         return self.node_file_rows[self.length() - 1]
 
+    def get_next_id(self):
+        """
+            Returns the the last id + 1
+
+            Parameters: None
+
+            Returns: int
+        """
+        return self.get_last_row().id + 1
+
     def get_row_by_id(self, row_id: int):
         """
         Returns the row with the given ID, None if no row found
@@ -413,6 +423,16 @@ class AntzGlyph:
     def get_last_row(self):
         """ Returns the last NodeFileRow of the file. (NodeFileRow) """
         return self.node_file_rows[self.length() - 1]
+
+    def get_next_id(self):
+        """
+            Returns the the last id + 1
+
+            Parameters: None
+
+            Returns: int
+        """
+        return self.get_last_row().id + 1
 
     def get_row_by_id(self, row_id: int):
         """

@@ -10,6 +10,7 @@ Construct using node file generated from antz that contains only one glyph.
    Attributes <antzglyph-attributes>
    length <antzglyph-length>
    get_last_row <antzglyph-get_last_row>
+   get_next_id <antzglyph-get_next_id>
    increment_ids <antzglyph-increment_ids>
    unselect_all <antzglyph-unselect_all>
    freeze_all <antzglyph-freeze_all>
