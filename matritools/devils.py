@@ -22,6 +22,11 @@ position_colors = {
     'L': 'blue',
 }
 
+team_textures = {
+    'team1': 1,
+    'team2': 2,
+}
+
 class Player:
     def __init__(self, df, number_of_reports = 0, less_than_function=None):
         self.bta_individual = None
@@ -350,7 +355,7 @@ class Player:
         if self.puck_handling is not None:
             self.total_skills += self.puck_handling
 
-class PlayerReport():
+class PlayerReport:
 
     def __init__(self, df):
         if isinstance(df, dict):
@@ -378,6 +383,7 @@ class PlayerReport():
                 "\n\tscout: " + str(self.scout) + "\n" + \
                 "\n\tscout type: " + str(self.scout_type) + "\n" + \
                 "\n\thome / away: " + str(self.home_away) + "\n" + \
+                "\n\tgame id: " + str(self.game_id) + "\n" + \
                 "\n\tgame_won: " + str(self.game_won) + "\n"
 
 
@@ -402,6 +408,7 @@ class PlayerReport():
         result['Home / Away'] = self.home_away
         result['Scout Type'] = self.scout_type
         result['Tournament'] = self.tournament
+        result['Game ID'] = self.game_id
 
         return result
 
@@ -424,6 +431,7 @@ class PlayerReport():
         self.home_away = df.iloc[0]['home_or_away_team']
         self.tournament = "N/A" if df.iloc[0]['tournamentname'] is None else df.iloc[0]['tournamentname']
         self.scout_type = df.iloc[0]['scouttype']
+        self.game_id = df.iloc[0]['gameid']
 
         self.__get_stats__(df)
 
@@ -446,6 +454,7 @@ class PlayerReport():
         self.home_away = player_dict['Home / Away']
         self.tournament = player_dict['Tournament']
         self.scout_type = player_dict['Scout Type']
+        self.game_id = player_dict['Game ID']
 
     def __get_stats__(self, df):
         nhl_grade_to_number = {
@@ -518,6 +527,38 @@ class PlayerReport():
             return new_stat
         except:
             return None
+
+class Game:
+    def __init__(self):
+        self.home_players = []
+        self.away_players = []
+        self.home_team = None
+        self.away_team = None
+        self.home_city = None
+        self.away_city = None
+        self.date = None
+        self.location = None
+        self.game_won = None
+        self.game_type = None
+
+def get_games(path=None, players=None):
+    if players is None:
+        if path is None:
+            raise RuntimeError('path must not be None')
+        players = get_players(path)
+
+    games = {}
+    for player in players:
+        for report in player.reports:
+            if report.game_id not in games.keys():
+                games[report.game_id] = Game()
+                games[report.game_id].date = report.date
+                games[report.game_id].game_won = report.game_won
+
+            if report.home_away == "Home":
+                games[report.game_id].home_team = player.team
+            else:
+                games[report.game_id].away_team = player.team
 
 def get_players(path, number_of_reports=0, less_than_function=None):
     players = []

@@ -1567,7 +1567,7 @@ class NodeFileRow:
         """
 
         Parameters:
-            color:
+            color: (str: None) name of a color i.e 'red'
 
         Returns: None
 
@@ -1580,6 +1580,54 @@ class NodeFileRow:
         self.color_g = self.colors[color][1]
         self.color_b = self.colors[color][2]
         self.color_a = 255
+
+    def set_color_by_hex(self, hex_code: str):
+        """
+
+        Parameters:
+            hex_code: (str: None) hex_code of a color i.e '#FF0000', Can contain '#' but doesn't have to
+
+        Returns: None
+
+        Raises: TypeError, ValueError
+        """
+
+        if not isinstance(hex_code, str):
+            raise TypeError("hex_code must be of type string")
+
+        hex_digits = {
+            '0': 0,
+            '1': 1,
+            '2': 2,
+            '3': 3,
+            '4': 4,
+            '5': 5,
+            '6': 6,
+            '7': 7,
+            '8': 8,
+            '9': 9,
+            'A': 10,
+            'B': 11,
+            'C': 12,
+            'D': 13,
+            'E': 14,
+            'F': 15
+        }
+        hex = hex_code.replace('#', '')
+        if len(hex) != 6:
+            raise ValueError("hex_code must be in form '#FF0000' or 'FF0000'. hex_code received: " + hex_code)
+
+        for c in hex:
+            if c.upper() not in hex_digits.keys():
+                raise ValueError(c + ' is not a hex code digit. Digit should be between 0-F')
+        r_hex = hex[0:2:]
+        r = (hex_digits[r_hex[0].upper()] * 16) + hex_digits[r_hex[1].upper()]
+        g_hex = hex[2:4:]
+        g = (hex_digits[g_hex[0].upper()] * 16) + hex_digits[g_hex[1].upper()]
+        b_hex = hex[4:6:]
+        b = (hex_digits[b_hex[0].upper()] * 16) + hex_digits[b_hex[1].upper()]
+
+        self.set_color(r, g, b)
 
     def color_to_list(self):
         """

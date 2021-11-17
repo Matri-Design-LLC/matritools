@@ -410,6 +410,38 @@ def test_set_color_by_name_bad_input_invalid_color():
 
 # endregion
 
+# region color
+
+def test_set_color_by_hex_correct_input_1():
+    test_nfr.set_color_by_hex("#FF0000")
+    assert test_nfr.color_r == 255 and test_nfr.color_g == 0 and test_nfr.color_b == 0 and test_nfr.color_a == 255
+
+def test_set_color_by_hex_correct_input_2():
+    test_nfr.set_color_by_hex("FF0000")
+    assert test_nfr.color_r == 255 and test_nfr.color_g == 0 and test_nfr.color_b == 0 and test_nfr.color_a == 255
+
+def test_set_color_by_hex_correct_input_3():
+    test_nfr.set_color_by_hex("#7DD0D7")
+    assert test_nfr.color_r == 125 and test_nfr.color_g == 208 and test_nfr.color_b == 215 and test_nfr.color_a == 255
+
+def test_set_color_by_hex_bad_input_none():
+    with pytest.raises(TypeError):
+        test_nfr.set_color_by_hex()
+
+def test_set_color_by_hex_bad_input_not_str():
+    with pytest.raises(TypeError):
+        test_nfr.set_color_by_hex(5)
+
+def test_set_color_by_hex_bad_input_invalid_digits():
+    with pytest.raises(ValueError):
+        test_nfr.set_color_by_hex("#FG0000")
+
+def test_set_color_by_hex_bad_input_too_many_digits():
+    with pytest.raises(ValueError):
+        test_nfr.set_color_by_hex("#FF00000")
+
+# endregion
+
 # region auto_zoom
 
 def test_set_auto_zoom_correct_input_ints():
