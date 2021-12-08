@@ -1,6 +1,5 @@
 .. include:: .special.rst
 Example 3
-
 =========
 
 First, import from required libraries

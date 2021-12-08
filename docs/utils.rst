@@ -18,3 +18,5 @@ Contains commonly used functions when wrangling data into a usable form to creat
    dict_to_multilined_str <utils-dict_to_multilined_str>
    create_column_value_color_legend <utils-create_column_value_color_legend>
    split_df_by_value <utils-split_df_by_value>
+   check_type <utils-check_type>
+   get_node_indexes <utils-get_node_indexes>

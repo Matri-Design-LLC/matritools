@@ -19,10 +19,10 @@ Derived Classes:
    get_nodes_by_parent_id <nodecontainer-get_nodes_by_parent_id>
    make_link <nodecontainer-make_link>
    create_node <nodecontainer-create_node>
-   add_glyph <nodefile-add_glyph>
+   add_glyph <nodecontainer-add_glyph>
    to_dataframe <nodecontainer-to_dataframe>
    unselect_all <nodecontainer-unselect_all>
-   untag_all <antzglyph-untag_all>
+   untag_all <nodecontainer-untag_all>
    match_record_ids_and_data_to_ids <nodecontainer-match_record_ids_and_data_to_ids>
    get_nodes_of_branch_level <nodecontainer-get_nodes_of_branch_level>
    remove_nodes_of_branch_level <nodecontainer-remove_nodes_of_branch_level>

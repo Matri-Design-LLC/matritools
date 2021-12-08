@@ -10,7 +10,7 @@ Class to contain and manage a list of Nodes
    set_properties_from_string_list <node-set_properties_from_string_list>
    print_properties <node-print_properties>
    to_string <node-to_string>
-   set_id <nodefilerow-set_id>
+   set_id <node-set_id>
    set_tag <node-set_tag>
    set_aux_a <node-set_aux_a>
    set_aux_b <node-set_aux_b>
@@ -27,10 +27,11 @@ Class to contain and manage a list of Nodes
    set_color <node-set_color>
    set_color_by_name <node-set_color_by_name>
    set_color_by_hex <node-set_color_by_hex>
+   set_color_by_id <node-set_color_by_id>
    color_to_list <node-color_to_list>
    set_auto_zoom <node-set_auto_zoom>
    set_trigger_hi <node-set_trigger_hi>
-   set_trigger_lo <nodefilerow-set_trigger_lo>
+   set_trigger_lo <node-set_trigger_lo>
    set_set_hi <node-set_set_hi>
    set_set_lo <node-set_set_lo>
    set_proximity <node-set_proximity>

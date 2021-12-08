@@ -23,9 +23,10 @@ as well as commonly used data manipulation functions used by Matri Design LLC.
 
    Getting Started <gettingstarted>
    NodeFileGlobals <nodefileglobals>
+   NodeContainer <nodecontainer>
    NodeFile <nodefile>
-   AntzGlyph <antzglyph>
-   NodeFileRow <nodefilerow>
+   AntzGlyph <glyph>
+   NodeFileRow <node>
    utils
    dataexploration
 
