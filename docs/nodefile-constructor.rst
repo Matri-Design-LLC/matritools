@@ -8,7 +8,7 @@ Parameters:
 +------------+-----------------------------------------------------+------------------+---------+
 | Name       | Description                                         | Type             | Default |
 +============+=====================================================+==================+=========+
-| file_name  | name of node and tag file created on write_to_csv() | str              | None    |
+| file_name  | name of node and tag file created on write_to_csv() | str              | N/A     |
 +------------+-----------------------------------------------------+------------------+---------+
 
 Raises:

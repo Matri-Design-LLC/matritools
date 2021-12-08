@@ -15,7 +15,8 @@ Parameters:
 | value     | target value | any  | None    |
 +-----------+--------------+------+---------+
 
-Returns: int
+Returns:
+    int
 
 Example::
 

@@ -1,7 +1,7 @@
 `utils <utils.html>`_
 =====================
-set_to_list
------------
+seperate_compount_dataframe
+---------------------------
 Use to create a list of data frames from a dataframe with embedded lists.
 
 Parameters:

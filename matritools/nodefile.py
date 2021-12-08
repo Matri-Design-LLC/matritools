@@ -1,32 +1,9 @@
 import pandas as pd
 import copy
 from typing import List
+from matritools import utils as mu
 
-
-class NodeFile:
-    """
-    Virtual representation of an ANTZ node csv
-
-    Used to construct a virtual antz node file.
-    On construction, provide a file name. The constructor will append "_node.csv" to the end of the provided file name.
-
-    Basic usage:
-      After created node_file class, set the properties of the class to what you want a node csv file row to be,
-      then call create_node_file_row.4e3
-      After adding all desired rows, call write to csv.
-
-    Advanced usage:
-      Create an AntzGlyph, modify its rows and use NodeFile.add_glyph_to_rows.
-      Then call AntzGlyph.increment_glyph, modify rows again accordingly, then use NodeFile.add_glyph_to_rows.
-      Repeat as necessary.
-
-    Attributes:
-        node_file_rows (list[NodeFileRow]) - list of NodeFileRows that make up a node file.
-        properties (NodeFileRow) - list of NodeFileRows that make up a node file.
-
-    """
-
-    header = "id,type,data,selected,parent_id," \
+node_file_header = "id,type,data,selected,parent_id," \
              "branch_level,child_id,child_index,palette_id,ch_input_id," \
              "ch_output_id,ch_last_updated,average,samples,aux_a_x," \
              "aux_a_y,aux_a_z,aux_b_x,aux_b_y,aux_b_z," \
@@ -46,555 +23,787 @@ class NodeFile:
              "proximity_mode_z,segments_x,segments_y,segments_z,tag_mode," \
              "format_id,table_id,record_id,size\n"
 
-    def __init__(self, file_name: str):
+geos = {
+        "z cube": 0,
+        "cube": 1,
+        "z sphere": 2,
+        "sphere": 3,
+        "z cone": 4,
+        "cone": 5,
+        "z toroid": 6,
+        "toroid": 7,
+        "z dodecahedron": 8,
+        "dodecahedron": 9,
+        "z octahedron": 10,
+        "octahedron": 11,
+        "z tetrahedron": 12,
+        "tetrahedron": 13,
+        "z icosahedron": 14,
+        "icosahedron": 15,
+        "pin": 16,
+        "Z pin": 17,
+        "z cylinder": 18,
+        "cylinder": 19,
+        "z plane": 20,
+        "plane": 21
+   }
 
+topos = {
+        "cube": 1,
+        "sphere": 2,
+        "toroid": 3,
+        "cylinder": 4,
+        "pin": 5,
+        "rod": 6,
+        "point": 7,
+        "plane": 8,
+        "z cube": 9,
+        "z sphere": 10,
+        "z toroid": 11,
+        "z cylinder": 12,
+        "z rod": 13
+    }
+
+colors = {
+    "red": [255, 0, 0],
+    "blue": [0, 0, 255],
+    "green": [0, 128, 0],
+    "yellow": [255, 255, 0],
+    "cyan": [0, 255, 255],
+    "magenta": [255, 0, 255],
+    "hot pink": [255, 105, 180],
+    "orange": [255, 128, 0],
+    "white": [255, 255, 255],
+    "black": [1, 1, 1],
+    "grey": [128, 128, 128],
+    "lime": [0, 255, 0],
+    "maroon": [128, 0, 0],
+    "navy": [0, 0, 128],
+    "teal": [0, 128, 128],
+    "crimson": [220, 20, 60],
+    "purple": [128, 0, 128],
+    "olive": [128, 128, 0],
+    "brown": [139, 69, 19],
+    "silver": [192, 192, 192],
+    "gold": [255, 215, 0],
+    "tan": [210, 180, 140],
+    "olive drab": [107, 142, 35],
+    "dark green": [0, 100, 0],
+    "aqua marine": [127, 255, 212],
+    "dodger blue": [30, 144, 255],
+    "deep sky blue": [0, 192, 255],
+    "indian red": [205, 92, 92],
+    "cadet blue": [95, 158, 160],
+    "indigo": [75, 0, 130],
+    "pink": [255, 192, 203],
+    "beige": [245, 245, 220],
+    "honeydew": [240, 255, 240],
+    "azure": [240, 255, 255],
+    "lavender": [230, 230, 250],
+    "peach": [255, 218, 185],
+    "rosy brown": [188, 143, 143],
+    "chocolate": [210, 105, 30],
+    "medium spring green": [0, 250, 154],
+    "golden rod": [218, 165, 32],
+    "coral": [255, 127, 80]
+}
+
+class NodeContainer:
+    """
+    Class to contain and manage a list of Nodes
+
+    Attributes:
+        nodes (list[Node]) - nodes that are managed
+    """
+    def __init__(self):
+        self.nodes = []
+
+    def length(self):
         """
+        Returns the number of Nodes in this NodeContainer.
+
         Parameters:
-            file_name (str: None) - name of node and tag file created on write_to_csv()
+            None
+
+        Returns:
+            int
+
+        Raises:
+            None
+        """
+        return len(self.nodes)
+
+    def get_last_node(self):
+        """
+        Returns the last Node of the NodeContainer. Returns None if nodes is empty.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+            Node
+
+        Raises:
+             None
+        """
+        if len(self.nodes) == 0:
+            return None
+        return self.nodes[self.length() - 1]
+
+    def get_next_id(self):
+        """
+            Returns the the last id + 1, Returns 1 if empty.
+
+            Parameters:
+                None
+
+            Returns:
+                int
+
+            Raises:
+                None
+        """
+        if len(self.nodes) == 0:
+            return 1
+        return self.get_last_node().id + 1
+
+    def get_node_by_id(self, node_id: int):
+        """
+        Returns the node with the given ID, None if no Node found.
+
+        Parameters:
+            node_id (int) - ID of requested Node
+
+        Returns:
+            Node
+            None
+
+        Raises:
+            TypeError
+        """
+        mu.check_type(node_id, int)
+        for node in self.nodes:
+            if node.id == node_id:
+                return node
+        return None
+
+    def get_nodes_by_parent_id(self, parent_id: int):
+        """
+        Returns a list of Nodes with a given parent_id.
+
+        Paramenters:
+            parent_id (int) - parent_id of returned nodes
+
+        Returns:
+            list[Node]
+
+        Raises:
+            TypeError
+        """
+        mu.check_type(parent_id, int)
+        result = []
+        for node in self.nodes:
+            if node.parent_id == int(parent_id):
+                result.append(node)
+        return result
+
+    def get_nodes_of_branch_level(self, branch_level: int):
+        """
+        Returns a list of Nodes of a given branch level.
+
+        Parameters:
+            branch_level (int)
+
+        Returns:
+            list[Node]
+
+        Raises:
+            TypeError
+        """
+        mu.check_type(branch_level, int)
+        result = []
+        for node in self.nodes:
+            if node.branch_level == branch_level:
+                result.append(node)
+        return result
+
+    def remove_nodes_of_branch_level(self, branch_level: int):
+        """
+        Removes all Nodes of a given branch level.
+
+        Parameters:
+            branch_level (int) - branch level of all Nodes to be removed
+
+        Returns:
+            self
+
+        Raise:
+            TypeError
+        """
+        mu.check_type(branch_level, int)
+        nodes_to_be_removed = self.get_nodes_of_branch_level(branch_level)
+
+        for node in nodes_to_be_removed:
+            self.nodes.remove(node)
+        return self
+
+    def unselect_all(self):
+        """
+        Changes the selected property of all NodeContainer's Nodes to 0.
+        When glyph template files are saved via "save selected",
+        each node is marked selected, use this to reverse this effect.
+
+        Parameters:
+            None
+
+        Returns:
+            self
+
+        Raises:
+            None
+        """
+        for node in self.nodes:
+            node.selected = 0
+        return self
+
+    def untag_all(self):
+        """
+        Sets tag_mode of all Nodes in a NodeContainer to 0.
+
+        Parameters:
+            None
+
+        Returns:
+            self
+
+        Raises:
+            None
+        """
+        for node in self.nodes:
+            node.tag_mode = 0
+        return self
+
+    def match_record_ids_and_data_to_ids(self):
+        """
+        Iterates over each Node in the NodeContainer and matches its record id and data to its id.\
+        Upon construction of a Glyph, this happens by default.
+        The uses of this function are primarily for internal purposes.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+
+        Raises:
+            self
+        """
+        for node in self.nodes:
+            node.set_id(node.id)
+
+    def to_dataframe(self):
+        """
+        Returns a DataFrame with all Nodes as rows and Node properties as columns.
+
+        Parameters:
+            None
+
+        Returns:
+            DataFrame
+
+        Raises:
+             None
+        """
+        list_of_lists = []
+        for node in self.nodes:
+            columns = node.to_string().split(",")
+            columns.append(node.tag_text)
+            list_of_lists.append(columns)
+        column_labels = node_file_header.split(',')
+        column_labels.append("tag_text")
+        return pd.DataFrame(data=list_of_lists, columns=column_labels)
+
+    def make_link(self, link_node_a: int, link_node_b: int):
+        """
+        Creates a visible link between link_node_a and link_node_b.
+        Returns the created Node.
+
+        Parameters:
+            link_node_a (Node) - Node to be linked from
+            link_node_b (Node) - Node to to be linked to
+
+        Returns:
+            Node
+
+        Raises:
+            RuntimeError
+            TypeError
+        """
+        # Error checking
+        mu.check_type(link_node_a, Node, False)
+        mu.check_type(link_node_b, Node, False)
+        if (link_node_a == link_node_b):
+            raise RuntimeError("link_node_a and link_node_b cannot be the same")
+        if self.get_node_by_id(link_node_a.id) is None:
+            raise RuntimeError("link_node_a (" + str(link_node_a) + ") must be an existing Node.")
+        if self.get_node_by_id(link_node_b.id) is None:
+            raise RuntimeError("link_node_b (" + str(link_node_b) + ") must be an existing Node.")
+
+        # Create link
+        link = self.create_node(link_node_a)
+        link.type = 7
+        link.child_id = link_node_b.id
+
+        return link
+
+    def add_glyph(self, glyph, parent_id: int = 0, copy_glyph: bool = True):
+        """
+        Appends all Nodes of a glyph to nodes and manages it's ID's.
+        Returns a list of copied Nodes.
+
+        Parameters:
+            glyph (Glyph) - Glyph that has its Nodes copied and incremented
+            parent_id (int : 0) - id of node this glyph will be attached too
+            copy_glyph (bool : True) - Should the glyph nodes be stored as copies?
+                                       Mark false if you if want to add the glyph only
+                                       once and maintain node references.
+
+        Returns:
+            list[Node]
 
         Raises:
             TypeError
             RuntimeError
         """
+        # Error checking
+        mu.check_type(glyph, Glyph, False)
+        mu.check_type(parent_id, int)
+        mu.check_type(copy_glyph, bool, False)
 
-        file_name = str(file_name)
+        # Increment glyph ids to to avoid duplicate IDs inside the NodeContainer as well as
+        # maintain outside glyph structure when Node references to assign parent_id's
+        glyph.nodes[0].parent_id = parent_id
+        glyph.__make_ids_consecutive__(self.get_next_id())
 
+        if parent_id != 0:
+            # Error checking
+            root_parent_node = self.get_node_by_id(parent_id)
+            if root_parent_node  == None :
+                raise RuntimeError("parent_id '" + str(parent_id) + "' does not belong to an existing node")
+            else:
+                try:
+                    if root_parent_node in self.__temp_nodes__:
+                        raise RuntimeError('parent_node is a temporary node'
+                                           ' and cannot be a parent of a non-temporary node.\n'
+                                           'If this you need to override this restriction, '
+                                           'you will need to manually keep track of your own temporary nodes.')
+                except AttributeError:
+                    pass
+                glyph.nodes[0].branch_level = root_parent_node.branch_level + 1
+                # Ensure branch levels make sure with new glyph parts
+                def update_branch_level(parent_node):
+                    for node in glyph.get_nodes_by_parent_id(parent_node.id):
+                        update_branch_level(node)
+                        node.branch_level = parent_node.branch_level + 1
+                update_branch_level(glyph.nodes[0])
+
+        # Not copying glyph allows references to the glyph being added to still be valid but this can only be done
+        # once for that glyph because any changes, such as assigning it's IDs, to that glyph would effect two more than
+        # Node and thus have duplicate ID's
+        if copy_glyph:
+            glyph = copy.deepcopy(glyph)
+
+        for node in glyph.nodes:
+            self.nodes.append(node)
+        return glyph
+
+    def create_node(self, parent_node = None, tag_text: str = "", tag_mode: int = 0, template = None):
+        """
+        Creates and returns a Node inside of the NodeContainer.
+
+        Parameters:
+            parent_node (Node: None) - Node that newly created Node will be associated with
+            tag_text (str : "") - text that will be written in the tag file associated with the created Node
+            tag_mode (int : 0) - int representing how the tag should be displayed by default
+            template (Node : None) - Created node will be a copy of template if one is passed.
+
+        Returns:
+            Node
+
+        Raises:
+            TypeError
+            RuntimeError
+        """
+        # Error checking
+        mu.check_type(tag_text, str)
+        mu.check_type(tag_mode, int)
+
+        if template is not None:
+            mu.check_type(template, Node, False)
+            node = copy.deepcopy(template)
+        else:
+            node = Node()
+
+        # maintain parent child structure
+        if parent_node != None:
+            mu.check_type(parent_node, Node, False)
+
+            if parent_node not in self.nodes:
+                raise RuntimeError('parent_node does not belong this NodeContainer')
+            try:
+                if parent_node in self.__temp_nodes__:
+                    raise RuntimeError('parent_node is a temporary node'
+                                       ' and cannot be a parent of a non-temporary node.\n'
+                                       'If this you need to override this restriction, '
+                                       'you will need to manually keep track of your own temporary nodes.')
+            except AttributeError:
+                pass
+            node.parent_id = copy.deepcopy(parent_node.id)
+            node.branch_level = parent_node.branch_level + 1
+        if tag_text != "":
+            node.set_tag(tag_text, int(tag_mode))
+        node.set_id(self.get_next_id())
+
+        self.nodes.append(node)
+        return node
+
+class NodeFile(NodeContainer):
+    """
+    Virtual representation of an ANTZ node csv.
+
+    Used to construct a virtual antz node file.
+    On construction, provide a file name. The constructor will append "_node.csv" to the end of the provided file name.
+
+    Basic usage:
+      Call create_node and assign it to a variable and modify its properties individually.
+
+    Advanced usage:
+      Create an Glyph, modify it's Nodes accordingly, then use NodeFile.add_glyph.
+      Repeat as necessary.
+    """
+
+    def __init__(self, file_name: str):
+        """
+        Parameters:
+            file_name (str) - name of node and tag file created on write_to_csv.
+
+        Raises:
+            TypeError
+            RuntimeError
+        """
+        # Error checking
+        mu.check_type(file_name, str)
         if file_name == "" or file_name is None:
             raise RuntimeError("NodeFile constructed without a name")
 
-        self.__taginc__ = 1  # line number for a tag file row
-        self.node_file_rows = []
-        self.properties = NodeFileRow()
+        super(NodeFile, self).__init__()
         self.__node_file_name__ = file_name
-        self.__add_initial_rows__()
+        self.__add_initial_nodes__()
 
-    def length(self):
-        """ Returns the number of NodeFileRows in this file. (int) """
-        return (len(self.node_file_rows))
-
-    def get_last_row(self):
-        """ Returns the last NodeFileRow of the file. (NodeFileRow) """
-        return self.node_file_rows[self.length() - 1]
-
-    def get_next_id(self):
+    def add_glyph(self, glyph, parent_id: int = 0, copy_glyph: bool = True):
         """
-            Returns the the last id + 1
-
-            Parameters: None
-
-            Returns: int
-        """
-        return self.get_last_row().id + 1
-
-    def get_row_by_id(self, row_id: int):
-        """
-        Returns the row with the given ID, None if no row found
+        Appends all Nodes of a glyph to nodes and manages it's ID's.
+        Clears the temporary Nodes of the passed glyph.
 
         Parameters:
-            row_id (int: None) - ID of requested NodeFileRow
+            glyph (Glyph) - Glyph that has its Nodes copied and incremented
+            parent_id (int : 0) - id of node this glyph will be attached too
+            copy_glyph (bool : True) - Should the glyph nodes be stored as copies?
+                                       Mark false if you if want to add the glyph only
+                                       once and maintain node references.
 
-        Returns: NodeFileRow, None
+        Returns:
+            self
+
+        Raises:
+            TypeError
+            RuntimeError
         """
-        for row in self.node_file_rows:
-            if row.id == row_id:
-                return row
-
-        return None
+        super(NodeFile, self).add_glyph(glyph, parent_id, copy_glyph)
+        glyph.__clear_temp_nodes__()
+        return self
 
     def write_to_csv(self):
         """
-        Writes all the parameters of each NodeFileRow into a node csv file as well as
-        creates a corresponding tag file.
+        Writes all the parameters of each Node into a node csv file as well as creates a corresponding tag file.
 
-        Returns: None
+        Returns:
+            self
 
         Raises:
             RuntimeError
         """
-
+        # setup to check for duplicate ID's
         ids = {}
         i = 0
-        for row in self.node_file_rows:
-            if row.id in ids.keys():
-                ids[row.id].append(i)
+        for node in self.nodes:
+            if node.id in ids.keys():
+                ids[node.id].append(i)
             else:
-                ids[row.id] = [i]
+                ids[node.id] = [i]
             i += 1
 
-        if len(set(ids.keys())) != len(self.node_file_rows):
-            temp_nf = NodeFile("temp")
+        # check for duplicate ID's
+        if len(set(ids.keys())) != len(self.nodes):
+            node_container = NodeContainer()
             result = ""
             for key in ids.keys():
                 if len(ids[key]) > 1:
                     result += str(key) + " | " + str(ids[key]) + "\n"
 
                     for index in ids[key]:
-                        temp_nf.node_file_rows.append(self.node_file_rows[index])
-            self.to_dataframe().to_csv("debug_node.csv")
-            raise RuntimeError("Created debug_node.csv. Node File contains duplicate IDs.\n\nID | Indexes:\n\n" +
-                               result + str(temp_nf.to_dataframe().to_string()))
+                        node_container.nodes.append(self.nodes[index])
 
+            self.to_dataframe().to_csv("debug_node.csv")
+
+            raise RuntimeError("Created debug_node.csv. Node File contains duplicate IDs.\n\nID | Indexes:\n\n" +
+                               result + str(node_container.to_dataframe().to_string()))
+
+        # open files
         node_file = open(self.__node_file_name__ + "_node.csv", "w", encoding="utf-8")
         tag_file = open(self.__node_file_name__ + "_tag.csv", "w", encoding="utf-8")
-    
+
+        # write headers
         tag_file.write("id,record_id,table_id,title,description\n")
+        node_file.write(node_file_header)
 
-        node_file.write(self.header)
-
-        for file_row in self.node_file_rows:
+        # write tag and node rows
+        taginc = 1
+        for file_row in self.nodes:
             node_file.write(file_row.to_string())
             if file_row.tag_text != "":
-                tag_text = str(self.__taginc__) + "," + \
+                tag_text = str(taginc) + "," + \
                            str(file_row.record_id) + ",0,\"" + \
                            str(file_row.tag_text) + "\",\"\"\n"
 
-                self.__taginc__ += 1
+                taginc += 1
                 tag_file.write(tag_text)
 
         node_file.close()
+        return self
 
-    def make_link(self, link_id_a: int, link_id_b: int, link_object_id: int = 0):
-        """
-        Creates a visible link between two NodeFileRows with IDs of link_id_a, and link_id_b.
-        Returns the created NodeFileRow.
-
-        Parameters:
-            link_id_a (int: None) - id of NodeFileRow
-            link_id_b (int: None) - id of NodeFileRow
-            link_object_id: 0) - id of created NodeFileRow, leave as default to generate a unique ID
-
-        Returns: NodeFileRow
-
-        Raises: RuntimeError
-        """
-
-        link_id_a = int(link_id_a)
-        link_id_b = int(link_id_b)
-        link_object_id = int(link_object_id)
-
-        if (link_id_a == link_id_b) or link_id_a == self.properties.id or link_id_b == self.properties.id:
-            raise RuntimeError("link_id_a and link_id_b cannot be equal to eachother and neither can be equal to id")
-
-        if (link_object_id == link_id_a) or link_object_id == link_id_b:
-            raise RuntimeError("link_object_id must be different from link_id_a, and link_id_b")
-
-        if self.get_row_by_id(link_id_a) is None:
-            raise RuntimeError("link_id_a (" + str(link_id_a) + ") must be the id of an existing NodeFileRow.")
-
-        if self.get_row_by_id(link_id_b) is None:
-            raise RuntimeError("link_id_b (" + str(link_id_b) + ") must be the id of an existing NodeFileRow.")
-
-        if self.get_row_by_id(link_object_id) is not None:
-            raise RuntimeError("link_object_id (" + str(link_object_id) + ") must not be the id of an existing NodeFileRow.")
-
-        link = NodeFileRow()
-        if link_object_id == 0:
-            link_id = self.get_last_row().id + 1
-            while self.get_row_by_id(link_id) is not None:
-                link_id += 1
-            link.set_id(link_id)
-        else:
-            link.set_id(link_object_id)
-
-        link.type = 7
-        link.parent_id = link_id_a
-        link.child_id = link_id_b
-
-        self.node_file_rows.append(link)
-
-        return link
-
-    def create_node_row(self, tag_text: str="", tag_mode: int=0):
-        """
-        Creates and returns a node file row from node_file current properties and increments id by 1
-
-        Parameters:
-            tag_text - text that will be written in the tag file associated with this node file row (default "")
-            tag_mode - int representing how the tag should be displayed by default (default 0)
-
-        Returns: NodeFileRow
-        """
-        node_row = copy.deepcopy(self.properties)
-        self.node_file_rows.append(node_row)
-        if tag_text != "":
-            node_row.set_tag(tag_text, tag_mode)
-        self.properties.set_id(self.properties.id + 1)
-        return node_row
-
-    def add_glyph(self, glyph):
-        """
-        Appends all rows of a glyph to node_file_rows and increments glyph template id, parent_id, data, and record_id
-
-        Parameters:
-            glyph (AntzGlyph) - AntzGlyph that has its NodeFileRows copied and incremented
-
-        Returns: None
-        """
-
-        if not isinstance(glyph, AntzGlyph):
-            raise TypeError("glyph must be of type AntzGlyph")
-        for row in glyph.node_file_rows:
-            self.node_file_rows.append(copy.deepcopy(row))
-        glyph.increment_ids()
-        self.properties.set_id(self.get_last_row().id + 1)
-
-    def to_dataframe(self):
-        """ Returns a data frame with all node file rows (DataFrame) """
-        list_of_lists = []
-        for row in self.node_file_rows:
-            columns = []
-            for column in row.to_string().split(","):
-                columns.append(column)
-            columns.append(row.tag_text)
-            list_of_lists.append(columns)
-        column_labels = self.header.split(',')
-        column_labels.append("tag_text")
-        return pd.DataFrame(data=list_of_lists, columns=column_labels)
-
-    def __add_initial_rows__(self):
-        # Row for world parameters
-        self.node_file_rows.append(NodeFileRow("1,0,1,0,0,"
-                                               "0,1,0,0,0,"
-                                               "0,0,0,1,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,1,"
-                                               "1,1,1,0,0,"
-                                               "0,0,0,1,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,1,0,0.1,0,"
-                                               "50,101,101,255,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,1,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,16,16,0,0,"
-                                               "0,0,0,420"))
-        # Row for first camera view
-        self.node_file_rows.append(NodeFileRow("2,1,2,0,0,"
-                                               "0,2,2,3,0,"
-                                               "0,0,0,1,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0.008645,0.825266,-0.564678,"
-                                               "1,1,1,-32.446629,-180.908295,"
-                                               "143.514175,0,0,1,0,"
-                                               "0,0,55.620094,0.6002,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "1,0,0.1,0,"
-                                               "50,101,101,255,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "214.306686,0,0,0,0,"
-                                               "0,16,16,0,0,"
-                                               "0,0,0,420"))
-        # Row for second camera view
-        self.node_file_rows.append(NodeFileRow("3,1,3,0,2,"
-                                               "1,3,0,0,0,"
-                                               "0,0,0,1,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,-1,"
-                                               "1,1,1,-0.5,0,"
-                                               "571.75,0,0,1,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,1,0,0.1,0,"
-                                               "50,101,101,255,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,16,16,0,0,"
-                                               "0,0,0,420"))
+    def __add_initial_nodes__(self):
+        # node for world parameters
+        self.nodes.append(Node("1,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,"
+                               "0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0.1,0,50,101,101,255,0,"
+                               "0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,16,16,0,0,0,0,0,420"))
+        # node for first camera view
+        self.nodes.append(Node("2,1,2,0,0,0,2,2,3,0,0,0,0,1,0,0,0,0,0,0,0,0,0.008645,0.825266,-0.564678,"
+                               "1,1,1,-32.446629,-180.908295,143.514175,0,0,1,0,0,0,55.620094,0.6002,0,0,0,0,0,0,0,"
+                               "0,0,0,0,0,1,0,0.1,0,50,101,101,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"
+                                "214.306686,0,0,0,0,0,16,16,0,0,0,0,0,420"))
+        # node for second camera view
+        self.nodes.append(Node("3,1,3,0,2,1,3,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,-1,1,1,1,-0.5,0,571.75,0,0,1,0,"
+                               "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0.1,0,50,101,101,255,0,0,0,0,0,0,0,0,0,0,0,"
+                               "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,16,0,0,0,0,0,420"))
         # Third camera view
-        self.node_file_rows.append(NodeFileRow("4,1,4,0,2,"
-                                               "1,4,0,0,0,"
-                                               "0,0,0,1,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,1,-0,"
-                                               "1,1,1,0,-90,"
-                                               "7,0,0,1,0,"
-                                               "0,0,90,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,1,0,0.1,0,"
-                                               "50,101,101,255,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,16,16,0,0,"
-                                               "0,0,0,420"))
+        self.nodes.append(Node("4,1,4,0,2,1,4,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,-0,1,1,1,0,-90,"
+                               "7,0,0,1,0,0,0,90,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0.1,0,50,101,101,255,0,"
+                               "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,16,0,0,0,0,0,420"))
         # Fourth camera view
-        self.node_file_rows.append(NodeFileRow("5,1,5,0,2,"
-                                               "1,5,0,0,0,"
-                                               "0,0,0,1,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,-1,-0,-0,"
-                                               "1,1,1,85,0,"
-                                               "7,0,0,1,0,"
-                                               "0,0,90,270,0,"
-                                               "0,0,0,0,0,"
-                                               "0,-0,0,0,0,"
-                                               "0,1,0,0.1,0,"
-                                               "50,101,101,255,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,16,16,0,0,"
-                                               "0,0,0,420"))
+        self.nodes.append(Node("5,1,5,0,2,1,5,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,-1,-0,-0,1,1,1,85,0,7,0,0,1,0,"
+                               "0,0,90,270,0,0,0,0,0,0,0,-0,0,0,0,0,1,0,0.1,0,50,101,101,255,0,0,0,0,0,0,"
+                               "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,16,0,0,0,0,0,420"))
         # Default Grid
-        self.node_file_rows.append(NodeFileRow("6,6,6,1,0,"
-                                               "0,0,1,0,0,"
-                                               "0,0,0,1,360,"
-                                               "220,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "1,1,1,0,0,"
-                                               "0,0,0,1,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,1,0,0.1,3,"
-                                               "0,0,255,150,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,0,0,0,0,"
-                                               "0,1,1,0,0,"
-                                               "0,0,0,420"))
+        self.nodes.append(Node("6,6,6,1,0,0,0,1,0,0,0,0,0,1,360,220,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,0,"
+                               "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0.1,3,0,0,255,150,0,0,0,0,0,0,0,0,0,0,0,"
+                               "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,420"))
 
 
-class AntzGlyph:
+class Glyph(NodeContainer):
     """
-    Class used to duplicate and edit individual instances glyphs to be rendered in OpenAntz
-    Construct using node file generated from antz that contains only one glyph.
-
-    Attributes:
-        node_file_rows (List[NodeFileRow]) -  list of NodeFileRows that make up the glyph
+    Class used to duplicate and edit individual instances glyphs to be rendered in OpenAntz.
+    Can be constructed using node file generated from antz that contains only one glyph.
     """
 
-    def __init__(self, csv_file_name: str = "",
-                 remove_global_params: bool = True,
-                 make_ids_consecutive: bool = True,
-                 unselect_all: bool = True,
-                 untag_all: bool = True):
+    def __init__(self, csv_file_name: str = "", unselect_all: bool = True, untag_all: bool = True):
         """
         Parameters:
-            csv_file_name (str: "") - name of the glyph template csv file (default: "")
-            remove_global_params (bool: True) - remove rows with an IDs that are 1-7 (default: True)
-            make_IDs_consecutive (bool: True) - remove gaps in between row IDs. i.e 1,2,4 becomes 1,2,3 (default: True)
-            unselect_all (bool: True) - sets all NodeFileRows selected mode to 0
-            untag_all (bool: True) - sets all NodeFileRows tag mode to 0
+            csv_file_name (str: "") - name of the glyph template csv file
+            unselect_all (bool: True) - Should all Nodes selected mode be 0?
+            untag_all (bool: True) - Should all Nodes tag mode be 0?
 
-        Raises: RuntimeError
+        Raises:
+            RuntimeError
+            TypeError
         """
+        # Error checking
+        mu.check_type(csv_file_name, str, False)
+        mu.check_type(unselect_all, bool, False)
+        mu.check_type(untag_all, bool, False)
 
-        self.node_file_rows = []
-
-        csv_file_name = str(csv_file_name)
-        if not csv_file_name.endswith(".csv"):
-            raise RuntimeError("csv_file_name must be name of csv file (must include '.csv'")
+        super(Glyph, self).__init__()
+        self.__temp_nodes__ = []
 
         if csv_file_name != "":
-            self.__populate_glyph__(csv_file_name, remove_global_params, make_ids_consecutive)
-        else:
-            raise RuntimeError("antz_glyph was constructed without a csv file name")
+            if not csv_file_name.endswith(".csv"):
+                raise RuntimeError("csv_file_name must be name of csv file (must include '.csv'")
+            self.__populate_glyph__(csv_file_name)
 
-        if unselect_all:
-            self.unselect_all()
+            if unselect_all:
+                self.unselect_all()
 
-        if untag_all:
-            self.untag_all()
+            if untag_all:
+                self.untag_all()
 
-    def length(self):
-        """ Returns the number of NodeFileRows in this file. (int) """
-        return len(self.node_file_rows)
-
-    def get_last_row(self):
-        """ Returns the last NodeFileRow of the file. (NodeFileRow) """
-        return self.node_file_rows[self.length() - 1]
-
-    def get_next_id(self):
+    def create_temp_node(self, parent_node = None, tag_text: str = "", tag_mode: int = 0, template = None):
         """
-            Returns the the last id + 1
-
-            Parameters: None
-
-            Returns: int
-        """
-        return self.get_last_row().id + 1
-
-    def get_row_by_id(self, row_id: int):
-        """
-        Returns the row with the given ID, None if no row found
+        Creates and returns a node inside of the NodeFile.
+        Temporary glyphs get removed on NodeFile.add_glyph.
 
         Parameters:
-            row_id (int: None) - ID of requested NodeFileRow
+            parent_node (Node : None) - Desired parent Node
+            tag_text (str: "") - text that will be written in the tag file associated with this Node (default "")
+            tag_mode (int: 0) - int representing how the tag should be displayed by default (default 0)
+            template (Node : None) - Created node will be a copy of template if one is passed.
 
-        Returns: NodeFileRow, None
-        """
-        for row in self.node_file_rows:
-            if row.id == row_id:
-                return row
+        Returns:
+            Node
 
-    def increment_ids(self, match_data_and_record_id_to_id: bool = True):
+        Raises:
+            TypeError
         """
-        Iterates over each NodeFileRow in the glyph and updates its ID, parent ID, and child ID reflect as a new glyph in a node
-        file starting with the highest ID + 1. This is called automatically when adding glyph to NodeFile
+        node = self.create_node(parent_node, tag_text, tag_mode, template)
+        self.__temp_nodes__.append(node)
+        return node
+
+    def add_temp_glyph(self, glyph, parent_id: int):
+        """
+        Temporarily appends all Nodes of a glyph to nodes and manages it's ID's.
+        Temporary glyphs get removed on NodeFile.add_glyph.
 
         Parameters:
-            match_data_and_record_id_to_id (bool: True) - Should the rows update their record ID and data to match their ID?
+            glyph (Glyph) - Glyph that has its Nodes copied and incremented
+            parent_id (int) - id of glyphs's root parent node
 
-        Returns: None
+        Returns:
+            self
 
+        Raises:
+            TypeError
         """
-        self.make_ids_consecutive(self.node_file_rows[len(self.node_file_rows) - 1].id + 1,
-                                      match_data_and_record_id_to_id)
+        glyph_copy = self.add_glyph(glyph, parent_id)
+        for node in glyph_copy.nodes:
+            self.__temp_nodes__.append(node)
+        return self
 
-    def unselect_all(self):
+    def freeze_all(self, freeze: bool = True):
         """
-        Changes the selected property of all glyph node file rows to 0.
-        When glyph template files are saved via "save selected",
-        each row is marked selected, use this to reverse this effect
-
-        Returns: None
-        """
-
-        for row in self.node_file_rows:
-            row.selected = 0
-
-    def freeze_all(self, freeze=True):
-        """
-        Sets all rows in glyph to be frozen or unfrozen
+        Sets all Nodes in this NodeContainer to be frozen or unfrozen
 
         Parameters:
-            freeze: Should all rows in glyph be frozen
+            freeze (bool: True) - Should all nodes in glyph be frozen
 
-        Returns: None
+        Returns:
+            self
 
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(freeze, bool, False)
+
+        freeze_mode = 0
         if freeze:
-            for row in self.node_file_rows:
-                row.freeze = 1
-        else:
-            for row in self.node_file_rows:
-                row.freeze = 0
+            freeze_mode = 1
 
-    def untag_all(self):
+        for node in self.nodes:
+            node.freeze = freeze_mode
+
+        return self
+
+    def __make_ids_consecutive__(self, starting_id: int = 8):
         """
-        Sets the tag mode all NodeFileRows to 0
-        Returns: None
-        """
-
-        for row in self.node_file_rows:
-            row.tag_mode = 0
-
-    def match_record_ids_and_data_to_ids(self):
-        """
-        Iterates over each NodeFileRow in the glyph and matches its record id and data to its id
-
-        Returns: None
-        """
-        for row in self.node_file_rows:
-            row.set_id(row.id)
-
-    def get_rows_of_branch_level(self, branch_level):
-        """ Returns a list of NodeFileRow's of a given branch level"""
-        rows = []
-        for row in self.node_file_rows:
-            if row.branch_level == branch_level:
-                rows.append(row)
-        return rows
-
-    def remove_rows_of_branch_level(self, branch_level):
-        """
-        Removes all NodeFileRow's of a given branch level
-
-        Parameters:
-            branch_level - branch level of all removed items (default: None)
-
-        Returns: None
-        """
-        rows = self.get_rows_of_branch_level(branch_level)
-
-        for row in rows:
-            self.node_file_rows.remove(row)
-
-    def make_ids_consecutive(self, starting_id: int = 8,  match_data_and_record_id_to_id: bool=True ):
-        """
-        Removes gaps in ids. i.e IDs 1,2,4 become 1,2,3
-        Can also be used to change the ID's of the glyph to start from a specified index
+        Removes gaps in ids. i.e IDs 1,2,4 become 1,2,3.
+        Can also be used to change the ID's of the glyph to start from a specified index.
 
         Parameters:
             starting_id (int: 8) - first id of the glyph
-            match_data_and_record_id_to_id (bool: True) - set true to set the data and record id of each row to match its id
 
-        Returns: None
+        Returns:
+            None
+
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(starting_id, int)
+
         # keys = old IDs, values = new IDs
-        ids = {0:0}
-        if self.node_file_rows[0].parent_id != 0:
-            ids[self.node_file_rows[0].parent_id] = self.node_file_rows[0].parent_id
+        ids = {0: 0}
+        if self.nodes[0].parent_id != 0:
+            ids[self.nodes[0].parent_id] = self.nodes[0].parent_id
         current_id = starting_id
 
-
-        for row in self.node_file_rows:
+        for node in self.nodes:
             # replace old IDs with new IDs
-            row.parent_id = ids[row.parent_id]
-            row.child_id = ids[row.child_id]
+            node.parent_id = ids[node.parent_id]
+            node.child_id = ids[node.child_id]
 
             # map old ID to new ID
-            ids[row.id] = current_id
+            ids[node.id] = current_id
 
-            if match_data_and_record_id_to_id:
-                row.set_id(current_id)
+            node.set_id(current_id)
 
             current_id += 1
 
-    def __populate_glyph__(self, csv_file_name: str = "",
-                           remove_global_params: bool = False,
-                           make_ids_consecutive: bool = True,
-                           match_data_and_record_id_to_id: bool = True):
+    def __clear_temp_nodes__(self):
+        """
+        Clears temporary Nodes from nodes
+
+         Parameters:
+             None
+
+         Returns:
+             None
+
+        Raises:
+            RuntimeError
+        """
+        for temp_node in self.__temp_nodes__:
+            for child_node in self.get_nodes_by_parent_id(temp_node.id):
+                if child_node not in self.__temp_nodes__:
+                    raise RuntimeError('A temporary node (id: ' + str(temp_node.id) +
+                                       ', tag: ' + temp_node.tag_text +
+                                       ') is the parent of a non-temporary node '
+                                       '(id: ' + str(child_node.id) + ', tag: ' + child_node.tag + ')')
+        for node in self.__temp_nodes__:
+            self.nodes.remove(node)
+        self.__temp_nodes__.clear()
+
+    def __populate_glyph__(self, csv_file_name: str = ""):
 
         df = pd.read_csv(csv_file_name)
         df = df.applymap(lambda cell: int(cell) if str(cell).endswith('.0') else cell)
 
+        root_found = False
+
         for index, row in df.iterrows():
+            # build Node from row
             line = ""
             for column in df.columns:
                 line += str(row[column]) + ","
             line = line[:len(line) - 1]
+            node = Node(line)
 
-            ntr = NodeFileRow(line)
-            if (not remove_global_params) or (remove_global_params and ntr.id not in range(8)):
-                self.node_file_rows.append(NodeFileRow(line))
+            if root_found:
+                if node.parent_id == 0:
+                    print(mu.WARNING + \
+                          'Glyph has more than one root node! '
+                          'If this is not by mistake, be sure to manage them properly.' + mu.ENDC)
+            else:
+                if node.parent_id == 0:
+                    root_found = True
 
-        i = 0
-        for row in self.node_file_rows:
-            if row.id in range(8):
-                raise RuntimeError("Glyph template csv contains row id's between 1-7. "
-                                   "Perhaps you generated the file in Antz using 'K' as opposed to 'ALT + K'")
-            i += 1
+            if node.id not in range(8):
+                self.nodes.append(node)
 
-        if make_ids_consecutive:
-            self.make_ids_consecutive(8, match_data_and_record_id_to_id)
+        self.__make_ids_consecutive__(8)
 
-
-
-
-class NodeFileRow:
+class Node:
     """
-    Container of properties and property setters for node file rows.
+    Container of properties and property setters for Nodes.
 
     Attributes:
         geos             - dictionary mapping names of shapes to IDs
@@ -709,98 +918,17 @@ class NodeFileRow:
         tag_text         - tag associated with this node object
     """
 
-    geos = {
-                "z cube": 0,
-                "cube": 1,
-                "z sphere": 2,
-                "sphere": 3,
-                "z cone": 4,
-                "cone": 5,
-                "z toroid": 6,
-                "toroid": 7,
-                "z dodecahedron": 8,
-                "dodecahedron": 9,
-                "z octahedron": 10,
-                "octahedron": 11,
-                "z tetrahedron": 12,
-                "tetrahedron": 13,
-                "z icosahedron": 14,
-                "icosahedron": 15,
-                "pin": 16,
-                "Z pin": 17,
-                "z cylinder": 18,
-                "cylinder": 19,
-                "z plane": 20,
-                "plane": 21
-           }
-
-    topos = {
-                "cube": 1,
-                "sphere": 2,
-                "toroid": 3,
-                "cylinder": 4,
-                "pin": 5,
-                "rod": 6,
-                "point": 7,
-                "plane": 8,
-                "z cube": 9,
-                "z sphere": 10,
-                "z toroid": 11,
-                "z cylinder": 12,
-                "z rod": 13
-            }
-
-    colors = {
-        "red": [255, 0, 0],
-        "blue": [0, 0, 255],
-        "green": [0, 128, 0],
-        "yellow": [255, 255, 0],
-        "cyan": [0, 255, 255],
-        "magenta": [255, 0, 255],
-        "hot pink": [255, 105, 180],
-        "orange": [255, 128, 0],
-        "white": [255, 255, 255],
-        "black": [1, 1, 1],
-        "grey": [128, 128, 128],
-        "lime": [0, 255, 0],
-        "maroon": [128, 0, 0],
-        "navy": [0, 0, 128],
-        "teal": [0, 128, 128],
-        "crimson": [220, 20, 60],
-        "purple": [128, 0, 128],
-        "olive": [128, 128, 0],
-        "brown": [139, 69, 19],
-        "silver": [192, 192, 192],
-        "gold": [255, 215, 0],
-        "tan": [210, 180, 140],
-        "olive drab": [107, 142, 35],
-        "dark green": [0, 100, 0],
-        "aqua marine": [127, 255, 212],
-        "dodger blue": [30, 144, 255],
-        "deep sky blue": [0, 192, 255],
-        "indian red": [205, 92, 92],
-        "cadet blue": [95, 158, 160],
-        "indigo": [75, 0, 130],
-        "pink": [255, 192, 203],
-        "beige": [245, 245, 220],
-        "honeydew": [240, 255, 240],
-        "azure": [240, 255, 255],
-        "lavender": [230, 230, 250],
-        "peach": [255, 218, 185],
-        "rosy brown": [188, 143, 143],
-        "chocolate": [210, 105, 30],
-        "medium spring green": [0, 250, 154],
-        "golden rod": [218, 165, 32],
-        "coral": [255, 127, 80]
-    }
-
     def __init__(self, comma_string: str = ""):
         """
         Parameters:
              comma_string (str: "") - a string with 94 comma seperated values in the order of an antz node file.
 
-        Raise: RuntimeError
+        Raise:
+            TypeError
+            RuntimeError
         """
+        # Error checking
+        mu.check_type(comma_string, str, False)
 
         # region properties
 
@@ -813,7 +941,7 @@ class NodeFileRow:
         self.selected = 0
 
         self.parent_id = 0  # ID of parent node
-        self.branch_level = 0  # root node is 0, each sub-level is 1, 2, 3, … n
+        self.branch_level = 1  # root node is 0, each sub-level is 1, 2, 3, … n
         self.child_id = 0  # same as node ID
         self.child_index = 0  # currently selected child node
 
@@ -956,28 +1084,31 @@ class NodeFileRow:
 
         # endregion
 
-        if not isinstance(comma_string, str):
-            raise RuntimeError('comma_string must be of type str')
         if comma_string == "":
             return
-        values = comma_string.split(",")
 
+        values = comma_string.split(",")
         self.set_properties_from_string_list(values)
 
     def set_properties_from_string_list(self, values: List[str]):
         """
+        Sets the properties of this Node from a list of values in the order they appear in a node file.
 
         Parameters:
             values (List[str]) - list of strings that can be cast as integrals
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: RuntimeError
-
+        Raises:
+            ValueError
+            RuntimeError
         """
+        # Error checking
         if len(values) != 94:
             raise RuntimeError("Comma separated string has incorrect number of values.\n Values length = " +
                                str(len(values)) + "\nInput: " + str(values))
+
         self.id = int(float(values[0]))
         self.type = int(float(values[1]))
         self.data = int(float(values[2]))
@@ -1079,7 +1210,14 @@ class NodeFileRow:
         """
         Prints the label and value of each property.
 
-        Returns: None
+        Parameters:
+            None
+
+        Returns:
+            self
+
+        Raises:
+            None
         """
         print("id: " + str(self.id))
         print("type: " + str(self.type))
@@ -1179,7 +1317,18 @@ class NodeFileRow:
         return self
 
     def to_string(self):
-        """ Returns a string of all node properties seperated by commas """
+        """
+        Returns a string of all node properties seperated by commas
+
+        Parameters:
+            None
+
+        Returns:
+            str
+
+        Raises:
+            None
+        """
         return str(int(float(self.id))) + "," + \
                str(int(float(self.type))) + "," + \
                str(int(float(self.data))) + "," + \
@@ -1277,96 +1426,106 @@ class NodeFileRow:
 
     # region setters for x, y , z properties
 
-    def set_id(self, row_id: int):
+    def set_id(self, node_id: int):
         """
-        Sets id, record_id, and data to row_id
+        Sets id, record_id, and data to node_id.
 
         Parameters:
-            row_id (int: None) - number to set id, record_id and row_id to
+            node_id (int) - number to set id, record_id and node_id to
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(node_id, int)
 
-        row_id = int(row_id)
-
-        self.id = row_id
-        self.record_id = row_id
-        self.data = row_id
+        self.id = int(node_id)
+        self.record_id = int(node_id)
+        self.data = int(node_id)
 
         return self
 
-    def set_tag(self, tag_text, tag_mode: int = 0):
+    def set_tag(self, tag_text: str, tag_mode: int = 0):
         """
-        Sets tag_text and tag_mode
+        Sets tag_text and tag_mode.
 
         Parameters:
+            tag_text (str) - label or description of this node to appear in Antz
+            tag_mode (int : 0) - mode that effects how tag is displayed in Antz
 
-        :param tag_text: (default "")
-        :param tag_mode: (default 0)
+        Returns:
+            self
 
-        Returns: self
-
-        Raises: TypeError
+        Raises:
+            TypeError
         """
-        tag_mode = int(tag_mode)
-        self.tag_text = tag_text
-        self.tag_mode = tag_mode
+        # Error checking
+        mu.check_type(tag_text, str)
+        mu.check_type(tag_mode, int)
+
+        self.tag_text = str(tag_text)
+        self.tag_mode = int(tag_mode)
 
         return self
 
     def set_aux_a(self, x: int = 30, y: int = 30, z: int = 30):
         """
-        Sets aux_a_x, y, and z
+        Sets aux_a_x, y, and z.
 
         Parameters:
             x (int: 30)
             y (int: 30)
             z (int: 30)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        x = int(x)
-        y = int(y)
-        z = int(z)
-
-        self.aux_a_x = x
-        self.aux_a_y = y
-        self.aux_a_z = z
+        self.aux_a_x = int(x)
+        self.aux_a_y = int(y)
+        self.aux_a_z = int(z)
 
         return self
 
     def set_aux_b(self, x: int = 30, y: int = 30, z=30):
         """
-        Sets aux_b_x,y, and z
+        Sets aux_b_x,y, and z.
 
         Parameters:
             x (int: 30)
             y (int: 30)
             z (int: 30)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        x = int(x)
-        y = int(y)
-        z = int(z)
-
-        self.aux_b_x = x
-        self.aux_b_y = y
-        self.aux_b_z = z
+        self.aux_b_x = int(x)
+        self.aux_b_y = int(y)
+        self.aux_b_z = int(z)
 
         return self
 
     def set_rotate_vec(self, x: int = 0, y: int = 0, z: int = 0, s: int = 0):
         """
-        Sets rotate_vec_x, y, z, and s
+        Sets rotate_vec_x, y, z, and s.
 
         Parameters:
             x (int: 0)
@@ -1374,224 +1533,254 @@ class NodeFileRow:
             z (int: 0)
             s (int: 0)
 
-        Returns: None
+        Returns:
+            None
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
+        mu.check_type(s, int)
 
-        x = int(x)
-        y = int(y)
-        z = int(z)
-        s = int(s)
-
-        self.rotate_vec_x = x
-        self.rotate_vec_y = y
-        self.rotate_vec_z = z
-        self.rotate_vec_s = s
+        self.rotate_vec_x = int(x)
+        self.rotate_vec_y = int(y)
+        self.rotate_vec_z = int(z)
+        self.rotate_vec_s = int(s)
 
         return self
 
     def set_scale(self, x: float = 1, y: float = 1, z: float = 1):
         """
-        Sets scale_x, y, z
+        Sets scale_x, y, z.
 
         Parameters:
             x (int: 1)
             y (int: 1)
             z (int: 1)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, float)
+        mu.check_type(y, float)
+        mu.check_type(z, float)
 
-        x = float(x)
-        y = float(y)
-        z = float(z)
-
-        self.scale_x = x
-        self.scale_y = y
-        self.scale_z = z
+        self.scale_x = float(x)
+        self.scale_y = float(y)
+        self.scale_z = float(z)
 
         return self
 
     def set_u_scale(self, scale: float = 1):
-        scale = float(scale)
+        """
+        Sets x, y, z scale uniformly.
+        Parameters:
+            scale (float : 1)
+
+        Returns:
+            self
+
+        Raises:
+            TypeError
+        """
+        # Error checking
+        mu.check_type(scale, float)
         self.set_scale(scale, scale, scale)
 
         return self
 
     def set_translate(self, x: float = 0, y: float = 0, z: float = 0):
         """
-        Sets translate_x, y, z
+        Sets translate_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: None
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, float)
+        mu.check_type(y, float)
+        mu.check_type(z, float)
 
-        x = float(x)
-        y = float(y)
-        z = float(z)
-
-        self.translate_x = x
-        self.translate_y = y
-        self.translate_z = z
+        self.translate_x = float(x)
+        self.translate_y = float(y)
+        self.translate_z = float(z)
 
         return self
 
     def set_tag_offset(self, x: float = 0, y: float = 0, z: float = 0):
         """
-        Sets tag_offset_x, y, z
+        Sets tag_offset_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, float)
+        mu.check_type(y, float)
+        mu.check_type(z, float)
 
-        x = float(x)
-        y = float(y)
-        z = float(z)
-
-        self.tag_offset_x = x
-        self.tag_offset_y = y
-        self.tag_offset_z = z
+        self.tag_offset_x = float(x)
+        self.tag_offset_y = float(y)
+        self.tag_offset_z = float(z)
 
         return self
 
     def set_rotate(self, x: float = 0, y: float = 0, z: float = 0):
         """
-        Sets rotate_x, y, z
+        Sets rotate_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, float)
+        mu.check_type(y, float)
+        mu.check_type(z, float)
 
-        x = float(x)
-        y = float(y)
-        z = float(z)
-
-        self.rotate_x = x
-        self.rotate_y = y
-        self.rotate_z = z
+        self.rotate_x = float(x)
+        self.rotate_y = float(y)
+        self.rotate_z = float(z)
 
         return self
 
     def set_rotate_rate(self, x: int = 0, y: int = 0, z: int = 0):
         """
-        Sets rotate_rate_x, y, z
+        Sets rotate_rate_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        x = int(x)
-        y = int(y)
-        z = int(z)
-
-        self.rotate_rate_x = x
-        self.rotate_rate_y = y
-        self.rotate_rate_z = z
+        self.rotate_rate_x = int(x)
+        self.rotate_rate_y = int(y)
+        self.rotate_rate_z = int(z)
 
         return self
 
     def set_scale_rate(self, x: int = 0, y: int = 0, z: int = 0):
         """
-        Sets scale_rate_x, y, z
+        Sets scale_rate_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        x = int(x)
-        y = int(y)
-        z = int(z)
-
-        self.scale_rate_x = x
-        self.scale_rate_y = y
-        self.scale_rate_z = z
+        self.scale_rate_x = int(x)
+        self.scale_rate_y = int(y)
+        self.scale_rate_z = int(z)
 
         return self
 
     def set_translate_rate(self, x: int = 0, y: int = 0, z: int = 0):
         """
-        Sets translate_rate_x, y, z
+        Sets translate_rate_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        x = int(x)
-        y = int(y)
-        z = int(z)
-
-        self.translate_rate_x = x
-        self.translate_rate_y = y
-        self.translate_rate_z = z
+        self.translate_rate_x = int(x)
+        self.translate_rate_y = int(y)
+        self.translate_rate_z = int(z)
 
         return self
 
     def set_translate_vec(self, x: int = 0, y: int = 0, z: int = 0):
         """
-        Sets translate_vec_x, y, z
+        Sets translate_vec_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        x = int(x)
-        y = int(y)
-        z = int(z)
-
-        self.translate_vec_x = x
-        self.translate_vec_y = y
-        self.translate_vec_z = z
+        self.translate_vec_x = int(x)
+        self.translate_vec_y = int(y)
+        self.translate_vec_z = int(z)
 
         return self
 
     def set_color(self, r: int = 0, g: int = 0, b: int = 0, a: int = 255):
         """
-        Sets color values
+        Sets color values.
 
         Parameters:
 
@@ -1600,51 +1789,61 @@ class NodeFileRow:
         b (int: 0) - blue (int) 0-255 (default 0)
         a (int: 255) - transparency 0-255 (default 255)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(r, int)
+        mu.check_type(g, int)
+        mu.check_type(b, int)
+        mu.check_type(a, int)
 
-        r = int(r)
-        g = int(g)
-        b = int(b)
-        a = int(a)
-
-        self.color_r = r
-        self.color_g = g
-        self.color_b = b
-        self.color_a = a
+        self.color_r = int(r)
+        self.color_g = int(g)
+        self.color_b = int(b)
+        self.color_a = int(a)
 
         return self
 
     def set_color_by_name(self, color: str):
         """
+        Set color with the name of a color as a string.
 
         Parameters:
-            color: (str: None) name of a color i.e 'red'
+            color: (str) name of a color i.e 'red'
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
-        if not isinstance(color, str):
-            raise TypeError("color must be of type string")
+        # Error checking
+        mu.check_type(color, str, False)
 
-        return self.set_color(self.colors[color][0], self.colors[color][1], self.colors[color][2])
+        return self.set_color(colors[color][0], colors[color][1], colors[color][2])
 
     def set_color_by_hex(self, hex_code: str):
         """
-
+        Sets color by hex code.
         Parameters:
-            hex_code: (str: None) hex_code of a color i.e '#FF0000', Can contain '#' but doesn't have to
+            hex_code: (str) hex_code of a color i.e '#FF0000', Can contain '#' but doesn't have to.
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError, ValueError
+        Raises:
+            TypeError
+            ValueError
         """
-
-        if not isinstance(hex_code, str):
-            raise TypeError("hex_code must be of type string")
+        # Error checking
+        mu.check_type(hex_code, str, False)
+        hex = hex_code.replace('#', '')
+        if len(hex) != 6:
+            raise ValueError("hex_code must be in form '#FF0000' or 'FF0000'. hex_code received: " + hex_code)
 
         hex_digits = {
             '0': 0,
@@ -1664,9 +1863,6 @@ class NodeFileRow:
             'E': 14,
             'F': 15
         }
-        hex = hex_code.replace('#', '')
-        if len(hex) != 6:
-            raise ValueError("hex_code must be in form '#FF0000' or 'FF0000'. hex_code received: " + hex_code)
 
         for c in hex:
             if c.upper() not in hex_digits.keys():
@@ -1680,204 +1876,254 @@ class NodeFileRow:
 
         return self.set_color(r, g, b)
 
+    def set_color_by_id(self, color_id: int, palette_id: int = None, color_a: int = 255):
+        """
+        Sets r,g,b to 0 and sets color by color_id, palette_id and color_a.
+
+        Paremeters:
+            color_id (int) - color_id of a color in a given palette
+            palette_id (int: None) - ID of a palette that effects what color color_id represents
+            color_a (int: 255) - int between 0 - 255 that effects the transparency of the color
+
+        Returns:
+            self
+
+        Raises:
+            TypeError
+        """
+        # Error checking
+        mu.check_type(color_id, int)
+        if palette_id is not None:
+            mu.check_type(palette_id, int)
+        mu.check_type(color_a, int)
+
+        self.color_id = int(color_id)
+        if palette_id is not None:
+            self.palette_id = int(palette_id)
+
+        return self.set_color(a=int(color_a))
 
     def color_to_list(self):
         """
-        Returns a list with rgba values of the nodes current color
+        Returns a list with rgba values of the nodes current color.
 
-        Returns: List
+        Parameters:
+            None
+
+        Returns:
+            List[int]
+
+        Raises:
+            None
         """
         return [self.color_r, self.color_g, self.color_b, self.color_a]
 
     def set_auto_zoom(self, x: int = 0, y: int = 0, z: int = 0):
         """
-        Sets auto_zoom_x, y, z
+        Sets auto_zoom_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        x = int(x)
-        y = int(y)
-        z = int(z)
-
-        self.auto_zoom_x = x
-        self.auto_zoom_y = y
-        self.auto_zoom_z = z
+        self.auto_zoom_x = int(x)
+        self.auto_zoom_y = int(y)
+        self.auto_zoom_z = int(z)
 
         return self
 
     def set_trigger_hi(self, x: int = 0, y: int = 0, z: int = 0):
         """
-        Sets trigger_hi_x, y, z
+        Sets trigger_hi_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
-        x = int(x)
-        y = int(y)
-        z = int(z)
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        self.trigger_hi_x = x
-        self.trigger_hi_y = y
-        self.trigger_hi_z = z
+        self.trigger_hi_x = int(x)
+        self.trigger_hi_y = int(y)
+        self.trigger_hi_z = int(z)
 
         return self
 
     def set_trigger_lo(self, x: int = 0, y: int = 0, z: int = 0):
         """
-        Sets trigger_low_x, y, z
+        Sets trigger_low_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
-        x = int(x)
-        y = int(y)
-        z = int(z)
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        self.trigger_lo_x = x
-        self.trigger_lo_y = y
-        self.trigger_lo_z = z
+        self.trigger_lo_x = int(x)
+        self.trigger_lo_y = int(y)
+        self.trigger_lo_z = int(z)
 
         return self
 
     def set_set_hi(self, x: int = 0, y: int = 0, z: int = 0):
         """
-        Sets hi_x, y, z
+        Sets hi_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        x = int(x)
-        y = int(y)
-        z = int(z)
-
-        self.set_hi_x = x
-        self.set_hi_y = y
-        self.set_hi_z = z
+        self.set_hi_x = int(x)
+        self.set_hi_y = int(y)
+        self.set_hi_z = int(z)
 
         return self
 
     def set_set_lo(self, x: int = 0, y: int = 0, z: int = 0):
         """
-        Sets lo_x, y, z
+        Sets lo_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        x = int(x)
-        y = int(y)
-        z = int(z)
-
-        self.set_lo_x = x
-        self.set_lo_y = y
-        self.set_lo_z = z
+        self.set_lo_x = int(x)
+        self.set_lo_y = int(y)
+        self.set_lo_z = int(z)
 
         return self
 
     def set_proximity(self, x: float = 0, y: float = 0, z: float = 0):
         """
-        Sets proximity_x, y, z
+        Sets proximity_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, float)
+        mu.check_type(y, float)
+        mu.check_type(z, float)
 
-        x = float(x)
-        y = float(y)
-        z = float(z)
-
-        self.proximity_x = x
-        self.proximity_y = y
-        self.proximity_z = z
+        self.proximity_x = int(x)
+        self.proximity_y = int(y)
+        self.proximity_z = int(z)
 
         return self
 
     def set_proximity_mode(self, x: int = 0, y: int = 0, z: int = 0):
         """
-        Sets proximity_mode_x, y, z
+        Sets proximity_mode_x, y, z.
 
         Parameters:
             x (int: 0)
             y (int: 0)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        x = int(x)
-        y = int(y)
-        z = int(z)
-
-        self.proximity_mode_x = x
-        self.proximity_mode_y = y
-        self.proximity_mode_z = z
+        self.proximity_mode_x = int(x)
+        self.proximity_mode_y = int(y)
+        self.proximity_mode_z = int(z)
 
         return self
 
     def set_segments(self, x: int = 20, y: int = 12, z: int = 0):
         """
-        Sets segments_x, y, z
+        Sets segments_x, y, z.
 
         Parameters:
             x (int: 20)
             y (int: 12)
             z (int: 0)
 
-        Returns: self
+        Returns:
+            self
 
-        Raises: TypeError
+        Raises:
+            TypeError
         """
+        # Error checking
+        mu.check_type(x, int)
+        mu.check_type(y, int)
+        mu.check_type(z, int)
 
-        x = int(x)
-        y = int(y)
-        z = int(z)
-
-        self.segments_x = x
-        self.segments_y = y
-        self.segments_z = z
+        self.segments_x = int(x)
+        self.segments_y = int(y)
+        self.segments_z = int(z)
 
         return self
 
     # endregion
-

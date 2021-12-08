@@ -1,5 +1,5 @@
 .. include:: .special.rst
-Example 1
+Example 2
 =========
 
 First, import from required libraries
@@ -42,65 +42,45 @@ In order to use this template, we need to get the csv file created from saving o
 and place it in the same directory as our script. Lets name it :filename:`"Example_2_Template.csv"`.
 
 Now, in order for us to change the :variable:`length` of our rods, we need to know which row in
-:filename:`"Example_2_Template.csv"` is which rod. The easiest way to identify them
-is know how they are the same, and know how they are different.
+:filename:`"Example_2_Template.csv"` is which rod.
 
-Below is a condensed version of the node file template.
+When we create a glyph in antz and save it, two files are created, a node and a tag file.
+Before we save our glyph we can add tags to individual pieces that we care about.
 
-+-----+----+------+----------------+------------------+-----------------+
-| Row | ID | topo | :red:`color_r` | :green:`color_g` | :blue:`color_b` |
-+=====+====+======+================+==================+=================+
-| 0   | 38 | 5    | 50             | 101              | 101             |
-+-----+----+------+----------------+------------------+-----------------+
-| 1   | 39 | 6    | 50             | 101              | 101             |
-+-----+----+------+----------------+------------------+-----------------+
-| 2   | 40 | 6    | 255            | 0                | 0               |
-+-----+----+------+----------------+------------------+-----------------+
-| 3   | 41 | 6    | 0              | 0                | 255             |
-+-----+----+------+----------------+------------------+-----------------+
-| 4   | 42 | 6    | 255            | 255              | 0               |
-+-----+----+------+----------------+------------------+-----------------+
-| 5   | 43 | 6    | 0              | 255              | 0               |
-+-----+----+------+----------------+------------------+-----------------+
+After labeling pieces and saving the glyph, in the same script or a separate one, we can call a function
+that will tell us the index numbers of each node.
 
-In this case, they are all rods and know they are all
-different colors. So lets look in file and search under the column :variable:`"topo"` and
-notice that all of numbers are 6 except 1. We know that our template is made of all rods
-except for one piece so we can assume a :variable:`topo` of 6 means rod,
-if we didn't know that already.
+Finding indexes::
 
-Next we can look for the columns :red:`color_r`, :green:`color_g`, and :blue:`color_b`.
-We can see that the rows 2 - 5 are the rows that are colored differently. Lets write this down.
+    from matritools import utils as mu
 
-+---+------------------+
-| 2 | :red:`red`       |
-+---+------------------+
-| 3 | :green:`green`   |
-+---+------------------+
-| 4 | :yellow:`yellow` |
-+---+------------------+
-| 5 | :blue:`blue`     |
-+---+------------------+
+    mu.get_node_indexes('Example_2_Template.csv', 'Example_2_Template_tag.csv')
 
-We can even save references to individual NodeFileRow's in our code.
+    # output:
+    # 0 : root
+    # 1 : record id: 21
+    # 2 : weight rod
+    # 3 : height_rod
+    # 4 : bank_rod
+    # 5 : age_rod
+
+
+Knowing the indexes, we can save references to individual Node's in our code.
 
 Define key nodes from your glyph::
 
-    root = glyph.node_file_rows[0]
-    weight_rod = glyph.node_file_rows[2]
-    height_rod = glyph.node_file_rows[3]
-    bank_rod = glyph.node_file_rows[4]
-    age_rod = glyph.node_file_rows[5]
+    root = glyph.nodes[0]
+    weight_rod = glyph.nodes[2]
+    height_rod = glyph.nodes[3]
+    bank_rod = glyph.nodes[4]
+    age_rod = glyph.nodes[5]
 
-Now that we are familiar with our node file. Lets establish our :variable:`AntzGlyph` object,
+Now that we are familiar with our node file. Lets establish our :variable:`Glyph` object,
 make some scalars and define how far apart we want to space our glyphs.
 
-Set up :variable:`AntzGlyph`, scalars and unit distance::
+Set up :variable:`Glyph`, scalars and unit distance::
 
-    glyph = nf.AntzGlyph("Example_2_Glyph_Template.csv")
-
-    # some times when saving the template in Antz, by default all rows are selected. Call this unselect them all
-    glyph.unselect_all()
+    glyph = nf.Glyph("Example_2_Glyph_Template.csv")
 
     # make a reusable function that scales a value originally between the min and max height to be within 0.1, 1.
     # this is used to change all of the values of height to be within 0.1, 1 but keep the same relative distance between
@@ -118,7 +98,7 @@ Modify the glyph::
 
     for index, row in df.iterrows():
 
-        # set the tag and tag mode of the root node row
+        # set the tag and tag mode of the root node
         root.set_tag(row["Name"], 1)
 
         # set x position
@@ -137,12 +117,12 @@ Modify the glyph::
         age_rod.scale_z = age_scalar(row['Age'])
 
         # set the tag and tag mode to display the un-interpolated value
-        weight_rod.set_tag(row['Weight'], 8)
-        height_rod.set_tag(row['Height'], 8)
-        bank_rod.set_tag(row['Bank Balance'], 8)
-        age_rod.set_tag(row['Age'], 8)
+        weight_rod.set_tag('Weight: ' + (row['Weight']), 8)
+        height_rod.set_tag('Height: ' + str(row['Height']), 8)
+        bank_rod.set_tag('Balance: ' + str(row['Bank Balance']), 8)
+        age_rod.set_tag('Age: ' + str(row['Age']), 8)
 
-        # add all NodeFileRows of glyph to the NodeFile and increment all of the IDs of the glyph
+        # add all Nodes of glyph to the NodeFile and increment all of the IDs of the glyph
         ntf.add_glyph(glyph)
 
     # create csv file to use in Antz
@@ -165,10 +145,7 @@ Final Code::
 
     ntf = nf.NodeFile("Example 2")
 
-    glyph = nf.AntzGlyph("Example_2_Glyph_Template.csv")
-
-    # some times when saving the template in Antz, by default all rows are selected. Call this unselect them all
-    glyph.unselect_all()
+    glyph = nf.Glyph("Example_2_Glyph_Template.csv")
 
     # make a reusable function that scales a value originally between the min and max height to be within 0.1, 1.
     # this is used to change all of the values of height to be within 0.1, 1 but keep the same relative distance between
@@ -182,15 +159,15 @@ Final Code::
     unit_distance = 20
 
     # define key nodes from your glyph
-    root = glyph.node_file_rows[0]
-    weight_rod = glyph.node_file_rows[2]
-    height_rod = glyph.node_file_rows[3]
-    bank_rod = glyph.node_file_rows[4]
-    age_rod = glyph.node_file_rows[5]
+    root = glyph.nodes[0]
+    weight_rod = glyph.nodes[2]
+    height_rod = glyph.nodes[3]
+    bank_rod = glyph.nodes[4]
+    age_rod = glyph.nodes[5]
 
     for index, row in df.iterrows():
 
-        # set the tag and tag mode of the root node row
+        # set the tag and tag mode of the root node
         root.set_tag(row["Name"], 1)
 
         # set x position
@@ -209,12 +186,12 @@ Final Code::
         age_rod.scale_z = age_scalar(row['Age'])
 
         # set the tag and tag mode to display the un-interpolated value
-        weight_rod.set_tag(row['Weight'], 8)
-        height_rod.set_tag(row['Height'], 8)
-        bank_rod.set_tag(row['Bank Balance'], 8)
-        age_rod.set_tag(row['Age'], 8)
+        weight_rod.set_tag('Weight: ' + (row['Weight']), 8)
+        height_rod.set_tag('Height: ' + str(row['Height']), 8)
+        bank_rod.set_tag('Balance: ' + str(row['Bank Balance']), 8)
+        age_rod.set_tag('Age: ' + str(row['Age']), 8)
 
-        # add all NodeFileRows of glyph to the NodeFile and increment all of the IDs of the glyph
+        # add all Nodes of glyph to the NodeFile and increment all of the IDs of the glyph
         ntf.add_glyph(glyph)
 
     # create csv file to use in Antz

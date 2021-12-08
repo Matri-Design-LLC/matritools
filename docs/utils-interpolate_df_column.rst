@@ -26,7 +26,8 @@ Parameters:
 | default_value | new maximum value                    | float            | None           |
 +---------------+--------------------------------------+------------------+----------------+
 
-Returns: pandas.DataFrame
+Returns:
+    pandas.DataFrame
 
 Example::
 

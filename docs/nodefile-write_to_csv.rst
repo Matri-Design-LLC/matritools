@@ -2,21 +2,24 @@
 ===========================
 write_to_csv
 ------------
-Writes all the parameters of each NodeFileRow into a node csv file as well as
+Writes all the parameters of each Node into a node csv file as well as
 creates a corresponding tag file.
 
-Parameters: None
+Parameters:
+    None
 
-Returns: None
+Returns:
+    self
 
-Raises: RuntimeError
+Raises:
+    RuntimeError
 
 Example::
 
     from matritools import nodefile as nf
 
     # create a glyph
-    my_glyph = nf.AntzGlyph("example.csv")
+    my_glyph = nf.Glyph("example.csv")
 
     # create a node file
     my_node_file = nf.NodeFile("My Node File")

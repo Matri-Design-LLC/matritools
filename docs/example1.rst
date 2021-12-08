@@ -55,9 +55,16 @@ Creating Nodes::
 
         name = row["Name"]
 
+        # label your nodes with tags
+        tag_text = 'Name: ' + name + \
+                        ', H: ' + str(row['Height']) + \
+                        ', W: ' + str(row['Weight']) + \
+                        ', A: ' + str(row['Age']) + \
+                        ', B: ' + str(row['Bank Balance'])
+
         # creates a new NodeFileRow and adds it to the NodeFile's node_file_rows
         # and sets its tag and tag mode
-        node = ntf.create_node_row(name, 1)
+        node = ntf.create_node(None, tag_text, 1)
 
         # sets the color of a NodeFileRow
         node.set_color_by_name(name_color_legend[name])
@@ -65,7 +72,7 @@ Creating Nodes::
         # change the geometry of this node to be a sphere
         node.geometry = node.geos['sphere']
 
-        # establish an x, y, and z coorinate based on scaled values of this person's height, weight, and age
+        # establish an x, y, and z coordinate based on scaled values of this person's height, weight, and age
         x_coordinate = (row["Age"])
         y_coordinate = (row["Bank Balance"])
         z_coordinate = (row['Height'])
@@ -73,7 +80,7 @@ Creating Nodes::
         # set position of this node in 3D space
         node.set_translate(x_coordinate, y_coordinate, z_coordinate)
 
-        # set the x, y, and z scale of the node uniformally
+        # set the x, y, and z scale of the node uniformly
         node.set_u_scale((row['Weight']))
 
     # create csv file to use in Antz
@@ -136,9 +143,16 @@ Final Code::
 
         name = row["Name"]
 
+        # label your nodes with tags
+        tag_text = 'Name: ' + name + \
+                        ', H: ' + str(row['Height']) + \
+                        ', W: ' + str(row['Weight']) + \
+                        ', A: ' + str(row['Age']) + \
+                        ', B: ' + str(row['Bank Balance'])
+
         # creates a new NodeFileRow and adds it to the NodeFile's node_file_rows
         # and sets its tag and tag mode
-        node = ntf.create_node_row(name, 1)
+        node = ntf.create_node(None, tag_text, 1)
 
         # sets the color of a NodeFileRow
         node.set_color_by_name(name_color_legend[name])

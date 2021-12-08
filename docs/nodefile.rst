@@ -1,5 +1,7 @@
 NodeFile
 ========
+Base Class:
+    `NodeContainer <nodecontainer.html>`_
 Virtual representation of an ANTZ node csv
 
 Used to construct a virtual antz node file.
@@ -20,12 +22,5 @@ Advanced usage:
 
    Constructor <nodefile-constructor>
    Attributes <nodefile-attributes>
-   length <nodefile-length>
-   get_last_row <nodefile-get_last_row>
-   get_next_id <nodefile-get_next_id>
-   get_row_by_id <nodefile-get_row_by_id>
-   make_link <nodefile-make_link>
    write_to_csv <nodefile-write_to_csv>
-   create_node_row <nodefile-create_node_row>
    add_glyph <nodefile-add_glyph>
-   to_dataframe <nodefile-to_dataframe>

@@ -1,6 +1,6 @@
 `utils <utils.html>`_
 =====================
-make_interpolator
+make_df_column_interpolator
 -----------------
 Creates a reusable interpolation function to scale a value in between a new min and new max.
 

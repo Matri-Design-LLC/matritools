@@ -12,7 +12,8 @@ Parameters:
 | column_series | target series from a data frame column         | pandas.Series    | None           |
 +---------------+------------------------------------------------+------------------+----------------+
 
-Returns: Dict[any, str]
+Returns:
+    Dict[any, str]
 
 Example::
 

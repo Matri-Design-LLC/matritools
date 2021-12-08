@@ -14,7 +14,8 @@ Parameters:
 | indent_level | used for recursion for formatting the string in the case of nested dicts | int  | 0       |
 +--------------+--------------------------------------------------------------------------+------+---------+
 
-Returns: str
+Returns:
+    str
 
 Example::
 

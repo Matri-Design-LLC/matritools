@@ -1,5 +1,6 @@
 .. include:: .special.rst
-Example 1
+Example 3
+
 =========
 
 First, import from required libraries
@@ -51,69 +52,46 @@ In order to use this template, we need to get the csv file created from saving o
 and place it in the same directory as our script. Lets name it :filename:`"Example_3_Template.csv"`.
 
 Now, in order for us to modify our :variable:`glyph`, we need to know which row in
-:filename:`"Example_3_Template.csv"` is which part of the glyph. The easiest way to identify them
-is know how they are the same, and know how they are different.
+:filename:`"Example_3_Template.csv"` is which part of the glyph.
 
-Below is a condensed version of the node file template.
+When we create a glyph in antz and save it, two files are created, a node and a tag file.
+Before we save our glyph we can add tags to individual pieces that we care about.
 
-+-----+----+------+----------------+------------------+-----------------+
-| Row | ID | topo | :red:`color_r` | :green:`color_g` | :blue:`color_b` |
-+=====+====+======+================+==================+=================+
-| 0   | 38 | 5    | 50             | 101              | 101             |
-+-----+----+------+----------------+------------------+-----------------+
-| 1   | 39 | 3    | 50             | 101              | 101             |
-+-----+----+------+----------------+------------------+-----------------+
-| 2   | 40 | 13   | 0              | 255              | 255             |
-+-----+----+------+----------------+------------------+-----------------+
-| 3   | 41 | 13   | 152            | 0                | 255             |
-+-----+----+------+----------------+------------------+-----------------+
-| 4   | 42 | 4    | 50             | 101              | 101             |
-+-----+----+------+----------------+------------------+-----------------+
+After labeling pieces and saving the glyph, in the same script or a separate one, we can call a function
+that will tell us the index numbers of each node.
 
-In this case, we have 2 rods that are different colors, 1 cylinder, 1 toroid and 1 pin.
-So lets look in file and search under the column :variable:`"topo"` and
-notice that we have 2 number 13s. If we didn't know 13 was rod, we can deduce it here.
+Finding indexes::
 
-Another way to identify parts is to look up topo and geometry IDs
-`here <https://matritools.readthedocs.io/en/latest/nodefilerow-attributes.html>`_
+    from matritools import utils as mu
 
-You could also load your template into a fresh instance of Antz and click on various objects to get its
-ID, but this can prove to be unreliable, so its good to know other ways.
+    mu.get_node_indexes('Example_2_Template.csv', 'Example_2_Template_tag.csv')
 
-We can save references to individual NodeFileRow's in our code.
+    # output:
+    # 0 : root
+    # 1 : record id: 21
+    # 2 : cat_rod
+    # 3 : dog_rod
+    # 4 : height weight age cylinder
+
+
+Knowing the indexes, we can save references to individual Node's in our code.
 
 Define key nodes from your glyph and modify properties that will remain constant::
 
-    root = glyph.node_file_rows[0]
-    cat_rod = glyph.node_file_rows[2]
-    dog_rod = glyph.node_file_rows[3]
-    height_weight_age_cylinder = glyph.node_file_rows[4]
+    root = glyph.nodes[0]
+    cat_rod = glyph.nodes[2]
+    dog_rod = glyph.nodes[3]
+    height_weight_age_cylinder = glyph.nodes[4]
 
     # set properties of glyph that will remain constant
-
-    # if a NodeFileRow's color_r, color_g, color_b all are set to 0
-    # its color is determined by its palette_id, and its color_id
-
-    # a NodeFileRow's color_id maps to a color relative to its palette_id
-    # for exampe, palette_id 0 maps color_id 1 to lime green, 2 to red, and 3 to blue
-    # while palette_id 6 maps 1 - 127 to be colors on a spectrum from green to red
-    # a spectrum is useful for displaying values in a range by color
-    height_weight_age_cylinder.color_r = 0
-    height_weight_age_cylinder.color_g = 0
-    height_weight_age_cylinder.color_b = 0
-    height_weight_age_cylinder.color_a = 255
-    height_weight_age_cylinder.palette_id = 6
     root.set_u_scale(4)
 
-Now that we are familiar with our node file. Lets establish our :variable:`AntzGlyph` object,
+Now that we are familiar with our node file. Lets establish our :variable:`Glyph` object,
 make some scalars and define how far apart we want to space our glyphs.
 
-Set up :variable:`AntzGlyph`, scalars and unit distance::
+Set up :variable:`Glyph`, scalars and unit distance::
 
-    glyph = nf.AntzGlyph("Example_3_Glyph_Template.csv")
-
-    # some times when saving the template in Antz, by default all rows are selected. Call this unselect them all
-    glyph.unselect_all()
+    glyph = nf.Glyph("Example_3_Glyph_Template.csv")
 
     # make a reusable function that scales a value originally between the min and max height to be within 0.1, 1.
     # this is used to change all of the values of height to be within 0.1, 1 but keep the same relative distance between
@@ -126,20 +104,17 @@ Set up :variable:`AntzGlyph`, scalars and unit distance::
     unit_distance = 50
     cat_dog_ring_distance = 50
 
-    # used to hold temporary NodeFileRows
-    temp_rows = []
-
 Now, lets set up our grids::
 
     # build male grid
 
-    # create_node_row() returns an instance of a NodeFileRow and adds it to the NodeFile
-    male_grid = ntf.create_node_row()
-    male_grid.geometry = nf.NodeFileRow.geos["plane"]
+    # create_node() returns an instance of a Node and adds it to the NodeFile
+    male_grid = ntf.create_node(None, 'Male Grid')
+    male_grid.geometry = nf.geos["plane"]
 
-    # when adding NodeFileRows manually to a NodeFile, we must manage the ID's
+    # when adding Nodes manually to a NodeFile, we must manage the ID's
     # to avoid having duplicate ID's in our NodeFile
-    male_grid.set_id(ntf.get_last_row().id + 1)
+    male_grid.set_id(ntf.get_last_node().id + 1)
     male_grid.set_color_by_name("blue")
     male_grid.set_translate(-75)
     male_grid.set_scale(0.25, 0.25, 0.25)
@@ -149,27 +124,16 @@ Now, lets set up our grids::
 
     # build female grid
 
-    # create a deep copy of male_grid and modify it accordingly
-    female_grid = copy.deepcopy(male_grid)
-    female_grid.set_id((ntf.get_last_row().id + 1))
+    female_grid = ntf.create_node(template=male_grid)
     female_grid.set_color_by_name('hot pink')
     female_grid.set_translate(75)
-
-    # since we created female_grid from a copy, we have to add it to the NodeFile
-    ntf.node_file_rows.append(female_grid)
-
-Because we added NodeFileRows manually, we need to ensure that our glyph doesn't share any ID's
-with the NodeFile. One way to do this is to call the glyphs method make_ids_consecutive and feed it
-the last ID of the NodeFile + 1::
-
-    glyph.make_ids_consecutive(ntf.get_last_row().id + 1)
 
 Instead of modifying everything inside of the main loop, lets write functions to organize our work.::
 
     # declare helper functions for organization
 
     def modify_root(index, row):
-        # set the tag and tag mode of the root node row
+        # set the tag and tag mode of the root Node
         root.set_tag(row["Name"], 1)
 
         # set x position
@@ -184,8 +148,17 @@ Instead of modifying everything inside of the main loop, lets write functions to
         z = height_cylinder_z_scalar(row['Height'])
         height_weight_age_cylinder.set_scale(x, y, z)
 
+
+        # if a Node's color_r, color_g, color_b all are set to 0
+        # its color is determined by its palette_id, and its color_id
+
+        # a Node's color_id maps to a color relative to its palette_id
+        # for exampe, palette_id 0 maps color_id 1 to lime green, 2 to red, and 3 to blue
+        # while palette_id 6 maps 1 - 127 to be colors on a spectrum from green to red
+
+
         # set the color_id to display a color on a spectrum relative to its palette_id
-        height_weight_age_cylinder.color_id = age_cylinder_color_scalar(row['Age'])
+        height_weight_age_cylinder.set_color_by_id(age_cylinder_color_scalar(row['Age'], 6)
 
         # set the tag and tag mode to display the un-interpolated value
         height_weight_age_cylinder.set_tag('Weight: ' + str(row['Weight']) +
@@ -203,26 +176,14 @@ Instead of modifying everything inside of the main loop, lets write functions to
         # create a ring for each cat or dog color in the list
         for i in range(len(colors)):
 
-            # by default, NodeFileRows are toroids
-            ring = nf.NodeFileRow()
+            # by default, Nodes are toroids
+            ring = glyph.create_temp_node(rod, data_value)
 
             # set position of ring on rod
             ring.translate_x = i * cat_dog_ring_distance
 
-            # manage duplicate_ids
-            ring.set_id(glyph.get_last_row().id + 1)
-
             # set color of toroid based on color value
             ring.set_color_by_name(colors[i])
-
-            # parent new ring to the rod
-            ring.parent_id = rod.id
-
-            # add ring to glyph template
-            glyph.node_file_rows.append(ring)
-
-            # add ring to temp_rows to be removed later
-            temp_rows.append(ring)
 
 Finally, lets iterate through the data and call our functions each iteration and be sure to clean up any
 unwanted changes to our glyph.
@@ -237,15 +198,8 @@ Modify the glyph::
         modify_rod(cat_rod, row['CatColors'])
         modify_rod(dog_rod, row['DogColors'])
 
-        # add copies of all NodeFileRows from glyph to NodeFile
+        # add copies of all Nodes from glyph to NodeFile
         ntf.add_glyph(glyph)
-
-        # all changes, such as adding rings, made to the glyph remain and can effect the logic of next iteration of the loop
-        # after adding the glyph's NodeFileRows to the NodeFile, it may be necessary to do some clean up such as
-        # removing the rings we added.
-        for node_row in temp_rows:
-            glyph.node_file_rows.remove(node_row)
-        temp_rows.clear()
 
     # create csv file to use in Antz
     ntf.write_to_csv()
@@ -270,10 +224,7 @@ Final Code::
 
     ntf = nf.NodeFile("Example 3")
 
-    glyph = nf.AntzGlyph("Example_3_Glyph_Template.csv")
-
-    # some times when saving the template in Antz, by default all rows are selected. Call this unselect them all
-    glyph.unselect_all()
+    glyph = nf.Glyph("Example_3_Glyph_Template.csv")
 
     # make a reusable function that scales a value originally between the min and max height to be within 0.1, 1.
     # this is used to change all of the values of height to be within 0.1, 1 but keep the same relative distance between
@@ -286,18 +237,11 @@ Final Code::
     unit_distance = 50
     cat_dog_ring_distance = 50
 
-    # used to hold temporary NodeFileRows
-    temp_rows = []
-
     # build male grid
 
-    # create_node_row() returns an instance of a NodeFileRow and adds it to the NodeFile
-    male_grid = ntf.create_node_row()
-    male_grid.geometry = nf.NodeFileRow.geos["plane"]
-
-    # when adding NodeFileRows manually to a NodeFile, we must manage the ID's
-    # to avoid having duplicate ID's in our NodeFile
-    male_grid.set_id(ntf.get_last_row().id + 1)
+    # create_node() returns an instance of a Node and adds it to the NodeFile
+    male_grid = ntf.create_node()
+    male_grid.geometry = nf.geos["plane"]
     male_grid.set_color_by_name("blue")
     male_grid.set_translate(-75)
     male_grid.set_scale(0.25, 0.25, 0.25)
@@ -307,45 +251,23 @@ Final Code::
 
     # build female grid
 
-    # create a deep copy of male_grid and modify it accordingly
-    female_grid = copy.deepcopy(male_grid)
-    female_grid.set_id((ntf.get_last_row().id + 1))
+    female_grid = ntf.create_node(template=male_grid)
     female_grid.set_color_by_name('hot pink')
     female_grid.set_translate(75)
 
-    # since we created female_grid from a copy, we have to add it to the NodeFile
-    ntf.node_file_rows.append(female_grid)
-
-    # because we added NodeFileRows manually, we need to ensure that our glyph doesn't share any ID's with the NodeFile
-    # One way to do this is to call the glyphs method make_ids_consecutive and feed it the last ID of the NodeFile + 1
-    glyph.make_ids_consecutive(ntf.get_last_row().id + 1)
-
     # define key nodes from your glyph
-    root = glyph.node_file_rows[0]
-    cat_rod = glyph.node_file_rows[2]
-    dog_rod = glyph.node_file_rows[3]
-    height_weight_age_cylinder = glyph.node_file_rows[4]
+    root = glyph.nodes[0]
+    cat_rod = glyph.nodes[2]
+    dog_rod = glyph.nodes[3]
+    height_weight_age_cylinder = glyph.nodes[4]
 
     # set properties of glyph that will remain constant
-
-    # if a NodeFileRow's color_r, color_g, color_b all are set to 0
-    # its color is determined by its palette_id, and its color_id
-
-    # a NodeFileRow's color_id maps to a color relative to its palette_id
-    # for exampe, palette_id 0 maps color_id 1 to lime green, 2 to red, and 3 to blue
-    # while palette_id 6 maps 1 - 127 to be colors on a spectrum from green to red
-    # a spectrum is useful for displaying values in a range by color
-    height_weight_age_cylinder.color_r = 0
-    height_weight_age_cylinder.color_g = 0
-    height_weight_age_cylinder.color_b = 0
-    height_weight_age_cylinder.color_a = 255
-    height_weight_age_cylinder.palette_id = 6
     root.set_u_scale(4)
 
     # declare helper functions for organization
 
     def modify_root(index, row):
-        # set the tag and tag mode of the root node row
+        # set the tag and tag mode of the root Node
         root.set_tag(row["Name"], 1)
 
         # set x position
@@ -360,8 +282,16 @@ Final Code::
         z = height_cylinder_z_scalar(row['Height'])
         height_weight_age_cylinder.set_scale(x, y, z)
 
+        # if a Node's color_r, color_g, color_b all are set to 0
+        # its color is determined by its palette_id, and its color_id
+
+        # a Node's color_id maps to a color relative to its palette_id
+        # for exampe, palette_id 0 maps color_id 1 to lime green, 2 to red, and 3 to blue
+        # while palette_id 6 maps 1 - 127 to be colors on a spectrum from green to red
+
+
         # set the color_id to display a color on a spectrum relative to its palette_id
-        height_weight_age_cylinder.color_id = age_cylinder_color_scalar(row['Age'])
+        height_weight_age_cylinder.set_color_by_id(age_cylinder_color_scalar(row['Age'], 6)
 
         # set the tag and tag mode to display the un-interpolated value
         height_weight_age_cylinder.set_tag('Weight: ' + str(row['Weight']) +
@@ -379,26 +309,14 @@ Final Code::
         # create a ring for each cat or dog color in the list
         for i in range(len(colors)):
 
-            # by default, NodeFileRows are toroids
-            ring = nf.NodeFileRow()
+            # by default, Nodes are toroids
+            ring = glyph.create_temp_node(rod, data_value)
 
             # set position of ring on rod
             ring.translate_x = i * cat_dog_ring_distance
 
-            # manage duplicate_ids
-            ring.set_id(glyph.get_last_row().id + 1)
-
             # set color of toroid based on color value
             ring.set_color_by_name(colors[i])
-
-            # parent new ring to the rod
-            ring.parent_id = rod.id
-
-            # add ring to glyph template
-            glyph.node_file_rows.append(ring)
-
-            # add ring to temp_rows to be removed later
-            temp_rows.append(ring)
 
     for index, row in df.iterrows():
 
@@ -408,15 +326,8 @@ Final Code::
         modify_rod(cat_rod, row['CatColors'])
         modify_rod(dog_rod, row['DogColors'])
 
-        # add copies of all NodeFileRows from glyph to NodeFile
+        # add copies of all Nodes from glyph to NodeFile
         ntf.add_glyph(glyph)
-
-        # all changes, such as adding rings, made to the glyph remain and can effect the logic of next iteration of the loop
-        # after adding the glyph's NodeFileRows to the NodeFile, it may be necessary to do some clean up such as
-        # removing the rings we added.
-        for node_row in temp_rows:
-            glyph.node_file_rows.remove(node_row)
-        temp_rows.clear()
 
     # create csv file to use in Antz
     ntf.write_to_csv()

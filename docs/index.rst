@@ -22,7 +22,8 @@ as well as commonly used data manipulation functions used by Matri Design LLC.
    :maxdepth: 2
 
    Getting Started <gettingstarted>
-   Nodefile <nodefile>
+   NodeFileGlobals <nodefileglobals>
+   NodeFile <nodefile>
    AntzGlyph <antzglyph>
    NodeFileRow <nodefilerow>
    utils

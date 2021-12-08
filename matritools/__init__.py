@@ -1,4 +1,4 @@
-from .nodefile import NodeFile, AntzGlyph, NodeFileRow
+from .nodefile import NodeFile, Glyph, Node
 from .dataexploration import explore_df, print_df_column_set
 from .utils import create_df_from_json, \
     create_df_from_json_string, \

@@ -12,7 +12,8 @@ Parameters:
 | json_file_name | string name of json file (including ".json" | str  | None    |
 +----------------+---------------------------------------------+------+---------+
 
-Returns: pandas.DataFrame
+Returns:
+    pandas.DataFrame
 
 Example::
 

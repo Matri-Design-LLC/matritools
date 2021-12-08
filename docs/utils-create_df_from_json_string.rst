@@ -12,7 +12,8 @@ Parameters:
 | json_string    | json formatted string | str  | None    |
 +----------------+-----------------------+------+---------+
 
-Returns: pandas.DataFrame
+Returns:
+    pandas.DataFrame
 
 Example::
 

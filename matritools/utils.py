@@ -2,6 +2,18 @@ import pandas as pd
 from matritools import nodefile as nf
 from ast import literal_eval
 import json
+import inspect
+import re
+
+HEADER = '\033[95m'
+OKBLUE = '\033[94m'
+OKCYAN = '\033[96m'
+OKGREEN = '\033[92m'
+WARNING = '\033[93m'
+FAIL = '\033[91m'
+ENDC = '\033[0m'
+BOLD = '\033[1m'
+UNDERLINE = '\033[4m'
 
 def create_df_from_json(json_file_name: str):
     """
@@ -10,8 +22,11 @@ def create_df_from_json(json_file_name: str):
     Parameters:
         json_file_name (str: None) - file name of .json file
 
-    Returns: DataFrame
+    Returns:
+        DataFrame
 
+    Raises:
+        FileNotFoundError
     """
     with open(json_file_name) as json_data:
         return pd.DataFrame(json.load(json_data))
@@ -23,12 +38,19 @@ def create_df_from_json_string(json_string):
     Parameters:
         json_string (str: None) - string in json format
 
-    Returns: Dataframe
-
+    Returns:
+        Dataframe
     """
     return pd.DataFrame(json.load(json_string))
 
-def interpolate_df_column(df, column: str, new_min: float, new_max: float, column_tail: str = "_interpolated", handle_error: bool = False, default_value: float = None):
+def interpolate_df_column(df,
+                          column: str,
+                          new_min: float,
+                          new_max: float,
+                          column_tail: str = "_interpolated",
+                          clamp_value: bool = False,
+                          handle_error: bool = False,
+                          default_value: float = None):
     """
     Scales the values of a data frame column between obj_scale_min and obj_scale_max.
     Adds the interpolated data into a new column labeled (original column name) + (column_tail) and preserves original
@@ -39,20 +61,35 @@ def interpolate_df_column(df, column: str, new_min: float, new_max: float, colum
         column (str: None) - string column to be interpolated
         obj_scale_min (float: None) - new minimum value
         obj_scale_max (float: None) -  new maximum value
+        handle_out_of_range (bool: False) - if value passed is outside of range the scalar function was built with,
+                                            the value will be clamped to fit between the min and max values
         column_tail (str: "_interpolated") - string to be appended to column name
-        handle_error (bool: False) - if value passed in isn't a number, should the function return default_value instead of raising error?
+        handle_error (bool: False) - if value passed in isn't a number,
+                                     should the function return default_value instead of raising error?
         default_value (float: None) - value that gets returned if non number is passed and handle_error == True
 
-    Returns: None
+    Returns:
+        None
     """
     col_min = df[column].min()
     col_max = df[column].max()
     col_list = df[column].tolist()
-    scalar = make_interpolator(col_min + .0002, col_max, float(new_min), float(new_max), handle_error, default_value)
+    scalar = make_interpolator(col_min + .0002, col_max,
+                               float(new_min),
+                               float(new_max),
+                               clamp_value,
+                               handle_error,
+                               default_value)
     col_interp = [scalar(x) for x in col_list]
     df[(str(column) + str(column_tail))] = col_interp
 
-def make_interpolator(old_min: float, old_max: float, new_min: float, new_max: float, handle_error: bool = False, default_value: float = None):
+def make_interpolator(old_min: float,
+                      old_max: float,
+                      new_min: float,
+                      new_max: float,
+                      clamp_value: bool = False,
+                      handle_error: bool = False,
+                      default_value: float = None):
     """
     Creates a reusable interpolation function to scale a value in between a new min and new max.
 
@@ -61,7 +98,10 @@ def make_interpolator(old_min: float, old_max: float, new_min: float, new_max: f
         old_max (float: None) - old maximum value
         new_min (float: None) - new minimum value
         new_max (float: None) - new maximum value
-        handle_error (bool: False) - if value passed in isn't a number, should the function return default_value instead of raising error?
+        handle_out_of_range (bool: False) - if value passed is outside of range the scalar function was built with,
+                                            the value will be clamped to fit between the min and max values
+        handle_error (bool: False) - if value passed in isn't a number,
+                                     should the function return default_value instead of raising error?
         default_value (float: None) - value that gets returned if non number is passed and handle_error == True
 
     Returns: interpolation function
@@ -70,7 +110,8 @@ def make_interpolator(old_min: float, old_max: float, new_min: float, new_max: f
         Paramaters:
             value (float: None) - value to be interpolated
 
-        Returns: float
+        Returns:
+            float
     """
 
     # Figure out how 'wide' each range is
@@ -91,7 +132,8 @@ def make_interpolator(old_min: float, old_max: float, new_min: float, new_max: f
         Paramaters:
             value (float: None) - value to be interpolated
 
-        Returns: float
+        Returns:
+            float
         """
         result = value
         if handle_error:
@@ -99,11 +141,21 @@ def make_interpolator(old_min: float, old_max: float, new_min: float, new_max: f
                 result = float(value)
             except:
                 return default_value
+        if clamp_value:
+            if result > old_max:
+                result = old_max
+            elif result < old_min:
+                result = old_min
         return new_min + (result - old_min) * scale_factor
 
     return interp_fn
 
-def make_df_column_interpolator(column_series, new_min: float, new_max: float, handle_error: bool = False, default_value: float = None):
+def make_df_column_interpolator(column_series,
+                                new_min: float,
+                                new_max: float,
+                                clamp_value: bool = False,
+                                handle_error: bool = False,
+                                default_value: float = None):
     """
         Creates a reusable interpolation function to scale a value in between a new min and new max.
 
@@ -111,7 +163,10 @@ def make_df_column_interpolator(column_series, new_min: float, new_max: float, h
             column_series (Series: None) - column_series that you want to derive old_min and old_max from
             new_min (float: None) - new minimum value
             new_max (float: None) - new maximum value
-            handle_error (bool: False) - if value passed in isn't a number, should the function return default_value instead of raising error?
+            handle_out_of_range (bool: False) - if value passed is outside of range the scalar function was built with,
+                                            the value will be clamped to fit between the min and max values
+            handle_error (bool: False) - if value passed in isn't a number,
+            should the function return default_value instead of raising error?
             default_value (float: None) - value that gets returned if non number is passed and handle_error == True
 
         Returns: interpolation function
@@ -120,14 +175,22 @@ def make_df_column_interpolator(column_series, new_min: float, new_max: float, h
             Paramaters:
                 value (float: None) - value to be interpolated
 
-            Returns: float
+            Returns:
+                float
     """
-    return make_interpolator(column_series.min(), column_series.max(), new_min, new_max, handle_error, default_value)
+    return make_interpolator(column_series.min(),
+                             column_series.max(),
+                             new_min,
+                             new_max,
+                             clamp_value,
+                             handle_error,
+                             default_value)
 
 def make_default_scalar(returned_value):
     """
     Creates a reusable place holder interpolation function that takes in a value and returns min_value
     (the value the function was built with).
+
     Paramaters:
         min_value: the value that will be returned when calling the returned function
 
@@ -151,6 +214,7 @@ def make_set_scalar(column_series, min_value: float, max_value: float):
     Creates a resabule psudo-interpolation function to scale non numeric values. This function essentially creates a
     dictionary, using each unique value in the column_series and assigns numeric values at equal increments between
     min_value and max_value.
+
     Parameters:
         column_series: (Series : None) column series whos values you want the function to interpolate
         min_value: (float : None) The smallest value you want mapped to the column_series values
@@ -164,7 +228,7 @@ def make_set_scalar(column_series, min_value: float, max_value: float):
                 value: (any: None) A value that belongs to the column_series the function was built with.
 
             Returns:
-                (float) the value that was mapped to value.
+                float
 
             Raises:
                 KeyError
@@ -194,7 +258,8 @@ def separate_compound_dataframe(df,  name_template=""):
         df (DataFrame) - a data frame that has lists of data contained in individual cells
         name_template: individual data frame columns = lambda x: (name_template + "{}").format(x + 1) (default "")
 
-    Returns: list of data frames
+    Returns:
+        list[DataFrame]
 
 
     I.E when a data frame is in the form of :
@@ -226,13 +291,14 @@ def separate_compound_dataframe(df,  name_template=""):
 
 def find_index_in_set(value_set, value):
     """
-    Returns the index of a value in a set as if it were a list
+    Returns the index of a value in a set as if it were a list, -1 if value is not in value_set
 
     Parameters:
         value_set (set: None) - target set
         value (any: None) target value
 
-    Returns: (int) index of value in value_set, returns -1 if value is not in value_set
+    Returns:
+        int
     """
     index = 0
     for i in value_set:
@@ -248,7 +314,8 @@ def set_to_list(value_set):
     Parameters:
         value_set (set: None) target set
 
-    Returns: list
+    Returns:
+        list
     """
     result = []
     for value in value_set:
@@ -263,7 +330,8 @@ def dict_to_multilined_str(dictionary: dict, indent_level = 0):
         dictionary (dict: None) - dict to be converted to string
         indent_level (int: 0) - used for recursion for formatting the string in the case of nested dicts
 
-    Returns: str
+    Returns:
+        str
 
     """
     result = ""
@@ -282,12 +350,13 @@ def create_column_value_color_legend(column_series):
     Parameters:
         column_series (Series: None) - target series from a data frame column
 
-    Returns: Dict[any, str]
+    Returns:
+        Dict[any, str]
 
     """
     color_keys = []
 
-    for color in nf.NodeFileRow.colors.keys():
+    for color in nf.colors.keys():
         color_keys.append(color)
 
     result = {}
@@ -306,6 +375,9 @@ def split_df_by_value(df, column):
     Parametes:
         df (Dataframe: None) - dataframe to be extracted from
         column (str: None) - column name to be extracted from.
+
+    Returns:
+        list[DataFrame]
     """
 
     values = set(df[column].tolist())
@@ -314,3 +386,77 @@ def split_df_by_value(df, column):
         result.append(df.loc[df[column] == value])
 
     return result
+
+def check_type(obj, passed_type, cast: bool = True):
+    """
+    Checks if obj's type matches passed_type and raises a TypeError if not.
+
+    Parameters:
+        obj (any) - variable that's type is being checked
+        passed_type (type) - type that is being checked for
+        cast (bool : True) - should the type check pass if obj can be casted to passed_type?
+
+    Returns:
+        None
+
+    Raises:
+        TypeError
+    """
+    if not isinstance(passed_type, type):
+        raise TypeError("passed_type must be of type <class, 'type'>. Type passed: " + str(type(passed_type)))
+    if not isinstance(cast, bool):
+        raise TypeError("cast must be of type <class, 'bool'>. Type passed: " + str(type(cast)))
+    obj_name = ""
+    for line in inspect.getframeinfo(inspect.currentframe().f_back)[3]:
+        for i in range(len(line)):
+            if line[i] == '(':
+                j = i + 1
+                while(line[j] != ','):
+                    obj_name += line[j]
+                    j+=1
+    #if not isinstance(obj, passed_type):
+    if cast:
+        try:
+            var = passed_type(obj)
+        except Exception:
+            raise TypeError(obj_name + " must be of type '" + str(passed_type) + "'. Type passed: " + str(type(obj)))
+    else:
+        if not isinstance(obj, passed_type):
+            raise TypeError(obj_name + " must be of type '" + str(passed_type) + "'. Type passed: " + str(type(obj)))
+
+def get_node_indexes(node_file: str, tag_file: str):
+    """
+    Prints out the indexes of a glyph templates NodeFileRows with their corresponding template tags
+
+    Parameters:
+        node_file (str) - name of node file location
+        tag_file (str = name of tag file location
+
+    Returns:
+        None
+
+    Raises:
+        FileNotFoundError
+        TypeError
+        RuntimeError
+    """
+    check_type(node_file, str, False)
+    check_type(tag_file, str, False)
+    if node_file != "":
+        if not node_file.endswith(".csv"):
+            raise RuntimeError("node_file must be name of csv file (must include '.csv'")
+        if tag_file != "":
+            if not tag_file.endswith(".csv"):
+                raise RuntimeError("tag_file must be name of csv file (must include '.csv'")
+
+    node_df = pd.read_csv(node_file)
+    tag_df = pd.read_csv(tag_file)
+
+    records = {}
+
+    for index, row in tag_df.iterrows():
+        records[row['record_id']] = row['title']
+
+    for index, row in node_df.iterrows():
+        if row['ext_record_id'] in records.keys():
+            print(str(index) + ": " + records[row['ext_record_id']])

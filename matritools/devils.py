@@ -1,6 +1,38 @@
-from matritools import utils as mu
+from matritools import nodefile as nf, utils as mu
 import json
 import datetime
+import copy
+
+min_player_height = 60
+max_player_height = 84
+min_player_weight = 120
+max_player_weight = 300
+min_player_age = 17
+max_player_age = 50
+
+
+scout_report_distance = 20
+scout_report_limit = 10
+scout_offset = - 175
+
+# player profile
+age_color_scalar = mu.make_interpolator(15, 60, 0, 127, True, True, 0)
+height_cylinder_scalar = mu.make_interpolator(40, 100, 0.1, 1, True, True, 0)
+weight_cylinder_scalar = mu.make_interpolator(75, 300, 0.1, 1, True, True, 0)
+
+# scouting report
+nhl_scalar = mu.make_interpolator(0, 8, 0.25, 1.85, True, True, 0)
+skill_scalar = mu.make_interpolator(0, 8, 1.1, 3.7, True, True, 0)
+total_skill_scalar = mu.make_interpolator(0, 48, 0.6, 2.4, True, True, 0)
+game_rating_scalar = mu.make_interpolator(1, 5, 0.6, 3, True, True, 0)
+
+# game ratings
+game_rating_stone_xy_scalar = mu.make_interpolator(1,5, 0.6, 2, True, True, 0)
+game_rating_stone_z_scalar = mu.make_interpolator(1,5, 0.06, 0.28, True, True, 0)
+total_skill_delta_color_id_scalar = mu.make_interpolator(-48, 48, 127, 0, True, True, 0)
+
+# bta
+bta_ring_scalar = mu.make_interpolator(0, 10, 0.3, 2)
 
 position_colors = {
     'Goalie': 'white',
@@ -23,9 +55,485 @@ position_colors = {
 }
 
 team_textures = {
-    'team1': 1,
-    'team2': 2,
+  "Abbotsford Canucks": 4,
+  "Bakersfield Condors": 5,
+  "Belleville Senators": 6,
+  "Bridgeport Islanders": 7,
+  "Charlotte Checkers": 8,
+  "Chicago Wolves": 9,
+  "Cleveland Monsters": 10,
+  "Colorado Eagles": 11,
+  "Grand Rapids Griffins": 12,
+  "Hartford Wolf Pack": 13,
+  "Hershey Bears": 14,
+  "Henderson Silver Knights": 15,
+  "Iowa Wild": 16,
+  "Laval Rocket": 17,
+  "Lehigh Valley Phantoms": 18,
+  "Manitoba Moose": 19,
+  "Milwaukee Admirals": 20,
+  "Ontario Reign": 21,
+  "Providence Bruins": 22,
+  "Rochester Americans": 23,
+  "Rockford IceHogs": 24,
+  "San Jose Barracuda": 25,
+  "San Diego Gulls": 26,
+  "Springfield Thunderbirds": 27,
+  "Stockton Heat": 28,
+  "Syracuse Crunch": 29,
+  "Texas Stars": 30,
+  "Toronto Marlies": 31,
+  "Tucson Roadrunners": 32,
+  "Utica Comets": 33,
+  "Wilkes-Barre/Scranton Penguins": 34,
+  "Anaheim Ducks": 35,
+  "Arizona Coyotes": 36,
+  "Boston Bruins": 37,
+  "Buffalo Sabres": 38,
+  "Calgary Flames": 39,
+  "Carolina Hurricanes": 40,
+  "Chicago Blackhawks": 41,
+  "Colorado Avalanche": 42,
+  "Columbus Blue Jackets": 43,
+  "Dallas Stars": 44,
+  "Detroit Red Wings": 45,
+  "Edmonton Oilers": 46,
+  "Florida Panthers": 47,
+  "Los Angeles Kings": 48,
+  "Minnesota Wild": 49,
+  "Montreal Canadiens": 50,
+  "Nashville Predators": 51,
+  "New Jersey Devils": 52,
+  "New York Islanders": 53,
+  "New York Rangers": 54,
+  "Ottawa Senators": 55,
+  "Philadelphia Flyers": 56,
+  "Pittsburgh Penguins": 57,
+  "San Jose Sharks": 58,
+  "Seattle Kraken": 59,
+  "St. Louis Blues": 60,
+  "Tampa Bay Lightning": 61,
+  "Toronto Maple Leafs": 62,
+  "Vancouver Canucks": 63,
+  "Vegas Golden Knights": 64,
+  "Washington Capitals": 65,
+  "Winnipeg Jets": 66
 }
+
+nhl_grade_to_number = {
+            'A+': 8,
+            'A': 7,
+            'B+': 6,
+            'B': 5,
+            'B-': 4,
+            'C+': 3,
+            'C': 2,
+            'D+': 1,
+            'D': 0,
+            '--': None,
+            'DK': None,
+            'DN': None,
+            '0': 0
+}
+
+number_to_nhl_grade = {
+            8: 'A+',
+            7: 'A',
+            6: 'B+',
+            5: 'B',
+            4: 'B-',
+            3: 'C+',
+            2: 'C',
+            1: 'D+',
+            0: 'D',
+}
+
+# region set up glyph and NodeFile---------------------------------------
+try:
+    player_glyph = nf.Glyph('../glyphs/amateur_player/am_player_profile_v2_template_node.csv')
+    scouting_report_mod = nf.Glyph('../glyphs/amateur_player/am_player_scouting_report_mod_template_node.csv')
+    game_stats_mod = nf.Glyph('../glyphs/amateur_player/am_player_game_stats_mod_node.csv')
+    game_ratings_mod = nf.Glyph('../glyphs/amateur_player/am_player_game_ratings_mod_node.csv')
+    scout_coverage_mod = nf.Glyph('../glyphs/amateur_player/am_player_scout_coverage_mod_node.csv')
+    scout_report_glyph = nf.Glyph('../glyphs/amateur_player/scout_report_template.csv')
+    bta_mod = nf.Glyph('../glyphs/amateur_player/player_bta_mode_v2_node.csv')
+
+    # endregion--------------------------------------------------------------
+
+    # region identify key pieces of glyph----------------------------
+
+    # since the glyph will be built in pieces, we can get references from the individual mods and append them to the main
+    # glyph. The references are not copied to the main glyph, they are shared
+
+    # player profile
+    root = player_glyph.nodes[0]
+    root.tag_text = 'root'
+    age_ring = player_glyph.nodes[2]
+    age_ring.set_color(0,0,0)
+    age_ring.palette_id = 6
+    shot_side_cone = player_glyph.nodes[3]
+    team_ring = player_glyph.nodes[4]
+    team_ring.set_color_by_name('white')
+    height_weight_cylinder = player_glyph.nodes[5]
+    league_ring = player_glyph.nodes[6]
+
+    # scouting report
+    scouting_root = scouting_report_mod.nodes[0]
+    scouting_root.tag_text = 'scouting root'
+    game_rating_cone = scouting_report_mod.nodes[1]
+    nhl_ring = scouting_report_mod.nodes[2]
+    shot_puck_handling_ring = scouting_report_mod.nodes[3]
+    hockey_strength_low_post_ring = scouting_report_mod.nodes[4]
+    compete_ring = scouting_report_mod.nodes[5]
+    skating_technical_ring = scouting_report_mod.nodes[6]
+    puck_athleticism_ring = scouting_report_mod.nodes[7]
+    hockey_sense_ring = scouting_report_mod.nodes[8]
+    total_skills_ring = scouting_report_mod.nodes[15]
+
+    # game stats
+    game_stats_root = game_stats_mod.nodes[0]
+    game_stats_root.tag_text = 'game stats root'
+    toi_sphere = game_stats_mod.nodes[1]
+    xGA_ring = game_stats_mod.nodes[2]
+    xGF_ring = game_stats_mod.nodes[3]
+
+    # game ratings
+    game_ratings_root = game_ratings_mod.nodes[0]
+    game_ratings_root.tag_text = 'game ratings root'
+    total_skill_delta_node = game_ratings_mod.nodes[11]
+    total_skill_delta_node.set_color(0,0,0)
+    total_skill_delta_node.palette_id = 6
+    game_stone_1 = game_ratings_mod.nodes[5]
+    game_stone_2 = game_ratings_mod.nodes[4]
+    game_stone_3 = game_ratings_mod.nodes[3]
+    game_stone_4 = game_ratings_mod.nodes[2]
+    game_stone_5 = game_ratings_mod.nodes[1]
+    game_stone_6 = game_ratings_mod.nodes[10]
+    game_stone_7 = game_ratings_mod.nodes[9]
+    game_stone_8 = game_ratings_mod.nodes[8]
+    game_stone_9 = game_ratings_mod.nodes[7]
+    game_stone_10 = game_ratings_mod.nodes[6]
+    game_stones = [game_stone_1,
+                   game_stone_2,
+                   game_stone_3,
+                   game_stone_4,
+                   game_stone_5,
+                   game_stone_6,
+                   game_stone_7,
+                   game_stone_8,
+                   game_stone_9,
+                   game_stone_10]
+
+    # scout coverage
+    scout_coverage_root = scout_coverage_mod.nodes[0]
+    scout_coverage_root.tag_text = 'scout coverage root'
+    low_coverage_alert = scout_coverage_mod.nodes[1]
+
+    # scout report
+    scout_report_root = scout_report_glyph.nodes[0]
+    scout_type_node = scout_report_glyph.nodes[1]
+    was_tournament_node = scout_report_glyph.nodes[2]
+    win_loss_node = scout_report_glyph.nodes[3]
+    home_away_node = scout_report_glyph.nodes[4]
+
+    # bta
+    bta_root = bta_mod.nodes[0]
+    bta_root.tag_text = 'bta root'
+    individual_ring = bta_mod.nodes[2]
+    teammate_ring = bta_mod.nodes[3]
+    learner_ring = bta_mod.nodes[4]
+    leader_ring = bta_mod.nodes[5]
+    competitor_ring = bta_mod.nodes[6]
+
+except Exception as exc:
+    print(mu.WARNING + 'If you are working outside of the Devils project, you may ignore the following warning. '
+                       'If you working in Devils project, contact Greg.\n' +  str(exc) + mu.ENDC)
+#endregion---------------------------------------------------------------
+
+# region piece mods together-------------------------------
+
+modding_scouting_report = False
+modding_game_stats = False
+modding_game_ratings = False
+modding_scout_coverage = False
+modding_bta = False
+# append_scouting_report
+def mod_scouting_report():
+    global modding_scouting_report
+    modding_scouting_report = True
+    #scouting_root.parent_id = league_ring.id
+    #scouting_report_mod.make_ids_consecutive(player_glyph.get_last_node().id + 1)
+    scouting_root.set_translate()
+    player_glyph.add_glyph(scouting_report_mod, league_ring.id, False)
+    #for node in scouting_report_mod.nodes:
+        #player_glyph.nodes.append(node)
+
+# append game_stats_mod
+def mod_game_stats():
+    global modding_game_stats
+    modding_game_stats = True
+    #game_stats_root.parent_id = league_ring.id
+    #game_stats_mod.make_ids_consecutive(player_glyph.get_last_node().id + 1)
+    game_stats_root.set_translate(90, 0, 0)
+    player_glyph.add_glyph(game_stats_mod, league_ring.id, False)
+    #for node in game_stats_mod.nodes:
+        #player_glyph.nodes.append(node)
+
+# append game_ratings_mod
+def mod_game_ratings():
+    global modding_game_ratings
+    modding_game_ratings = True
+    #game_ratings_root.parent_id = league_ring.id
+    #game_ratings_mod.make_ids_consecutive(player_glyph.get_last_node().id + 1)
+    game_ratings_root.set_translate(180, 0, 0)
+    player_glyph.add_glyph(game_ratings_mod, league_ring.id, False)
+    #for node in game_ratings_mod.nodes:
+     #   player_glyph.nodes.append(node)
+
+# append scout_coverage_mod
+def mod_scout_coverage():
+    global modding_scout_coverage
+    modding_scout_coverage = True
+    #scout_coverage_root.parent_id = league_ring.id
+    #scout_coverage_mod.make_ids_consecutive(player_glyph.get_last_node().id + 1)
+    scout_coverage_root.set_translate(-90, 0, 0)
+    player_glyph.add_glyph(scout_coverage_mod, league_ring.id, False)
+    #for node in scout_coverage_mod.nodes:
+        #player_glyph.nodes.append(node)
+
+def mod_bta():
+    global modding_bta
+    modding_bta = True
+    #bta_root.parent_id = league_ring.id
+    #bta_mod.make_ids_consecutive(player_glyph.get_last_node().id + 1)
+    bta_root.set_translate(-45, 0, 0)
+    player_glyph.add_glyph(bta_mod, league_ring.id, False)
+    #for node in bta_mod.nodes:
+        #player_glyph.nodes.append(node)
+
+
+# player profile
+def build_player_profile(player, league_color_legend):
+
+    # height, weight, position
+    height_weight_cylinder.set_color_by_name(position_colors[player.position])
+    x = y = weight_cylinder_scalar(player.weight)
+    z = height_cylinder_scalar(player.height)
+    height_weight_cylinder.set_scale(x, y, z)
+    height_weight_cylinder.set_tag(
+        player.fname + ' ' + player.lname + ', P: ' + player.position + ', W: ' + str(player.weight) + ', H: ' + str(
+            player.height))
+
+    # league
+    league_ring.set_color_by_name(league_color_legend[player.league])
+    league_ring.set_tag(player.league)
+
+    team_ring.texture_id = team_textures[player.team]
+    team_ring.tag_text = player.team
+
+    age_ring.color_id = int(age_color_scalar(player.age))
+    age_ring.tag_text = 'Age: ' + str(player.age)
+
+    if player.shot_side == 'L':
+        shot_side_cone.color_a = 255
+        shot_side_cone.set_color_by_name('blue')
+        shot_side_cone.translate_x = 90
+        shot_side_cone.tag_text = "Shot Side: L"
+    elif player.shot_side == 'R':
+        shot_side_cone.color_a = 255
+        shot_side_cone.set_color_by_name('red')
+        shot_side_cone.translate_x = -90
+        shot_side_cone.tag_text = "Shot Side: R"
+    else:
+        shot_side_cone.color_a = 0
+        shot_side_cone.tag_text = ""
+
+# region scouting report
+def build_scouting_report(player):
+    # total skills
+    total_skills_ring.set_u_scale(total_skill_scalar(player.total_skills))
+    total_skills_ring.set_tag("Total Skills(" + str(player.total_skills) + "/48)")
+
+    build_nhl_ring(player)
+    build_skill_rings(player)
+
+    # game rating
+    game_rating_cone.set_u_scale(game_rating_scalar(player.game_rating))
+    game_rating_cone.set_tag("Game Rating(" + str(player.game_rating) + "/5)")
+
+def build_skill_rings(player):
+    if player.position == 'Goalie':
+        build_skill_ring(player.low_post_play, hockey_strength_low_post_ring, 'Low / Post Play')
+        build_skill_ring(player.technical, skating_technical_ring, 'Technical')
+        build_skill_ring(player.athleticism, puck_athleticism_ring, 'Athleticism')
+        build_skill_ring(player.puck_handling, shot_puck_handling_ring, 'Puck Handling')
+    else:
+        build_skill_ring(player.hockey_strength, hockey_strength_low_post_ring, 'Hockey Strength')
+        build_skill_ring(player.skating, skating_technical_ring, 'Skating')
+        build_skill_ring(player.puck_skills, puck_athleticism_ring, 'Puck Skills')
+        build_skill_ring(player.shot, shot_puck_handling_ring, 'Shot')
+
+    build_skill_ring(player.compete, compete_ring, 'Compete')
+    build_skill_ring(player.hockey_sense, hockey_sense_ring, 'Hockey Sense')
+
+def build_skill_ring(skill_rating, ring, skill_name):
+    ring.scale_z = skill_scalar(skill_rating)
+    ring.set_tag(skill_name + "(" + str(skill_rating) + "/8)")
+
+def build_nhl_ring(player):
+    nhl_scale = nhl_scalar(player.nhl_rating)
+    nhl_ring.scale_x = nhl_scale
+    nhl_ring.scale_y = nhl_scale
+    if player.nhl_rating is not None:
+        nhl_ring.set_tag("NHL Rating(" + number_to_nhl_grade[round(player.nhl_rating)] + ")")
+    else:
+        nhl_ring.set_tag("NHL Rating(" + str(player.nhl_rating) + ")")
+# endregion
+
+# region game ratings
+def build_game_ratings(player):
+    build_game_stones(player)
+
+    # reset color_a
+    total_skill_delta_node.color_a = 255
+    total_skill_deltas = []
+    for i in range(1, len(game_stones)):
+        if i >= len(player.reports):
+            continue
+        total_skill_deltas.append(player.reports[i].total_skills - player.reports[i-1].total_skills)
+
+    # if there are no total_skill_deltas, hide total_skill_delta
+    if len(total_skill_deltas) == 0:
+        total_skill_delta_node.color_a = 0
+        total_skill_delta_node.set_tag("Total Skill Delta: N/A")
+    else:
+        total_skill_delta_node.color_id = int(total_skill_delta_color_id_scalar(sum(total_skill_deltas) / len(total_skill_deltas)))
+        total_skill_delta_node.set_tag("Total Skill Delta: " + str(sum(total_skill_deltas) / len(total_skill_deltas)))
+
+def build_game_stones(player):
+    for i in range(len(game_stones)):
+        # if less reports than there are stones, fill the rest N/A
+        if i >= len(player.reports):
+            game_stones[i].set_scale(0, 0, 0)
+            game_stones[i].set_tag("Game " + str(i + 1) + " Rating(N/A)")
+        else:
+            if player.reports[i].game_rating is None:
+                game_stones[i].set_scale(0,0,0)
+                game_stones[i].set_tag("Game " + str(i + 1) + " Rating(N/A)")
+            else:
+                x = y = game_rating_stone_xy_scalar(player.reports[i].game_rating)
+                z = game_rating_stone_z_scalar(player.reports[i].game_rating)
+                game_stones[i].set_scale(x, y, z)
+                game_stones[i].set_tag("Game " + str(i+1) + " Rating(" + str(player.reports[i].game_rating) + ")")
+# endregion
+
+# region scout coverage
+def build_scout_coverage(player):
+    # paraent scout report to scout coverage mod
+    #scout_report_root.parent_id = scout_coverage_root.id
+
+    # build each report
+    for i in range(len(player.reports)):
+        if i == scout_report_limit:
+            break
+        build_scout_report(i, player.reports[i])
+
+def build_scout_report(index, report):
+    # adjust ids
+    #scout_report_glyph.make_ids_consecutive(player_glyph.get_next_id())
+
+    scout_report_root.set_translate((index * scout_report_distance) + scout_offset)
+
+    # edit individual pieces of scout report glyph
+    build_win_loss(report)
+    build_home_away(report)
+    build_was_tournament(report)
+    build_scout_type(report)
+    player_glyph.add_temp_glyph(scout_report_glyph, scout_coverage_root.id)
+
+    # copy nodes of report template onto main glyph
+    #for node in scout_report_glyph.nodes:
+        #node_copy = copy.deepcopy(node)
+        #player_glyph.nodes.append(node_copy)
+        #player_glyph.__temp_nodes__.append(node_copy)
+
+def build_scout_type(report):
+    if report.scout_type == 'A':
+        scout_type_node.geometry = nf.geos['sphere']
+        scout_type_node.set_color_by_name('green')
+        scout_type_node.set_tag('A')
+    else:
+        scout_type_node.geometry = nf.geos['cube']
+        scout_type_node.set_color_by_name('orange')
+        scout_type_node.set_tag('M')
+
+def build_was_tournament(report):
+    if report.tournament != "N/A":
+        was_tournament_node.geometry = nf.geos['cube']
+        was_tournament_node.set_color_by_name('beige')
+    else:
+        was_tournament_node.geometry = nf.geos['cone']
+        was_tournament_node.set_color_by_name('cyan')
+
+    was_tournament_node.set_tag(report.tournament)
+
+def build_home_away(report):
+    home_away_node.color_a = 255
+    if report.home_away == "Home":
+        home_away_node.geometry = nf.geos['sphere']
+        home_away_node.set_color_by_name('hot pink')
+        home_away_node.set_tag("Home")
+    elif report.home_away == "Away":
+        home_away_node.geometry = nf.geos['cube']
+        home_away_node.set_color_by_name('purple')
+        home_away_node.set_tag("Away")
+    else:
+        home_away_node.color_a = 0
+
+def build_win_loss(report):
+    if report.game_won == 'True':
+        win_loss_node.geometry = 13
+        win_loss_node.set_color_by_name('grey')
+        win_loss_node.tag_text = "Game Won"
+    else:
+        win_loss_node.geometry = 15
+        win_loss_node.set_color_by_name('yellow')
+        win_loss_node.tag_text = "Game loss"
+# endregion
+
+# region bta
+def build_bta(player):
+    individual_ring.color_a = 255
+    teammate_ring.color_a = 255
+    learner_ring.color_a = 255
+    leader_ring.color_a = 255
+    competitor_ring.color_a = 255
+
+    build_bta_ring(player.bta_individual, individual_ring, "Individual")
+    build_bta_ring(player.bta_teammate, teammate_ring, 'Teammate')
+    build_bta_ring(player.bta_learner, learner_ring, 'Learner')
+    build_bta_ring(player.bta_leader, leader_ring, 'Leader')
+    build_bta_ring(player.bta_competitor, competitor_ring, 'Competitor')
+
+def build_bta_ring(bta_rating, ring, tag):
+    if bta_rating is None:
+        ring.color_a = 0
+    else:
+        ring.set_u_scale(bta_ring_scalar(bta_rating))
+        ring.tag_text = tag + ": " + str(bta_rating)
+
+# endregion
+
+def build_glyph(player, league_color_legend):
+    build_player_profile(player, league_color_legend)
+    if modding_scouting_report:
+        build_scouting_report(player)
+    if modding_game_ratings:
+        build_game_ratings(player)
+    if modding_scout_coverage:
+        build_scout_coverage(player)
+    if modding_bta:
+        build_bta(player)
 
 class Player:
     def __init__(self, df, number_of_reports = 0, less_than_function=None):
@@ -57,7 +565,8 @@ class Player:
                 report_str += str(report)
             report_str += "\n"
 
-        return  "fname: " + self.fname + "\n" + \
+        return  "id: " + self.id + "\n" + \
+                "fname: " + self.fname + "\n" + \
                 "lname: " + self.lname + "\n" + \
                 "age: " + str(self.age) + "\n" + \
                 "height: " + str(self.height) + "\n" + \
@@ -91,6 +600,7 @@ class Player:
     def to_dict(self):
         result = {}
 
+        result['ID'] = self.id
         result['First Name'] = self.fname
         result['Last Name'] = self.lname
         result['Age'] = self.age
@@ -150,6 +660,7 @@ class Player:
         self.bta_leader = player_dict['BTA Leader']
         self.bta_competitor = player_dict['BTA Competitor']
 
+        self.id = player_dict['ID']
         self.fname = player_dict['First Name'].lower()
         self.lname = player_dict['Last Name'].lower()
         self.age = player_dict['Age']
@@ -176,6 +687,7 @@ class Player:
 
 
     def __build_from_df__(self, df, number_of_reports):
+        self.id = df.iloc[0]['playerid']
         self.fname = df.iloc[0]['firstname']
         self.lname = df.iloc[0]['lastname']
         self.age = round(int( df.iloc[0]['age'].days) / 365, 2)
@@ -190,6 +702,11 @@ class Player:
         self.position = df.iloc[0]['positionname']
         self.league = df.iloc[0]['league_name']
         self.team = df.iloc[0]['currentteamname']
+        if self.team is None:
+            if df.iloc[0]['home_or_away_team'] == 'Away':
+                self.team = df.iloc[0]['awayteamname']
+            else:
+                self.team = df.iloc[0]['hometeamname']
         self.nhl_rating = None
         self.hockey_sense = None
         self.skating = None
@@ -384,6 +901,12 @@ class PlayerReport:
                 "\n\tscout type: " + str(self.scout_type) + "\n" + \
                 "\n\thome / away: " + str(self.home_away) + "\n" + \
                 "\n\tgame id: " + str(self.game_id) + "\n" + \
+                "\n\tgame type: " + str(self.game_type) + "\n" + \
+                "\n\tlocation: " + self.location + "\n" + \
+                "\n\thome team: " + self.home_team + "\n" + \
+                "\n\taway team: " + self.away_team + "\n" + \
+                "\n\thome city: " + self.home_city + "\n" + \
+                "\n\taway city: " + self.away_city + "\n" + \
                 "\n\tgame_won: " + str(self.game_won) + "\n"
 
 
@@ -409,6 +932,12 @@ class PlayerReport:
         result['Scout Type'] = self.scout_type
         result['Tournament'] = self.tournament
         result['Game ID'] = self.game_id
+        result['Game Type'] = self.game_type
+        result['Location'] = self.location
+        result['Home Team'] = self.home_team
+        result['Away Team'] = self.away_team
+        result['Home City'] = self.home_city
+        result['Away City'] = self.away_city
 
         return result
 
@@ -432,6 +961,12 @@ class PlayerReport:
         self.tournament = "N/A" if df.iloc[0]['tournamentname'] is None else df.iloc[0]['tournamentname']
         self.scout_type = df.iloc[0]['scouttype']
         self.game_id = df.iloc[0]['gameid']
+        self.game_type = df.iloc[0]['game_type']
+        self.location = df.iloc[0]['location']
+        self.home_team = df.iloc[0]['hometeamname']
+        self.away_team = df.iloc[0]['awayteamname']
+        self.home_city = df.iloc[0]['homecity']
+        self.away_city = df.iloc[0]['awaycity']
 
         self.__get_stats__(df)
 
@@ -455,23 +990,14 @@ class PlayerReport:
         self.tournament = player_dict['Tournament']
         self.scout_type = player_dict['Scout Type']
         self.game_id = player_dict['Game ID']
+        self.game_type = player_dict['Game Type']
+        self.location = player_dict['Location']
+        self.home_team = player_dict['Home Team']
+        self.away_team = player_dict['Away Team']
+        self.home_city = player_dict['Home City']
+        self.away_city = player_dict['Away City']
 
     def __get_stats__(self, df):
-        nhl_grade_to_number = {
-            'A+': 8,
-            'A': 7,
-            'B+': 6,
-            'B': 5,
-            'B-': 4,
-            'C+': 3,
-            'C': 2,
-            'D+': 1,
-            'D': 0,
-            '--': None,
-            'DK': None,
-            'DN': None,
-            '0': 0
-        }
 
         for index, row in df.iterrows():
             if row['rating_type'] == 'Skating':
@@ -530,8 +1056,8 @@ class PlayerReport:
 
 class Game:
     def __init__(self):
-        self.home_players = []
-        self.away_players = []
+        self.home_players = {}
+        self.away_players = {}
         self.home_team = None
         self.away_team = None
         self.home_city = None
@@ -540,6 +1066,17 @@ class Game:
         self.location = None
         self.game_won = None
         self.game_type = None
+
+    def __repr__(self):
+        return "\nhome players: " + str(len(self.home_players)) + \
+                "\naway players: " + str(len(self.away_players)) + \
+                "\nhome team: " + self.home_team + \
+                "\naway team: " + self.away_team + \
+                "\nhome city: " + self.home_city + \
+                "\ndate: " + str(self.date) + \
+                "\nlocation: " + self.location + \
+                "\ngame won: " + self.game_won + \
+                "\ngame type: " + self.game_type
 
 def get_games(path=None, players=None):
     if players is None:
@@ -554,11 +1091,18 @@ def get_games(path=None, players=None):
                 games[report.game_id] = Game()
                 games[report.game_id].date = report.date
                 games[report.game_id].game_won = report.game_won
-
+                games[report.game_id].game_type = report.game_type
+                games[report.game_id].home_team = report.home_team
+                games[report.game_id].away_team = report.away_team
+                games[report.game_id].home_city = report.home_city
+                games[report.game_id].away_city = report.away_city
+                games[report.game_id].location = report.location
             if report.home_away == "Home":
-                games[report.game_id].home_team = player.team
-            else:
-                games[report.game_id].away_team = player.team
+                games[report.game_id].home_players[player.id] = player
+            elif report.home_away == "Away":
+                games[report.game_id].away_players[player.id] = player
+
+    return games
 
 def get_players(path, number_of_reports=0, less_than_function=None):
     players = []
