@@ -354,6 +354,8 @@ class NodeContainer:
         link = self.create_node(link_node_a)
         link.type = 7
         link.child_id = link_node_b.id
+        link.geometry = geos['cylinder']
+        link.topo = 0
 
         return link
 

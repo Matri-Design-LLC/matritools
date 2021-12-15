@@ -73,9 +73,9 @@ Creating Nodes::
         node.geometry = node.geos['sphere']
 
         # establish an x, y, and z coordinate based on scaled values of this person's height, weight, and age
-        x_coordinate = (row["Age"])
-        y_coordinate = (row["Bank Balance"])
-        z_coordinate = (row['Height'])
+        x_coordinate = row["Age"]
+        y_coordinate = row["Bank Balance"]
+        z_coordinate = row['Height']
 
         # set position of this node in 3D space
         node.set_translate(x_coordinate, y_coordinate, z_coordinate)

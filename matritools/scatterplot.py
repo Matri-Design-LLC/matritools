@@ -31,14 +31,15 @@ def set_mins(x, y, z, color):
     z_column_min = z
     color_column_min = color
 
-def scatter_plot(df, ntf, grid_color, key_column, x_column, y_column, z_column, color_column, common_tag, target_keys):
+def scatter_plot(df, ntf, grid_color, key_column, x_column, y_column, z_column, color_column, common_tag, target_keys=None):
     global x_column_min, x_column_max, y_column_min, y_column_max, z_column_min, z_column_max, \
         color_column_min, color_column_max
 
     target_nodes = {}
 
-    for key in target_keys:
-        target_nodes[key] = []
+    if target_keys is not None:
+        for key in target_keys:
+            target_nodes[key] = []
 
     if str(z_column) == 'nan':
         z_column = None
@@ -101,22 +102,22 @@ def scatter_plot(df, ntf, grid_color, key_column, x_column, y_column, z_column, 
         node.set_translate(x,y,z)
         node.set_tag(tag, 0)
 
-    create_cube_corner(0, grid_size, 0, "")
+    create_cube_corner(0, grid_size+1, 0, "")
 
     if z_column is not None:
-        create_cube_corner(-grid_size, -grid_size, 0, common_tag + '(' + str(x_column_min) + ', ' + str(round(y_column_min, 2)) + ', ' + str(round(z_column_min, 2)) + ')')
-        create_cube_corner(grid_size, -grid_size, 0, common_tag + '(' + str(x_column_max) + ',' + str(round(y_column_min, 2)) + ' , ' + str(round(z_column_min, 2)) + ')')
-        create_cube_corner(-grid_size, grid_size, 0, common_tag + '(' + str(x_column_min) + ',' + str(round(y_column_max, 2)) + ', ' + str(round(z_column_min, 2)) + ')')
-        create_cube_corner(grid_size, grid_size, 0, common_tag + '(' + str(x_column_max) + ', ' + str(round(y_column_max, 2)) + ', ' + str(round(z_column_min, 2)) + ')')
-        create_cube_corner(-grid_size, -grid_size, grid_size, common_tag + '(' + str(x_column_min) + ', ' + str(round(y_column_min, 2)) + ',' + str(round(z_column_max, 2)) + ')')
-        create_cube_corner(grid_size, -grid_size, grid_size, common_tag + '(' + str(x_column_max) + ', ' + str(round(y_column_min, 2)) + ', ' + str(round(z_column_max, 2)) + ')')
-        create_cube_corner(-grid_size, grid_size, grid_size, common_tag + '(' + str(x_column_min) + ', ' + str(round(y_column_max, 2)) + ', ' + str(round(z_column_max, 2)) + ')')
-        create_cube_corner(grid_size, grid_size, grid_size, common_tag + '(' + str(x_column_max) + ', ' + str(round(y_column_max, 2)) + ', ' + str(round(z_column_max, 2)) + ')')
+        create_cube_corner(-grid_size-1, -grid_size-1, 0, common_tag + '(' + str(x_column_min) + ', ' + str(round(y_column_min, 2)) + ', ' + str(round(z_column_min, 2)) + ')')
+        create_cube_corner(grid_size+1, -grid_size-1, 0, common_tag + '(' + str(x_column_max) + ',' + str(round(y_column_min, 2)) + ' , ' + str(round(z_column_min, 2)) + ')')
+        create_cube_corner(-grid_size-1, grid_size+1, 0, common_tag + '(' + str(x_column_min) + ',' + str(round(y_column_max, 2)) + ', ' + str(round(z_column_min, 2)) + ')')
+        create_cube_corner(grid_size+1, grid_size+1, 0, common_tag + '(' + str(x_column_max) + ', ' + str(round(y_column_max, 2)) + ', ' + str(round(z_column_min, 2)) + ')')
+        create_cube_corner(-grid_size-1, -grid_size-1, grid_size, common_tag + '(' + str(x_column_min) + ', ' + str(round(y_column_min, 2)) + ',' + str(round(z_column_max, 2)) + ')')
+        create_cube_corner(grid_size+1, -grid_size-1, grid_size, common_tag + '(' + str(x_column_max) + ', ' + str(round(y_column_min, 2)) + ', ' + str(round(z_column_max, 2)) + ')')
+        create_cube_corner(-grid_size-1, grid_size+1, grid_size, common_tag + '(' + str(x_column_min) + ', ' + str(round(y_column_max, 2)) + ', ' + str(round(z_column_max, 2)) + ')')
+        create_cube_corner(grid_size+1, grid_size+1, grid_size, common_tag + '(' + str(x_column_max) + ', ' + str(round(y_column_max, 2)) + ', ' + str(round(z_column_max, 2)) + ')')
     else:
-        create_cube_corner(-grid_size, -grid_size, 0, common_tag + '(' + str(x_column_min) + ', ' + str(round(y_column_min, 2)) + ')')
-        create_cube_corner(grid_size, -grid_size, 0, common_tag + '(' + str(x_column_max) + ',' + str(round(y_column_min, 2)) + ')')
-        create_cube_corner(-grid_size, grid_size, 0, common_tag + '(' + str(x_column_min) + ',' + str(round(y_column_max, 2)) + ')')
-        create_cube_corner(grid_size, grid_size, 0, common_tag + '(' + str(x_column_max) + ', ' + str(round(y_column_max, 2)) + ')')
+        create_cube_corner(-grid_size-1, -grid_size-1, 0, common_tag + '(' + str(x_column_min) + ', ' + str(round(y_column_min, 2)) + ')')
+        create_cube_corner(grid_size+1, -grid_size-1, 0, common_tag + '(' + str(x_column_max) + ',' + str(round(y_column_min, 2)) + ')')
+        create_cube_corner(-grid_size-1, grid_size+1, 0, common_tag + '(' + str(x_column_min) + ',' + str(round(y_column_max, 2)) + ')')
+        create_cube_corner(grid_size+1, grid_size+1, 0, common_tag + '(' + str(x_column_max) + ', ' + str(round(y_column_max, 2)) + ')')
 
 
     def bad_input(value, is_clamped, value_min, value_max):
