@@ -1,7 +1,6 @@
 from matritools import nodefile as nf, utils as mu
 import json
-import datetime
-import copy
+import pandas as pd
 
 min_player_height = 60
 max_player_height = 84
@@ -257,6 +256,8 @@ modding_game_stats = False
 modding_game_ratings = False
 modding_scout_coverage = False
 modding_bta = False
+using_pro_data = True
+player_tag_mode = 0
 # append_scouting_report
 def mod_scouting_report():
     global modding_scouting_report
@@ -322,13 +323,14 @@ def build_player_profile(player, league_color_legend):
     height_weight_cylinder.set_scale(x, y, z)
     height_weight_cylinder.set_tag(
         player.fname + ' ' + player.lname + ', P: ' + player.position + ', W: ' + str(player.weight) + ', H: ' + str(
-            player.height))
+            player.height), player_tag_mode)
 
     # league
     league_ring.set_color_by_name(league_color_legend[player.league])
     league_ring.set_tag(player.league)
 
-    team_ring.texture_id = team_textures[player.team]
+    if using_pro_data:
+        team_ring.texture_id = team_textures[player.team]
     team_ring.tag_text = player.team
 
     age_ring.color_id = int(age_color_scalar(player.age))
@@ -451,12 +453,6 @@ def build_scout_report(index, report):
     build_scout_type(report)
     player_glyph.add_temp_glyph(scout_report_glyph, scout_coverage_root.id)
 
-    # copy nodes of report template onto main glyph
-    #for node in scout_report_glyph.nodes:
-        #node_copy = copy.deepcopy(node)
-        #player_glyph.nodes.append(node_copy)
-        #player_glyph.__temp_nodes__.append(node_copy)
-
 def build_scout_type(report):
     if report.scout_type == 'A':
         scout_type_node.geometry = nf.geos['sphere']
@@ -543,6 +539,30 @@ class Player:
         self.bta_leader = None
         self.bta_competitor = None
 
+        self.bta_individual_z_score = None
+        self.bta_teammate_z_score = None
+        self.bta_learner_z_score = None
+        self.bta_leader_z_score = None
+        self.bta_competitor_z_score = None
+
+        self.hockey_sense_z_score = None
+        self.skating_z_score = None
+        self.compete_z_score = None
+        self.hockey_strength_z_score = None
+        self.puck_skills_z_score = None
+        self.game_rating_z_score = None
+        self.nhl_rating_z_score = None
+        self.low_post_play_z_score = None
+        self.technical_z_score = None
+        self.athleticism_z_score = None
+        self.puck_handling_z_score = None
+        self.shot_z_score = None
+        self.total_skills_z_score = None
+
+        self.age_z_score = None
+        self.height_z_score = None
+        self.weight_z_score = None
+
         self.rank = None
         self.change = None
         if isinstance(df, dict):
@@ -558,7 +578,7 @@ class Player:
         else:
             self.less_than = less_than_function
 
-    def __repr__(self, include_reports = False):
+    def __repr__(self, include_reports=False):
         report_str = ""
         if include_reports:
             for report in self.reports:
@@ -597,7 +617,7 @@ class Player:
     def __lt__(self, other):
         return self.less_than(self, other)
 
-    def to_dict(self):
+    def to_dict(self, include_reports=True):
         result = {}
 
         result['ID'] = self.id
@@ -631,11 +651,35 @@ class Player:
         result['BTA Leader'] = self.bta_leader
         result['BTA Competitor'] = self.bta_competitor
 
-        report_dict = {}
-        for report in self.reports:
-            report_dict[str(report.date)] = report.to_dict()
 
-        result['Reports'] = report_dict
+        result['Age Z Score'] = self.age_z_score
+        result['Height Z Score'] = self.height_z_score
+        result['Weight Z Score'] = self.weight_z_score
+        result['Hockey Sense Z Score'] = self.hockey_sense_z_score
+        result['Skating Z Score'] = self.skating_z_score
+        result['Compete Z Score'] = self.compete_z_score
+        result['Hockey Strength Z Score'] = self.hockey_strength_z_score
+        result['Puck Skills Z Score'] = self.puck_skills_z_score
+        result['Game Rating Z Score'] = self.game_rating_z_score
+        result['NHL Rating Z Score'] = self.nhl_rating_z_score
+        result['Low / Post Play Z Score'] = self.low_post_play_z_score
+        result['Technical Z Score'] = self.technical_z_score
+        result['Athleticism Z Score'] = self.athleticism_z_score
+        result['Puck Handling Z Score'] = self.puck_handling_z_score
+        result['Shot Z Score'] = self.shot_z_score
+        result['Total Skills Z Score'] = self.total_skills_z_score
+        result['BTA Individual Z Score'] = self.bta_individual_z_score
+        result['BTA Teammate Z Score'] = self.bta_teammate_z_score
+        result['BTA Learner Z Score'] = self.bta_learner_z_score
+        result['BTA Leader Z Score'] = self.bta_leader_z_score
+        result['BTA Competitor Z Score'] = self.bta_competitor_z_score
+
+        if include_reports:
+            report_dict = {}
+            for report in self.reports:
+                report_dict[str(report.date)] = report.to_dict()
+
+            result['Reports'] = report_dict
         return result
 
     def __build_from_dict__(self, player_dict, number_of_reports):
@@ -666,10 +710,13 @@ class Player:
         self.age = player_dict['Age']
         self.height = player_dict['Height']
         self.weight = player_dict['Weight']
-        if self.weight > 400:
-            self.weight = 400
-        if self.weight < 70:
-            self.weight = 70
+        if str(self.weight) == 'nan':
+            self.weight = None
+        else:
+            if self.weight > 400:
+                self.weight = 400
+            if self.weight < 70:
+                self.weight = 70
         self.rank = player_dict['Rank']
         self.change = player_dict['Change']
         self.shot_side = player_dict['Shot Side']
@@ -684,6 +731,31 @@ class Player:
 
         self.__set_stats__(number_of_reports)
         self.__set_total_skills__()
+
+
+        self.age_z_score = player_dict['Age Z Score']
+        self.height_z_score = player_dict['Height Z Score']
+        self.weight_z_score = player_dict['Weight Z Score']
+
+        self.hockey_sense_z_score = player_dict['Hockey Sense Z Score']
+        self.skating_z_score = player_dict['Skating Z Score']
+        self.compete_z_score = player_dict['Compete Z Score']
+        self.hockey_strength_z_score = player_dict['Hockey Strength Z Score']
+        self.puck_skills_z_score = player_dict['Puck Skills Z Score']
+        self.game_rating_z_score = player_dict['Game Rating Z Score']
+        self.nhl_rating_z_score = player_dict['NHL Rating Z Score']
+        self.low_post_play_z_score = player_dict['Low / Post Play Z Score']
+        self.technical_z_score = player_dict['Technical Z Score']
+        self.athleticism_z_score = player_dict['Athleticism Z Score']
+        self.puck_handling_z_score = player_dict['Puck Handling Z Score']
+        self.shot_z_score = player_dict['Shot']
+        self.total_skills_z_score = player_dict['Total Skills Z Score']
+
+        self.bta_individual_z_score = player_dict['BTA Individual Z Score']
+        self.bta_teammate_z_score = player_dict['BTA Teammate Z Score']
+        self.bta_learner_z_score = player_dict['BTA Learner Z Score']
+        self.bta_leader_z_score = player_dict['BTA Leader Z Score']
+        self.bta_competitor_z_score = player_dict['BTA Competitor Z Score']
 
 
     def __build_from_df__(self, df, number_of_reports):
@@ -763,40 +835,40 @@ class Player:
             if i == len(self.reports):
                 break
             report = self.reports[i]
-            if report.nhl_rating is not None:
+            if report.nhl_rating is not None and str(report.nhl_rating) != 'nan':
                 nhl_count += 1
                 nhl_total += report.nhl_rating
-            if report.skating is not None:
+            if report.skating is not None and str(report.skating) != 'nan':
                 skating_count += 1
                 skating_total += report.skating
-            if report.hockey_sense is not None:
+            if report.hockey_sense is not None and str(report.hockey_sense) != 'nan':
                 sense_count += 1
                 sense_total += report.hockey_sense
-            if report.compete is not None:
+            if report.compete is not None and str(report.compete) != 'nan':
                 compete_count += 1
                 compete_total += report.compete
-            if report.hockey_strength is not None:
+            if report.hockey_strength is not None and str(report.hockey_strength) != 'nan':
                 strength_count += 1
                 strength_total += report.hockey_strength
-            if report.game_rating is not None:
+            if report.game_rating is not None and str(report.game_rating) != 'nan':
                 game_count += 1
                 game_total += report.game_rating
-            if report.puck_skills is not None:
+            if report.puck_skills is not None and str(report.puck_skills) != 'nan':
                 puck_count += 1
                 puck_total += report.puck_skills
-            if report.low_post_play is not None:
+            if report.low_post_play is not None and str(report.low_post_play) != 'nan':
                 low_post_count += 1
                 low_post_total += report.low_post_play
-            if report.technical is not None:
+            if report.technical is not None and str(report.technical) != 'nan':
                 technical_count += 1
                 technical_total += report.technical
-            if report.athleticism is not None:
+            if report.athleticism is not None and str(report.athleticism) != 'nan':
                 athlete_count += 1
                 athlete_total += report.athleticism
-            if report.shot is not None:
+            if report.shot is not None and str(report.shot) != 'nan':
                 shot_count += 1
                 shot_total += report.shot
-            if report.puck_handling is not None:
+            if report.puck_handling is not None and str(report.puck_handling) != 'nan':
                 puck_handling_count += 1
                 puck_handling_total += report.puck_handling
 
@@ -1058,13 +1130,15 @@ class Game:
     def __init__(self):
         self.home_players = {}
         self.away_players = {}
+        self.attached_home_players = 0
+        self.attached_away_players = 0
         self.home_team = None
         self.away_team = None
         self.home_city = None
         self.away_city = None
         self.date = None
         self.location = None
-        self.game_won = None
+        self.winning_team = None
         self.game_type = None
 
     def __repr__(self):
@@ -1075,7 +1149,7 @@ class Game:
                 "\nhome city: " + self.home_city + \
                 "\ndate: " + str(self.date) + \
                 "\nlocation: " + self.location + \
-                "\ngame won: " + self.game_won + \
+                "\nwinning team: " + self.winning_team + \
                 "\ngame type: " + self.game_type
 
 def get_games(path=None, players=None):
@@ -1090,7 +1164,6 @@ def get_games(path=None, players=None):
             if report.game_id not in games.keys():
                 games[report.game_id] = Game()
                 games[report.game_id].date = report.date
-                games[report.game_id].game_won = report.game_won
                 games[report.game_id].game_type = report.game_type
                 games[report.game_id].home_team = report.home_team
                 games[report.game_id].away_team = report.away_team
@@ -1099,8 +1172,12 @@ def get_games(path=None, players=None):
                 games[report.game_id].location = report.location
             if report.home_away == "Home":
                 games[report.game_id].home_players[player.id] = player
+                if report.game_won:
+                    games[report.game_id].winning_team = "Home"
             elif report.home_away == "Away":
                 games[report.game_id].away_players[player.id] = player
+                if report.game_won:
+                    games[report.game_id].winning_team = "Away"
 
     return games
 
@@ -1116,3 +1193,12 @@ def get_players(path, number_of_reports=0, less_than_function=None):
 
     return players
 
+def players_to_df(players):
+    result = pd.DataFrame()
+    for player in players:
+        player_dict = player.to_dict(False)
+        player_dict['Full Name'] = player.fname + " " + player.lname
+        series = pd.Series(player_dict)
+        result = result.append(series, True)
+
+    return result

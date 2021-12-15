@@ -141,6 +141,10 @@ def make_interpolator(old_min: float,
                 result = float(value)
             except:
                 return default_value
+            if str(value) == 'nan':
+                return default_value
+        if str(value) == 'nan':
+            raise RuntimeError('value is nan')
         if clamp_value:
             if result > old_max:
                 result = old_max
