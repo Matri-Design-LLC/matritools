@@ -23,6 +23,14 @@ node_file_header = "id,type,data,selected,parent_id," \
              "proximity_mode_z,segments_x,segments_y,segments_z,tag_mode," \
              "format_id,table_id,record_id,size\n"
 
+types = {
+    'world': 0,
+    'camera': 1,
+    'glyph': 5,
+    'grid': 6,
+    'link': 7,
+}
+
 geos = {
         "z cube": 0,
         "cube": 1,
@@ -420,7 +428,7 @@ class NodeContainer:
             self.nodes.append(node)
         return glyph
 
-    def create_node(self, parent_node = None, tag_text: str = "", tag_mode: int = 0, template = None):
+    def create_node(self, parent_node=None, tag_text: str = "", tag_mode: int = 0, template=None):
         """
         Creates and returns a Node inside of the NodeContainer.
 
@@ -469,6 +477,52 @@ class NodeContainer:
 
         self.nodes.append(node)
         return node
+
+    def create_grid(self, parent_node=None, grid_tag_text: str = "", grid_tag_mode: int = 0, grid_template=None,
+                    create_handle: bool = True, handle_tag_text: str = "", handle_tag_mode: int = 0,
+                    handle_template = None):
+        """
+        Creates and returns a Node inside of the NodeContainer.
+        If create_handle is True, the created handle and grid are returned. If not, just the grid is returned
+
+        Parameters:
+            parent_node (Node: None) - Node that newly created Node will be associated with
+            grid_tag_text (str : "") - text that will be written in the tag file associated with the created grid
+            grid_tag_mode (int : 0) - int representing how the grid's tag should be displayed by default
+            grid_template (Node : None) - Created grid will be a copy of template if one is passed.
+            create_handle (bool : True) - should the grid be attached to a handle?
+            handle_tag_text (str : "") - text that will be written in the tag file associated with the created handle
+            handle_tag_mode (int : 0) - int representing how the handle tag should be displayed by default
+            handle_template (Node : None) - Created handle will be a copy of template if one is passed.
+
+        Returns:
+            Node
+            Node, Node
+
+        Raises:
+            TypeError
+            Run
+        """
+
+        mu.check_type(create_handle, bool, False)
+        if create_handle:
+            handle = self.create_node(parent_node, handle_tag_text, handle_tag_mode, handle_template)
+            handle.geometry = geos['pin']
+            handle.topo = topos['pin']
+
+            grid = self.create_node(handle, grid_tag_text, grid_tag_mode, grid_template)
+            grid.type = types['grid']
+            grid.topo = topos['plane']
+            grid.geometry = geos['plane']
+
+            return handle, grid
+        else:
+            grid = self.create_node(parent_node, grid_tag_text, grid_tag_mode, grid_template)
+            grid.type = types['grid']
+            grid.topo = topos['plane']
+            grid.geometry = geos['plane']
+
+            return grid
 
 class NodeFile(NodeContainer):
     """
@@ -526,6 +580,12 @@ class NodeFile(NodeContainer):
         glyph.__clear_temp_nodes__()
         return self
 
+    def create_node(self, parent_node=None, tag_text: str = "", tag_mode: int = 0, template=None):
+        if parent_node is None:
+            return super(NodeFile, self).create_node(self.main_grid, tag_text, tag_mode, template)
+        else:
+            return super(NodeFile, self).create_node(parent_node, tag_text, tag_mode, template)
+
     def write_to_csv(self):
         """
         Writes all the parameters of each Node into a node csv file as well as creates a corresponding tag file.
@@ -536,7 +596,6 @@ class NodeFile(NodeContainer):
         Raises:
             RuntimeError
         """
-        # setup to check for duplicate ID's
         ids = {}
         i = 0
         for node in self.nodes:
@@ -608,9 +667,10 @@ class NodeFile(NodeContainer):
                                "0,0,90,270,0,0,0,0,0,0,0,-0,0,0,0,0,1,0,0.1,0,50,101,101,255,0,0,0,0,0,0,"
                                "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,16,0,0,0,0,0,420"))
         # Default Grid
-        self.nodes.append(Node("6,6,6,1,0,0,0,1,0,0,0,0,0,1,360,220,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,0,"
+        self.main_grid = Node("6,6,6,1,0,0,0,1,0,0,0,0,0,1,360,220,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,0,"
                                "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0.1,3,0,0,255,150,0,0,0,0,0,0,0,0,0,0,0,"
-                               "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,420"))
+                               "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,420")
+        self.nodes.append(self.main_grid)
 
 
 class Glyph(NodeContainer):
@@ -808,9 +868,6 @@ class Node:
     Container of properties and property setters for Nodes.
 
     Attributes:
-        geos             - dictionary mapping names of shapes to IDs
-        topos            - dictionary mapping names of topos to IDs
-        colors           - dictionary mapping names of color names to int list
         id               - node ID used for pin tree relationship graph
         type            - node type - 1: Camera; 2: video; 3: Surface;
                          - 4: Points, 5:Pin, 6:Grid

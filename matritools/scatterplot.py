@@ -62,8 +62,11 @@ def scatter_plot(df, ntf, grid_color, key_column, x_column, y_column, z_column, 
     if str(color_column_max) == 'nan':
         color_column_max = None
 
-    main_grid = ntf.get_node_by_id(6)
-    grid = ntf.create_node(main_grid, template=main_grid).set_aux_a(grid_size, grid_size, grid_size)
+    grid_handle, grid = ntf.create_grid(ntf.main_grid, grid_template=ntf.main_grid)
+
+    grid_handle.set_color_by_name(grid_color)
+
+    grid.set_aux_a(grid_size, grid_size, grid_size)
     grid.set_color_by_name(grid_color)
     grid.set_segments(2,2,0)
 
@@ -163,4 +166,7 @@ def scatter_plot(df, ntf, grid_color, key_column, x_column, y_column, z_column, 
         if color_column is not None:
             node.tag_text += ', ' + str(round(row[color_column], 2))
 
-    return grid, target_nodes
+    if target_keys is None:
+        return grid_handle, grid
+    else:
+        return grid_handle, grid, target_nodes
