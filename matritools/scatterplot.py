@@ -41,25 +41,25 @@ def scatter_plot(df, ntf, grid_color, key_column, x_column, y_column, z_column, 
         for key in target_keys:
             target_nodes[key] = []
 
-    if str(z_column) == 'nan':
+    if str(z_column) == 'nan' or str(z_column) == '':
         z_column = None
-    if str(color_column) == 'nan':
+    if str(color_column) == 'nan' or str(color_column) == '':
         color_column = None
-    if str(x_column_min) == 'nan':
+    if str(x_column_min) == 'nan' or str(x_column_min) == '':
         x_column_min = None
-    if str(x_column_max) == 'nan':
+    if str(x_column_max) == 'nan' or str(x_column_max) == '':
         x_column_max = None
-    if str(y_column_min) == 'nan':
+    if str(y_column_min) == 'nan' or str(y_column_min) == '':
         y_column_min = None
-    if str(y_column_max) == 'nan':
+    if str(y_column_max) == 'nan' or str(y_column_max) == '':
         y_column_max = None
-    if str(z_column_min) == 'nan':
+    if str(z_column_min) == 'nan' or str(z_column_min) == '':
         z_column_min = None
-    if str(z_column_max) == 'nan':
+    if str(z_column_max) == 'nan' or str(z_column_max) == '':
         z_column_max = None
-    if str(color_column_min) == 'nan':
+    if str(color_column_min) == 'nan' or str(color_column_min) == '':
         color_column_min = None
-    if str(color_column_max) == 'nan':
+    if str(color_column_max) == 'nan' or str(color_column_max) == '':
         color_column_max = None
 
     grid_handle, grid = ntf.create_grid(ntf.main_grid, grid_template=ntf.main_grid)
