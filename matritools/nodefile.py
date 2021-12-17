@@ -482,8 +482,8 @@ class NodeContainer:
                     create_handle: bool = True, handle_tag_text: str = "", handle_tag_mode: int = 0,
                     handle_template = None):
         """
-        Creates and returns a Node inside of the NodeContainer.
-        If create_handle is True, the created handle and grid are returned. If not, just the grid is returned
+        Creates and returns a Node formatted as a grid, inside of the NodeContainer.
+        If create_handle is True, the created handle and grid are returned. If not, just the grid is returned.
 
         Parameters:
             parent_node (Node: None) - Node that newly created Node will be associated with
@@ -501,7 +501,7 @@ class NodeContainer:
 
         Raises:
             TypeError
-            Run
+            RuntimeError
         """
 
         mu.check_type(create_handle, bool, False)
@@ -581,6 +581,23 @@ class NodeFile(NodeContainer):
         return self
 
     def create_node(self, parent_node=None, tag_text: str = "", tag_mode: int = 0, template=None):
+        """
+        Creates and returns a Node inside of the NodeFile. If parent_node is None, main_grid id is assigned as created
+        nodes parent id.
+
+        Parameters:
+            parent_node (Node: None) - Node that newly created Node will be associated with
+            tag_text (str : "") - text that will be written in the tag file associated with the created Node
+            tag_mode (int : 0) - int representing how the tag should be displayed by default
+            template (Node : None) - Created node will be a copy of template if one is passed.
+
+        Returns:
+            Node
+
+        Raises:
+            TypeError
+            RuntimeError
+        """
         if parent_node is None:
             return super(NodeFile, self).create_node(self.main_grid, tag_text, tag_mode, template)
         else:

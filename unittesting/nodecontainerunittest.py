@@ -357,3 +357,45 @@ def test_create_node_parent_node_not_in_nodes():
         node2 = node_container.create_node(fake_node)
 # endregion
 
+# region create_grid
+def test_create_grid_no_handle_no_():
+    node_container = nf.NodeContainer()
+    node_tuple = node_container.create_grid()
+    assert type(node_tuple) == tuple
+
+def test_create_grid_no_handle():
+    node_container = nf.NodeContainer()
+    grid = node_container.create_grid(create_handle=False)
+    assert type(grid) == nf.Node
+
+def test_create_grid_parent_id():
+    node_container = nf.NodeContainer()
+    grid_handle, grid = node_container.create_grid()
+    assert grid_handle.id == grid.parent_id
+
+def test_create_grid_grid_properties():
+    node_container = nf.NodeContainer()
+    grid_handle, grid = node_container.create_grid()
+    assert grid.type == 6 and grid.topo == nf.topos['plane'] and grid.geometry == nf.geos['plane']
+
+def test_create_grid_templates():
+    node_container = nf.NodeContainer()
+    grid_handle, grid = node_container.create_grid()
+
+    grid.set_segments(500)
+    grid_handle.color_a = 100
+
+    new_grid_handle, new_grid = node_container.create_grid(grid_template=grid, handle_template=grid_handle)
+    assert new_grid_handle.color_a == grid_handle.color_a and grid.segments_x == new_grid.segments_x
+
+def test_create_grid_template_not_equal():
+    node_container = nf.NodeContainer()
+    grid_handle, grid = node_container.create_grid()
+
+    grid.set_segments(500)
+    grid_handle.color_a = 100
+
+    new_grid_handle, new_grid = node_container.create_grid(grid_template=grid, handle_template=grid_handle)
+    assert grid_handle.id != new_grid_handle.id and grid.id != new_grid.id
+# endregion
+

@@ -19,6 +19,7 @@ Derived Classes:
    get_nodes_by_parent_id <nodecontainer-get_nodes_by_parent_id>
    make_link <nodecontainer-make_link>
    create_node <nodecontainer-create_node>
+   create_grid <nodecontainer-create_grid>
    add_glyph <nodecontainer-add_glyph>
    to_dataframe <nodecontainer-to_dataframe>
    unselect_all <nodecontainer-unselect_all>

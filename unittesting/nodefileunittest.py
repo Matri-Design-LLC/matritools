@@ -128,3 +128,16 @@ def test_add_glyph_bad_input_copy_glyph():
         node_container = nf.NodeContainer()
         node_container.add_glyph(glyph, '0', 'a')
 # endregion
+
+# region create_node
+def test_create_node_no_parent_node():
+    ntf = nf.NodeFile('test')
+    node = ntf.create_node()
+    assert node.parent_id == ntf.main_grid.id
+
+def test_create_node_with_parent_node():
+    ntf = nf.NodeFile('test')
+    parent_node = ntf.create_node()
+    node = ntf.create_node(parent_node)
+    assert node.parent_id == parent_node.id
+# endregion
