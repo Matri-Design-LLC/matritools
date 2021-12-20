@@ -461,6 +461,9 @@ def get_node_indexes(node_file: str, tag_file: str):
     for index, row in tag_df.iterrows():
         records[row['record_id']] = row['title']
 
+    i = 0
     for index, row in node_df.iterrows():
         if row['ext_record_id'] in records.keys():
-            print(str(index) + ": " + records[row['ext_record_id']])
+            if row['np_node_id'] > 7:
+                print(str(i) + ": " + records[row['ext_record_id']])
+                i += 1

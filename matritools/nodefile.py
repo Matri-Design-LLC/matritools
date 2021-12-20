@@ -576,6 +576,8 @@ class NodeFile(NodeContainer):
             TypeError
             RuntimeError
         """
+        if parent_id == 0:
+            parent_id = self.main_grid.id
         super(NodeFile, self).add_glyph(glyph, parent_id, copy_glyph)
         glyph.__clear_temp_nodes__()
         return self
@@ -855,8 +857,8 @@ class Glyph(NodeContainer):
 
         df = pd.read_csv(csv_file_name)
         df = df.applymap(lambda cell: int(cell) if str(cell).endswith('.0') else cell)
-
-        root_found = False
+        root_ids = []
+        length = 0
 
         for index, row in df.iterrows():
             # build Node from row
@@ -866,17 +868,18 @@ class Glyph(NodeContainer):
             line = line[:len(line) - 1]
             node = Node(line)
 
-            if root_found:
-                if node.parent_id == 0:
-                    print(mu.WARNING + \
-                          'Glyph has more than one root node! '
-                          'If this is not by mistake, be sure to manage them properly.' + mu.ENDC)
-            else:
-                if node.parent_id == 0:
-                    root_found = True
+            if node.parent_id == 0 and node.id > 7:
+               root_ids.append(f'Index: {length}, ID: {node.id}\n\t')
 
             if node.id not in range(8):
                 self.nodes.append(node)
+                length += 1
+
+        if len(root_ids) > 1:
+            print(mu.WARNING + \
+                  'Glyph has more than one root node! '
+                  'If this is not by mistake, be sure to manage them properly.' + mu.ENDC + \
+                  'Root Nodes:\n' + str(root_ids))
 
         self.__make_ids_consecutive__(8)
 

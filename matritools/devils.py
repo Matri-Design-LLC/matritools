@@ -2,10 +2,10 @@ from matritools import nodefile as nf, utils as mu
 import json
 import pandas as pd
 
-min_player_height = 60
+min_player_height = 64
 max_player_height = 84
-min_player_weight = 120
-max_player_weight = 300
+min_player_weight = 150
+max_player_weight = 275
 min_player_age = 17
 max_player_age = 50
 
@@ -15,9 +15,9 @@ scout_report_limit = 10
 scout_offset = - 175
 
 # player profile
-age_color_scalar = mu.make_interpolator(15, 60, 0, 127, True, True, 0)
-height_cylinder_scalar = mu.make_interpolator(40, 100, 0.1, 1, True, True, 0)
-weight_cylinder_scalar = mu.make_interpolator(75, 300, 0.1, 1, True, True, 0)
+age_color_scalar = mu.make_interpolator(min_player_age, max_player_age, 0, 127, True, True, 0)
+height_cylinder_scalar = mu.make_interpolator(min_player_height, max_player_height, 0.1, 1, True, True, 0)
+weight_cylinder_scalar = mu.make_interpolator(min_player_weight, max_player_weight, 0.1, 1, True, True, 0)
 
 # scouting report
 nhl_scalar = mu.make_interpolator(0, 8, 0.25, 1.85, True, True, 0)
