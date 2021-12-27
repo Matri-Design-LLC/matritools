@@ -748,7 +748,7 @@ class Player:
         self.technical_z_score = player_dict['Technical Z Score']
         self.athleticism_z_score = player_dict['Athleticism Z Score']
         self.puck_handling_z_score = player_dict['Puck Handling Z Score']
-        self.shot_z_score = player_dict['Shot']
+        self.shot_z_score = player_dict['Shot Z Score']
         self.total_skills_z_score = player_dict['Total Skills Z Score']
 
         self.bta_individual_z_score = player_dict['BTA Individual Z Score']

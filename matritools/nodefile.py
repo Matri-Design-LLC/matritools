@@ -126,6 +126,9 @@ class NodeContainer:
     def __init__(self):
         self.nodes = []
 
+    def __getitem__(self, item):
+        return self.nodes[item]
+
     def length(self):
         """
         Returns the number of Nodes in this NodeContainer.
