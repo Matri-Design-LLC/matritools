@@ -1,5 +1,5 @@
-cosine
-------
+line_function
+-------------
 Creates a sine function with pre set parameters.
 
 Y = round({sin([x + x_offset] * [pi / increments] * frequency) * amplitude} + y_offset, decimal_place)

@@ -37,7 +37,7 @@ Let's make a simple 3D bar graph to show the data of each person.
 
 Let us represent a data values by adjusting the :variable:`scale` of each of the cylinder in the middle.
 
-Let the :variable:`height' or :variable:`scale_z' represent the :variable:`height`, and :variable:`scale_x`
+Let the :variable:`height` or :variable:`scale_z` represent the :variable:`height`, and :variable:`scale_x`
 and :variable:`scale_y` represent :variable:`weight` and finally, let the :variable:`color` represent age.
 
 Each person has a number of cats and or dogs, given by how many colors were list of their cats or dogs.
