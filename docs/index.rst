@@ -21,13 +21,15 @@ as well as commonly used data manipulation functions used by Matri Design LLC.
 .. toctree::
    :maxdepth: 2
 
-   Getting Started <gettingstarted>
-   NodeFileGlobals <nodefileglobals>
-   NodeContainer <nodecontainer>
-   NodeFile <nodefile>
-   AntzGlyph <glyph>
-   NodeFileRow <node>
-   utils
-   dataexploration
+   examples/gettingstarted
+   nodefileglobals
+   nodecontainer/nodecontainer
+   nodefile/nodefile
+   glyph/glyph
+   node/node
+   channelfile/channelfile
+   graphfunctions/graphfunctions
+   utils/utils
+   dataexploration/dataexploration
 
 
