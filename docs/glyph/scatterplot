@@ -1,0 +1,3 @@
+scatterplot
+
+Call the nodes marking the edges of the cube of the scatterplot space with [sp.corner_cube_template]
