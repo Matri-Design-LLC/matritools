@@ -24,6 +24,10 @@ palette_id = 6
 grid_size = 25
 dot_size = 0.5
 
+corner_cube_template = nf.Node()
+corner_cube_template.geometry = nf.geos['cube']
+corner_cube_template.set_color_by_name('cyan')
+
 def set_mins(x, y, z, color):
     global x_column_min, y_column_min, z_column_min, color_column_min
     x_column_min = x
@@ -99,9 +103,7 @@ def scatter_plot(df, ntf, grid_color, key_column, x_column, y_column, z_column, 
         color_scalar = mu.make_interpolator(color_column_min, color_column_max, color_id_min, color_id_max, clamp_color, True, color_id_min)
 
     def create_cube_corner(x, y, z, tag):
-        node = ntf.create_node(grid)
-        node.geometry = nf.geos['cube']
-        node.set_color_by_name('cyan')
+        node = ntf.create_node(grid, template=corner_cube_template)
         node.set_translate(x,y,z)
         node.set_tag(tag, 0)
 

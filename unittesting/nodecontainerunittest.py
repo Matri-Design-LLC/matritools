@@ -103,23 +103,6 @@ def test_get_nodes_of_branch_level():
     assert results == [10, 11, 14, 15]
 # endregion
 
-# region remove nodes of branch level
-def test_remove_nodes_of_branch_level():
-    test_glyph = nf.Glyph("Test4.csv", False, False)
-    node_container = nf.NodeContainer()
-    for node in test_glyph.nodes:
-        node_container.nodes.append(node)
-    node_container.remove_nodes_of_branch_level(3)
-    nodes = node_container.get_nodes_of_branch_level(3)
-
-    results = []
-
-    for node in nodes:
-        results.append(node.id)
-
-    assert results == []
-# endregion
-
 # region unselect all
 def test_unselect_all():
     node_container = nf.NodeContainer()
@@ -327,9 +310,9 @@ def test_create_node_with_parent():
 def test_create_node_with_template():
     node_container = nf.NodeContainer()
     node1 = node_container.create_node()
-    node1.tag_mode = 1
+    node1.scale_x = 6
     node2 = node_container.create_node(template=node1)
-    assert node2.id != node1.id and node1.tag_mode == node2.tag_mode
+    assert node2.id != node1.id and node1.scale_x == node2.scale_x
 
 def test_create_node_bad_input_parent_node():
     with pytest.raises(TypeError):

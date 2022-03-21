@@ -440,6 +440,10 @@ def test_set_color_by_name_bad_input_invalid_color():
 
 def test_set_color_by_name_return_self():
     assert test_nfr.set_color_by_name("red") == test_nfr
+
+def test_set_color_by_name_color_a():
+    test_nfr.set_color_by_name("red", 100)
+    assert test_nfr.color_a == 100
 # endregion
 
 # region color by hex
@@ -474,6 +478,10 @@ def test_set_color_by_hex_bad_input_too_many_digits():
 
 def test_set_color_by_hex_return_self():
     assert test_nfr.set_color_by_hex("#FF0000") == test_nfr
+
+def test_set_color_by_hex_color_a():
+    test_nfr.set_color_by_hex("#FF0000", 100)
+    assert test_nfr.color_a == 100
 # endregion
 
 # region color by id

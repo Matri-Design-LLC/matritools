@@ -164,7 +164,7 @@ class NodeContainer:
 
     def get_next_id(self):
         """
-            Returns the the last id + 1, Returns 1 if empty.
+            Returns the last id + 1, Returns 1 if empty.
 
             Parameters:
                 None
@@ -239,26 +239,6 @@ class NodeContainer:
                 result.append(node)
         return result
 
-    def remove_nodes_of_branch_level(self, branch_level: int):
-        """
-        Removes all Nodes of a given branch level.
-
-        Parameters:
-            branch_level (int) - branch level of all Nodes to be removed
-
-        Returns:
-            self
-
-        Raise:
-            TypeError
-        """
-        mu.check_type(branch_level, int)
-        nodes_to_be_removed = self.get_nodes_of_branch_level(branch_level)
-
-        for node in nodes_to_be_removed:
-            self.nodes.remove(node)
-        return self
-
     def unselect_all(self):
         """
         Changes the selected property of all NodeContainer's Nodes to 0.
@@ -312,6 +292,7 @@ class NodeContainer:
         """
         for node in self.nodes:
             node.set_id(node.id)
+        return self
 
     def to_dataframe(self):
         """
@@ -357,9 +338,9 @@ class NodeContainer:
         if (link_node_a == link_node_b):
             raise RuntimeError("link_node_a and link_node_b cannot be the same")
         if self.get_node_by_id(link_node_a.id) is None:
-            raise RuntimeError("link_node_a (" + str(link_node_a) + ") must be an existing Node.")
+            raise RuntimeError("link_node_a must be an existing Node within the container.")
         if self.get_node_by_id(link_node_b.id) is None:
-            raise RuntimeError("link_node_b (" + str(link_node_b) + ") must be an existing Node.")
+            raise RuntimeError("link_node_b must be an existing Node within the container.")
 
         # Create link
         link = self.create_node(link_node_a)
@@ -474,8 +455,7 @@ class NodeContainer:
                 pass
             node.parent_id = copy.deepcopy(parent_node.id)
             node.branch_level = parent_node.branch_level + 1
-        if tag_text != "":
-            node.set_tag(tag_text, int(tag_mode))
+        node.set_tag(tag_text, int(tag_mode))
         node.set_id(self.get_next_id())
 
         self.nodes.append(node)
@@ -493,7 +473,7 @@ class NodeContainer:
             grid_tag_text (str : "") - text that will be written in the tag file associated with the created grid
             grid_tag_mode (int : 0) - int representing how the grid's tag should be displayed by default
             grid_template (Node : None) - Created grid will be a copy of template if one is passed.
-            create_handle (bool : True) - should the grid be attached to a handle?
+            create_handle (bool : True) - Should the grid be attached to a handle?
             handle_tag_text (str : "") - text that will be written in the tag file associated with the created handle
             handle_tag_mode (int : 0) - int representing how the handle tag should be displayed by default
             handle_template (Node : None) - Created handle will be a copy of template if one is passed.
@@ -554,7 +534,7 @@ class NodeFile(NodeContainer):
         # Error checking
         mu.check_type(file_name, str)
         if file_name == "" or file_name is None:
-            raise RuntimeError("NodeFile constructed without a name")
+            raise RuntimeError("NodeFile cannot be constructed without a name")
 
         super(NodeFile, self).__init__()
         self.__node_file_name__ = file_name
@@ -664,6 +644,7 @@ class NodeFile(NodeContainer):
                 tag_file.write(tag_text)
 
         node_file.close()
+        tag_file.close()
         return self
 
     def __add_initial_nodes__(self):
@@ -704,7 +685,7 @@ class Glyph(NodeContainer):
     def __init__(self, csv_file_name: str = "", unselect_all: bool = True, untag_all: bool = True):
         """
         Parameters:
-            csv_file_name (str: "") - name of the glyph template csv file
+            csv_file_name (str: "") - Name of the glyph template csv file
             unselect_all (bool: True) - Should all Nodes selected mode be 0?
             untag_all (bool: True) - Should all Nodes tag mode be 0?
 
@@ -851,7 +832,7 @@ class Glyph(NodeContainer):
                     raise RuntimeError('A temporary node (id: ' + str(temp_node.id) +
                                        ', tag: ' + temp_node.tag_text +
                                        ') is the parent of a non-temporary node '
-                                       '(id: ' + str(child_node.id) + ', tag: ' + child_node.tag + ')')
+                                       '(id: ' + str(child_node.id) + ', tag: ' + child_node.tag_text + ')')
         for node in self.__temp_nodes__:
             self.nodes.remove(node)
         self.__temp_nodes__.clear()
@@ -1211,7 +1192,7 @@ class Node:
         self.aux_b_x = int(float(values[17]))
         self.aux_b_y = int(float(values[18]))
         self.aux_b_z = int(float(values[19]))
-        self.color_shift = int(float(values[20]))
+        self.color_shift = float(values[20])
         self.rotate_vec_x = float(values[21])
         self.rotate_vec_y = float(values[22])
         self.rotate_vec_z = float(values[23])
@@ -1225,25 +1206,25 @@ class Node:
         self.tag_offset_x = float(values[31])
         self.tag_offset_y = float(values[32])
         self.tag_offset_z = float(values[33])
-        self.rotate_rate_x = int(float(values[34]))
-        self.rotate_rate_y = int(float(values[35]))
-        self.rotate_rate_z = int(float(values[36]))
+        self.rotate_rate_x = float(values[34])
+        self.rotate_rate_y = float(values[35])
+        self.rotate_rate_z = float(values[36])
         self.rotate_x = float(values[37])
         self.rotate_y = float(values[38])
         self.rotate_z = float(values[39])
-        self.scale_rate_x = int(float(values[40]))
-        self.scale_rate_y = int(float(values[41]))
-        self.scale_rate_z = int(float(values[42]))
-        self.translate_rate_x = int(float(values[43]))
-        self.translate_rate_y = int(float(values[44]))
-        self.translate_rate_z = int(float(values[45]))
-        self.translate_vec_x = int(float(values[46]))
-        self.translate_vec_y = int(float(values[47]))
-        self.translate_vec_z = int(float(values[48]))
+        self.scale_rate_x = float(values[40])
+        self.scale_rate_y = float(values[41])
+        self.scale_rate_z = float(values[42])
+        self.translate_rate_x = float(values[43])
+        self.translate_rate_y = float(values[44])
+        self.translate_rate_z = float(values[45])
+        self.translate_vec_x = float(values[46])
+        self.translate_vec_y = float(values[47])
+        self.translate_vec_z = float(values[48])
         self.shader = int(float(values[49]))
         self.geometry = int(float(values[50]))
-        self.line_width = int(float(values[51]))
-        self.point_size = int(float(values[52]))
+        self.line_width = float(values[51])
+        self.point_size = float(values[52])
         self.ratio = float(values[53])
         self.color_id = int(float(values[54]))
         self.color_r = int(float(values[55]))
@@ -1265,12 +1246,12 @@ class Node:
         self.trigger_lo_x = int(float(values[71]))
         self.trigger_lo_y = int(float(values[72]))
         self.trigger_lo_z = int(float(values[73]))
-        self.set_hi_x = int(float(values[74]))
-        self.set_hi_y = int(float(values[75]))
-        self.set_hi_z = int(float(values[76]))
-        self.set_lo_x = int(float(values[77]))
-        self.set_lo_y = int(float(values[78]))
-        self.set_lo_z = int(float(values[79]))
+        self.set_hi_x = float(values[74])
+        self.set_hi_y = float(values[75])
+        self.set_hi_z = float(values[76])
+        self.set_lo_x = float(values[77])
+        self.set_lo_y = float(values[78])
+        self.set_lo_z = float(values[79])
         self.proximity_x = float(values[80])
         self.proximity_y = float(values[81])
         self.proximity_z = float(values[82])
@@ -1454,9 +1435,9 @@ class Node:
                str(int(float(self.scale_rate_x))) + "," + \
                str(int(float(self.scale_rate_y))) + "," + \
                str(int(float(self.scale_rate_z))) + "," + \
-               str(int(float(self.translate_rate_x))) + "," + \
-               str(int(float(self.translate_rate_y))) + "," + \
-               str(int(float(self.translate_rate_z))) + "," + \
+               str(float(self.translate_rate_x)) + "," + \
+               str(float(self.translate_rate_y)) + "," + \
+               str(float(self.translate_rate_z)) + "," + \
                str(int(float(self.translate_vec_x))) + "," + \
                str(int(float(self.translate_vec_y))) + "," + \
                str(int(float(self.translate_vec_z))) + "," + \
@@ -1485,12 +1466,12 @@ class Node:
                str(int(float(self.trigger_lo_x))) + "," + \
                str(int(float(self.trigger_lo_y))) + "," + \
                str(int(float(self.trigger_lo_z))) + "," + \
-               str(int(float(self.set_hi_x))) + "," + \
-               str(int(float(self.set_hi_y))) + "," + \
-               str(int(float(self.set_hi_z))) + "," + \
-               str(int(float(self.set_lo_x))) + "," + \
-               str(int(float(self.set_lo_y))) + "," + \
-               str(int(float(self.set_lo_z))) + "," + \
+               str(float(self.set_hi_x)) + "," + \
+               str(float(self.set_hi_y)) + "," + \
+               str(float(self.set_hi_z)) + "," + \
+               str(float(self.set_lo_x)) + "," + \
+               str(float(self.set_lo_y)) + "," + \
+               str(float(self.set_lo_z)) + "," + \
                str(float(self.proximity_x)) + "," + \
                str(float(self.proximity_y)) + "," + \
                str(float(self.proximity_z)) + "," + \
@@ -1808,7 +1789,7 @@ class Node:
 
         return self
 
-    def set_translate_rate(self, x: int = 0, y: int = 0, z: int = 0):
+    def set_translate_rate(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets translate_rate_x, y, z.
 
@@ -1824,13 +1805,13 @@ class Node:
             TypeError
         """
         # Error checking
-        mu.check_type(x, int)
-        mu.check_type(y, int)
-        mu.check_type(z, int)
+        mu.check_type(x, float)
+        mu.check_type(y, float)
+        mu.check_type(z, float)
 
-        self.translate_rate_x = int(x)
-        self.translate_rate_y = int(y)
-        self.translate_rate_z = int(z)
+        self.translate_rate_x = float(x)
+        self.translate_rate_y = float(y)
+        self.translate_rate_z = float(z)
 
         return self
 
@@ -1890,12 +1871,13 @@ class Node:
 
         return self
 
-    def set_color_by_name(self, color: str):
+    def set_color_by_name(self, color: str, color_a: int = 255):
         """
         Set color with the name of a color as a string.
 
         Parameters:
             color: (str) name of a color i.e 'red'
+            color_a (int : 255)
 
         Returns:
             self
@@ -1905,14 +1887,16 @@ class Node:
         """
         # Error checking
         mu.check_type(color, str, False)
+        mu.check_type(color_a, int)
 
-        return self.set_color(colors[color][0], colors[color][1], colors[color][2])
+        return self.set_color(colors[color][0], colors[color][1], colors[color][2], int(color_a))
 
-    def set_color_by_hex(self, hex_code: str):
+    def set_color_by_hex(self, hex_code: str, color_a: int = 255):
         """
         Sets color by hex code.
         Parameters:
             hex_code: (str) hex_code of a color i.e '#FF0000', Can contain '#' but doesn't have to.
+            color_a (int : 255)
 
         Returns:
             self
@@ -1923,6 +1907,7 @@ class Node:
         """
         # Error checking
         mu.check_type(hex_code, str, False)
+        mu.check_type(color_a, int)
         hex = hex_code.replace('#', '')
         if len(hex) != 6:
             raise ValueError("hex_code must be in form '#FF0000' or 'FF0000'. hex_code received: " + hex_code)
@@ -1956,7 +1941,7 @@ class Node:
         b_hex = hex[4:6:]
         b = (hex_digits[b_hex[0].upper()] * 16) + hex_digits[b_hex[1].upper()]
 
-        return self.set_color(r, g, b)
+        return self.set_color(r, g, b, int(color_a))
 
     def set_color_by_id(self, color_id: int, palette_id: int = None, color_a: int = 255):
         """
@@ -1999,6 +1984,12 @@ class Node:
             None
         """
         return [self.color_r, self.color_g, self.color_b, self.color_a]
+
+    def set_color_by_list(self, list):
+        self.color_r = list[0]
+        self.color_g = list[1]
+        self.color_b = list[2]
+        self.color_a = list[3]
 
     def set_auto_zoom(self, x: int = 0, y: int = 0, z: int = 0):
         """
@@ -2078,7 +2069,7 @@ class Node:
 
         return self
 
-    def set_set_hi(self, x: int = 0, y: int = 0, z: int = 0):
+    def set_set_hi(self, x: float = 0, y: float = 0, z: float = 0):
         """
         Sets hi_x, y, z.
 
@@ -2094,13 +2085,13 @@ class Node:
             TypeError
         """
         # Error checking
-        mu.check_type(x, int)
-        mu.check_type(y, int)
-        mu.check_type(z, int)
+        mu.check_type(x, float)
+        mu.check_type(y, float)
+        mu.check_type(z, float)
 
-        self.set_hi_x = int(x)
-        self.set_hi_y = int(y)
-        self.set_hi_z = int(z)
+        self.set_hi_x = float(x)
+        self.set_hi_y = float(y)
+        self.set_hi_z = float(z)
 
         return self
 
@@ -2150,9 +2141,9 @@ class Node:
         mu.check_type(y, float)
         mu.check_type(z, float)
 
-        self.proximity_x = int(x)
-        self.proximity_y = int(y)
-        self.proximity_z = int(z)
+        self.proximity_x = float(x)
+        self.proximity_y = float(y)
+        self.proximity_z = float(z)
 
         return self
 
