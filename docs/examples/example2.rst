@@ -212,9 +212,7 @@ Final Code::
 
 Final Result:
 
-.. image:: Example_2_Glyph_Template.png
-
-.. image:: Example_2_result.png
+.. image:: Example_2_Result.png
 
 “Standards are always out of date.  That’s what makes them standards.”
 — Alan Bennett
