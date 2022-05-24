@@ -1,7 +1,7 @@
 add_glyph
 ---------
 Appends all Nodes of a glyph to Nodes and manages the glyph's IDs.
-Returns a list of copied Nodes.
+Returns passed glyph (Glyph).
 
 Parameters:
 
@@ -18,7 +18,7 @@ Parameters:
 +------------+-------------------------------------------------+-------------------------------+---------+
 
 Returns:
-    list[Node]
+    Glyph
 
 Raises:
     TypeError

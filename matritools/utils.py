@@ -31,7 +31,7 @@ def create_df_from_json(json_file_name: str):
     with open(json_file_name) as json_data:
         return pd.DataFrame(json.load(json_data))
 
-def create_df_from_json_string(json_string):
+def create_df_from_json_string(json_string: str):
     """
     Crates a dataframe from a json formatted string.
 
@@ -43,14 +43,14 @@ def create_df_from_json_string(json_string):
     """
     return pd.DataFrame(json.load(json_string))
 
-def interpolate_df_column(df,
+def interpolate_df_column(df: pd.DataFrame,
                           column: str,
                           new_min: float,
                           new_max: float,
-                          column_tail: str = "_interpolated",
-                          clamp_value: bool = False,
-                          handle_error: bool = False,
-                          default_value: float = None):
+                          column_tail: str="_interpolated",
+                          clamp_value: bool=False,
+                          handle_error: bool=False,
+                          default_value: float=None):
     """
     Scales the values of a data frame column between obj_scale_min and obj_scale_max.
     Adds the interpolated data into a new column labeled (original column name) + (column_tail) and preserves original

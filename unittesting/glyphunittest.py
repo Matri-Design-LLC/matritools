@@ -81,9 +81,9 @@ def test_create_temp_node_with_parent():
 def test_create_temp_node_with_template():
     glyph = nf.Glyph()
     node1 = glyph.create_node()
-    node1.tag_mode = 1
+    node1.selected = 1
     node2 = glyph.create_temp_node(template=node1)
-    assert node2.id != node1.id and node1.tag_mode == node2.tag_mode
+    assert node2.id != node1.id and node1.selected == node2.selected
 
 def test_create_temp_node_bad_input_parent_node():
     with pytest.raises(TypeError):

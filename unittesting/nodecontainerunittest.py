@@ -122,9 +122,9 @@ def test_unselect_all():
 def test_untag_all():
     node_container = nf.NodeContainer()
     for i in range(5):
-        node_container.create_node().tag_mod = 1
+        node_container.create_node(tag_mode=1)
 
-    node_container.unselect_all()
+    node_container.untag_all()
 
     for node in node_container.nodes:
         if node.tag_mode == 1:

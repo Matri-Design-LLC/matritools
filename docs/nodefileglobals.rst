@@ -157,3 +157,20 @@ colors:
     "golden rod": [218, 165, 32],
 
     "coral": [255, 127, 80]
+
+types:
+    "world": 0,
+
+    "camera": 1,
+
+	"video": 2,
+
+	"surface": 3,
+
+	"point": 4,
+
+    "glyph": 5,
+
+    "grid": 6,
+
+    "link": 7,
