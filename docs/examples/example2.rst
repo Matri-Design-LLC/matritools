@@ -67,8 +67,6 @@ Finding indexes::
 
 Knowing the indexes, we can save references to individual Node's in our code.
 
-.. image:: Example_2_result.png
-
 Define key nodes from your glyph::
 
     root = glyph.nodes[0]
@@ -78,7 +76,7 @@ Define key nodes from your glyph::
     age_rod = glyph.nodes[5]
 
 .. note::
-   In the context,
+   In this context,
 	a::
 
 		glyph.nodes[0]
@@ -213,6 +211,8 @@ Final Code::
     ntf.write_to_csv()
 
 Final Result:
+
+.. image:: Example_2_Glyph_Template.png
 
 .. image:: Example_2_result.png
 
