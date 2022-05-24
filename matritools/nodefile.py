@@ -316,7 +316,7 @@ class NodeContainer:
         column_labels.append("tag_text")
         return pd.DataFrame(data=list_of_lists, columns=column_labels)
 
-    def make_link(self, link_node_a: int, link_node_b: int):
+    def make_link(self, link_node_a: int, link_node_b: int, ratio: float = 0.1):
         """
         Creates a visible link between link_node_a and link_node_b.
         Returns the created Node.
@@ -348,6 +348,7 @@ class NodeContainer:
         link.child_id = link_node_b.id
         link.geometry = geos['cylinder']
         link.topo = 0
+        link.ratio = ratio
 
         return link
 

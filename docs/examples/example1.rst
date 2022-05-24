@@ -70,7 +70,7 @@ Creating Nodes::
         node.set_color_by_name(name_color_legend[name])
 
         # change the geometry of this node to be a sphere
-        node.geometry = node.geos['sphere']
+        node.geometry = nf.geos['sphere']
 
         # establish an x, y, and z coordinate based on scaled values of this person's height, weight, and age
         x_coordinate = row["Age"]
@@ -158,7 +158,7 @@ Final Code::
         node.set_color_by_name(name_color_legend[name])
 
         # change the geometry of this node to be a sphere
-        node.geometry = node.geos['sphere']
+        node.geometry = nf.geos['sphere']
 
         # establish an x, y, and z coorinate based on scaled values of this person's height, weight, and age
         x_coordinate = age_scalar(row["Age"])

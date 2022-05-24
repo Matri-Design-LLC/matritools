@@ -67,6 +67,8 @@ Finding indexes::
 
 Knowing the indexes, we can save references to individual Node's in our code.
 
+.. image:: Example_2_result.png
+
 Define key nodes from your glyph::
 
     root = glyph.nodes[0]
@@ -74,6 +76,19 @@ Define key nodes from your glyph::
     height_rod = glyph.nodes[3]
     bank_rod = glyph.nodes[4]
     age_rod = glyph.nodes[5]
+
+.. note::
+   In the context,
+	a::
+
+		glyph.nodes[0]
+
+	is the same as ...
+
+	b::
+
+		glyph[0]
+
 
 Now that we are familiar with our node file. Lets establish our :variable:`Glyph` object,
 make some scalars and define how far apart we want to space our glyphs.
