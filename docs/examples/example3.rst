@@ -333,8 +333,8 @@ Final Code::
 
 Final Result:
 
-.. image:: Example_3_final_1.png
-.. image:: Example_3_final_2.png
+.. image:: Example_3_Final_1.png
+.. image:: Example_3_Final_2.png
 
 “It’s hardware that makes a machine fast.  It’s software that makes a fast machine slow.”
 — Craig Bruce
