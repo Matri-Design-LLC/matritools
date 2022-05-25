@@ -4,3 +4,7 @@ from .graphfunctions import *
 from .dataexploration import *
 from .utils import *
 from .devils import *
+from .glyph import *
+from .nodecontainer import *
+from .node  import *
+from .nodefileglobals import *

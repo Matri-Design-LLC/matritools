@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import List
 import pandas as pd
 
 def print_df_column_set(column_series, print_set: bool = False):
@@ -38,7 +40,7 @@ def get_df_column_frequency_by_value(column_series):
             result[value] = 1
     return result
 
-def explore_df(df):
+def explore_df(df: pd.DataFrame) -> pd:
     """
     Returns the result of df.describe() with an added row describe the number of unique values per parameter.
 

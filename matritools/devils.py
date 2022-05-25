@@ -1,4 +1,4 @@
-from matritools import nodefile as nf, utils as mu
+from matritools import nodefile as nf, glyph as g, utils as mu
 import json
 import pandas as pd
 
@@ -149,13 +149,13 @@ number_to_nhl_grade = {
 
 # region set up glyph and NodeFile---------------------------------------
 try:
-    player_glyph = nf.Glyph('../glyphs/amateur_player/am_player_profile_v2_template_node.csv')
-    scouting_report_mod = nf.Glyph('../glyphs/amateur_player/am_player_scouting_report_mod_template_node.csv')
-    game_stats_mod = nf.Glyph('../glyphs/amateur_player/am_player_game_stats_mod_node.csv')
-    game_ratings_mod = nf.Glyph('../glyphs/amateur_player/am_player_game_ratings_mod_node.csv')
-    scout_coverage_mod = nf.Glyph('../glyphs/amateur_player/am_player_scout_coverage_mod_node.csv')
-    scout_report_glyph = nf.Glyph('../glyphs/amateur_player/scout_report_template.csv')
-    bta_mod = nf.Glyph('../glyphs/amateur_player/player_bta_mode_v2_node.csv')
+    player_glyph = g.Glyph('../glyphs/amateur_player/am_player_profile_v2_template_node.csv')
+    scouting_report_mod = g.Glyph('../glyphs/amateur_player/am_player_scouting_report_mod_template_node.csv')
+    game_stats_mod = g.Glyph('../glyphs/amateur_player/am_player_game_stats_mod_node.csv')
+    game_ratings_mod = g.Glyph('../glyphs/amateur_player/am_player_game_ratings_mod_node.csv')
+    scout_coverage_mod = g.Glyph('../glyphs/amateur_player/am_player_scout_coverage_mod_node.csv')
+    scout_report_glyph = g.Glyph('../glyphs/amateur_player/scout_report_template.csv')
+    bta_mod = g.Glyph('../glyphs/amateur_player/player_bta_mode_v2_node.csv')
 
     # endregion--------------------------------------------------------------
 

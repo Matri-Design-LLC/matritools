@@ -1,4 +1,4 @@
-import matritools.nodefile as nf
+import matritools as mt
 import pytest
 
 test_property_string = '1,2,3,4,5,6,7,8,9,10,' \
@@ -16,29 +16,29 @@ test_property_string = '1,2,3,4,5,6,7,8,9,10,' \
 
 def test_empty_construction():
     try:
-        nf.Node()
+        mt.Node()
     except Exception as exc:
         assert False, exc
 
 
 def test_construct_with_less_than_94_values():
     with pytest.raises(RuntimeError):
-        nf.Node('0')
+        mt.Node('0')
 
 
 def test_construct_with_more_than_94_values():
     with pytest.raises(RuntimeError):
-        nf.Node(test_property_string + ',95')
+        mt.Node(test_property_string + ',95')
 
 
 def test_proper_construction():
     try:
-        nf.Node(test_property_string)
+        mt.Node(test_property_string)
     except Exception as exc:
         assert False, exc
 
 
-test_nfr = nf.Node(test_property_string)
+test_nfr = mt.Node(test_property_string)
 
 
 def test_to_string():
