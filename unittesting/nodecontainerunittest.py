@@ -5,8 +5,8 @@ import pytest
 def test_empty_constructor():
     try:
         mt.NodeContainer()
-    except Exception:
-        assert False, 'Constructor raised exception'
+    except Exception as exec:
+        assert False, 'Constructor raised exception.\n' + exec
 # endregion
 
 # region length

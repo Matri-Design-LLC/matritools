@@ -1,0 +1,27 @@
+RUN TESTS
+
+1. Open terminal
+2. Activate a virtual environment with pytest and matritools installed
+3. Navigate to unittesting folder
+4. type "pytest name_of_unit_test.py"
+
+WRITE TESTS
+
+define a function starting with "test_"
+i.e:
+def test_my_unit_test():
+	# your code here
+
+NORMAL TEST
+	# result = result_of_your_test()
+	# assert result == your_expected_result
+
+TEST THAT EXCEPTION WAS NOT RAISED
+	try:
+        # your test
+    except Exception as exec:
+        assert False, 'Your message here.\n' + exec
+
+TEST THAT EXCEPTION WAS RAISED
+	 with pytest.raises(ErrorYoureTestingFor):
+        # your test

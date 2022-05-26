@@ -148,7 +148,7 @@ class NodeFile(nc.NodeContainer):
 		
 		# write headers
 		tag_file.write("id,record_id,table_id,title,description\n")
-		node_file.write(node_file_header)
+		node_file.write(self.node_file_header)
 		
 		# write tag and node rows
 		taginc = 1
