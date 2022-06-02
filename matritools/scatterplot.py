@@ -1,5 +1,5 @@
 import pandas as pd
-from matritools import nodefile as nf, utils as mu, node, nodefileglobals as globals
+from matritools import utils as mu, node, nodefileglobals as globals
 
 x_column_min = None
 x_column_max = None
