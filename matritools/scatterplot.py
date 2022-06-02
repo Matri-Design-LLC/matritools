@@ -1,5 +1,5 @@
 import pandas as pd
-from matritools import nodefile as nf, utils as mu, node
+from matritools import nodefile as nf, utils as mu, node, nodefileglobals as globals
 
 x_column_min = None
 x_column_max = None
@@ -26,7 +26,7 @@ dot_size = 0.5
 default_sphere_color = None
 
 corner_cube_template = node.Node()
-corner_cube_template.geometry = nf.geos['cube']
+corner_cube_template.geometry = globals.geos['cube']
 corner_cube_template.set_color_by_name('cyan')
 
 def set_mins(x, y, z, color):
@@ -153,7 +153,7 @@ def scatter_plot(df, ntf, grid_color, key_column, x_column, y_column, z_column, 
 				target_nodes[row[key_column]].append(node)
 		if color_column is not None:
 			node.set_color_by_id(color_scalar(row[color_column]), palette_id)
-		node.geometry = nf.geos['sphere']
+		node.geometry = globals.geos['sphere']
 		
 		x = pos_x_scalar(row[x_column])
 		y = pos_y_scalar(row[y_column])
