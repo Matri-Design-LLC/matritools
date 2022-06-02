@@ -1,5 +1,6 @@
+from __future__ import annotations
 import pandas as pd
-from matritools import utils as mu, node, nodefileglobals as globals
+from matritools import utils as mu, node, nodefileglobals as globals, nodefile as nf
 
 x_column_min = None
 x_column_max = None
@@ -36,7 +37,8 @@ def set_mins(x, y, z, color):
     z_column_min = z
     color_column_min = color
 
-def scatter_plot(df, ntf, grid_color, key_column, x_column, y_column, z_column, color_column, common_tag, target_keys=None):
+def scatter_plot(df: pd.DataFrame, ntf: nf.NodeFile, grid_color: str, key_column: str, x_column: str, y_column: str,
+				 z_column: str=None, color_column: str=None, common_tag: str="", target_keys: List[str]=None):
 	global x_column_min, x_column_max, y_column_min, y_column_max, z_column_min, z_column_max, \
 		color_column_min, color_column_max
 	

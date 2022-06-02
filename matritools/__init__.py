@@ -8,3 +8,4 @@ from .glyph import *
 from .nodecontainer import *
 from .node  import *
 from .nodefileglobals import *
+from .scatterplot import *
