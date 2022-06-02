@@ -1,5 +1,5 @@
 import pandas as pd
-from matritools import nodefile as nf, utils as mu
+from matritools import nodefile as nf, utils as mu, node
 
 x_column_min = None
 x_column_max = None
@@ -25,7 +25,7 @@ grid_size = 25
 dot_size = 0.5
 default_sphere_color = None
 
-corner_cube_template = nf.Node()
+corner_cube_template = node.Node()
 corner_cube_template.geometry = nf.geos['cube']
 corner_cube_template.set_color_by_name('cyan')
 

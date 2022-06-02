@@ -231,7 +231,7 @@ class Node(fc.FrozenClass):
 		self.hide = 0  # hides the plot if set to 1
 		self.freeze = 0  # freezes the plot if set to 1
 		self.topo = 3  # topology type …uses KML coordinates
-		self.facet = 0  # facet node belongs to, such as which side of a cube
+		self.facet = 1  # facet node belongs to, such as which side of a cube
 		
 		# auto-zooms plots to keep in bounds of the screen
 		self.auto_zoom_x = 0
