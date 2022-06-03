@@ -196,8 +196,7 @@ Is this tutorial just for fun? Not exactly. Let's discuss a practical applicatio
 
 First, adding glyphs to glyphs doesn't just apply to glyphs made entirly in code.
 You can recall from previous examples that glyphs can be made from node csv files and there may be times where you want to combine two files.
-If you have a suite of glyphs that are almost the same but differ by one or more pieces.
-You could seperate the pieces that change into seperate glyphs.
+If you have a suite of glyphs that are almost the same but differ by one or more pieces, you could separate the pieces that change into seperate glyphs.
 This way changes to the base glyph don't need to be reapplied to all of its copies.
 We can call this modular glyph building.
 
