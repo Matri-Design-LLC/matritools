@@ -8,7 +8,7 @@ Import::
 
     import pandas as pd
     import copy
-    from matritools import nodefile as nf, utils as mu
+    import matrtiools as mt
 
 Next, we can create some data, load it into a :variable:`pandas DataFrame` and establish a
 :variable:`NodeFile`.
@@ -27,7 +27,7 @@ Create Data::
 
     df = pd.DataFrame(my_data)
 
-    ntf = nf.NodeFile("Example 3")
+    ntf = mt.NodeFile("Example 3")
 
 Now lets create a glyph template inside of antz to represent data points of one person.
 
@@ -61,9 +61,9 @@ that will tell us the index numbers of each node.
 
 Finding indexes::
 
-    from matritools import utils as mu
+    import matritools as mt
 
-    mu.get_node_indexes('Example_2_Template.csv', 'Example_2_Template_tag.csv')
+    mt.get_node_indexes('Example_2_Template.csv', 'Example_2_Template_tag.csv')
 
     # output:
     # 0 : root
@@ -90,14 +90,14 @@ make some scalars and define how far apart we want to space our glyphs.
 
 Set up :variable:`Glyph`, scalars and unit distance::
 
-    glyph = nf.Glyph("Example_3_Glyph_Template.csv")
+    glyph = mt.Glyph("Example_3_Glyph_Template.csv")
 
     # make a reusable function that scales a value originally between the min and max height to be within 0.1, 1.
     # this is used to change all of the values of height to be within 0.1, 1 but keep the same relative distance between
     # each value
-    height_cylinder_z_scalar = mu.make_df_column_interpolator(df['Height'], 0.1, 1)
-    weight_cylinder_xy_scalar = mu.make_df_column_interpolator(df['Weight'], 0.1, 1)
-    age_cylinder_color_scalar = mu.make_df_column_interpolator(df['Age'], 0, 127)
+    height_cylinder_z_scalar = mt.make_df_column_interpolator(df['Height'], 0.1, 1)
+    weight_cylinder_xy_scalar = mt.make_df_column_interpolator(df['Weight'], 0.1, 1)
+    age_cylinder_color_scalar = mt.make_df_column_interpolator(df['Age'], 0, 127)
 
     # used to space glyphs apart
     unit_distance = 50
@@ -109,7 +109,7 @@ Now, lets set up our grids::
 
     # create_node() returns an instance of a Node and adds it to the NodeFile
     male_grid = ntf.create_node(None, 'Male Grid')
-    male_grid.geometry = nf.geos["plane"]
+    male_grid.geometry = mt.geos["plane"]
 
     # when adding Nodes manually to a NodeFile, we must manage the ID's
     # to avoid having duplicate ID's in our NodeFile
@@ -207,7 +207,7 @@ Final Code::
 
     import pandas as pd
     import copy
-    from matritools import nodefile as nf, utils as mu
+    import matritools as mt
 
     my_data = {
         'Name'     : ['Kevin',              'Lisa', 'Ranir',     'Abigale', 'Robert',              'Fran'],
@@ -221,16 +221,16 @@ Final Code::
 
     df = pd.DataFrame(my_data)
 
-    ntf = nf.NodeFile("Example 3")
+    ntf = mt.NodeFile("Example 3")
 
-    glyph = nf.Glyph("Example_3_Glyph_Template.csv")
+    glyph = mt.Glyph("Example_3_Glyph_Template.csv")
 
     # make a reusable function that scales a value originally between the min and max height to be within 0.1, 1.
     # this is used to change all of the values of height to be within 0.1, 1 but keep the same relative distance between
     # each value
-    height_cylinder_z_scalar = mu.make_df_column_interpolator(df['Height'], 0.1, 1)
-    weight_cylinder_xy_scalar = mu.make_df_column_interpolator(df['Weight'], 0.1, 1)
-    age_cylinder_color_scalar = mu.make_df_column_interpolator(df['Age'], 0, 127)
+    height_cylinder_z_scalar = mt.make_df_column_interpolator(df['Height'], 0.1, 1)
+    weight_cylinder_xy_scalar = mt.make_df_column_interpolator(df['Weight'], 0.1, 1)
+    age_cylinder_color_scalar = mt.make_df_column_interpolator(df['Age'], 0, 127)
 
     # used to space glyphs apart
     unit_distance = 50
@@ -240,7 +240,7 @@ Final Code::
 
     # create_node() returns an instance of a Node and adds it to the NodeFile
     male_grid = ntf.create_node()
-    male_grid.geometry = nf.geos["plane"]
+    male_grid.geometry = mt.geos["plane"]
     male_grid.set_color_by_name("blue")
     male_grid.set_translate(-75)
     male_grid.set_scale(0.25, 0.25, 0.25)

@@ -8,7 +8,7 @@ First, import from required libraries
 Import::
 
     import pandas as pd
-    from matritools import nodefile as nf, utils as mu
+    import matritools as mt
 
 Next, we can create some data, load it into a :variable:`pandas DataFrame` and establish a
 :variable:`NodeFile`.
@@ -25,7 +25,7 @@ Create Data::
 
     df = pd.DataFrame(my_data)
 
-    ntf = nf.NodeFile("Example 1")
+    ntf = mt.NodeFile("Example 1")
 
 Then, think about how you want to display data within Antz.
 
@@ -49,7 +49,7 @@ Lets iterate through our data with a for loop and create and modify nodes based 
 Creating Nodes::
 
     # create a dictionary mapping names of people to names of colors
-    name_color_legend = mu.create_column_value_color_legend(df['Name'])
+    name_color_legend = mt.create_column_value_color_legend(df['Name'])
 
     for index, row in df.iterrows():
 
@@ -70,7 +70,7 @@ Creating Nodes::
         node.set_color_by_name(name_color_legend[name])
 
         # change the geometry of this node to be a sphere
-        node.geometry = nf.geos['sphere']
+        node.geometry = mt.geos['sphere']
 
         # establish an x, y, and z coordinate based on scaled values of this person's height, weight, and age
         x_coordinate = row["Age"]
@@ -101,20 +101,20 @@ Create scalar functions::
     # this is used to change all of the values of height to be within 0, 10 but keep the same relative distance between each
     # value
 
-    height_scalar = mu.make_interpolator(min(my_data['Height']), max(my_data['Height']), 0, 10)
+    height_scalar = mt.make_interpolator(min(my_data['Height']), max(my_data['Height']), 0, 10)
 
-    weight_scalar = mu.make_interpolator(min(my_data['Weight']), max(my_data['Weight']), 0.25, 1.5)
+    weight_scalar = mt.make_interpolator(min(my_data['Weight']), max(my_data['Weight']), 0.25, 1.5)
 
-    age_scalar = mu.make_interpolator(min(my_data['Age']), max(my_data['Age']), 0, 10)
+    age_scalar = mt.make_interpolator(min(my_data['Age']), max(my_data['Age']), 0, 10)
 
-    bank_scalar = mu.make_interpolator(min(my_data['Bank Balance']), max(my_data['Bank Balance']), 0, 10)
+    bank_scalar = mt.make_interpolator(min(my_data['Bank Balance']), max(my_data['Bank Balance']), 0, 10)
 
 Now that we have scalar functions, lets see them in action.
 
 Final Code::
 
     import pandas as pd
-    from matritools import nodefile as nf, utils as mu
+    import matritools as mt
 
     my_data = {
         'Name'         : ['Kevin', 'Lisa', 'Ranir', 'Abigale', 'Robert', 'Fran'],
@@ -126,18 +126,18 @@ Final Code::
 
     df = pd.DataFrame(my_data)
 
-    ntf = nf.NodeFile("Example 1")
+    ntf = mt.NodeFile("Example 1")
 
     # make a reusable function that scales a value originally between the min and max height to be within 0, 10.
     # this is used to change all of the values of height to be within 0, 10 but keep the same relative distance between each
     # value
-    height_scalar = mu.make_interpolator(min(my_data['Height']), max(my_data['Height']), 0, 10)
-    weight_scalar = mu.make_interpolator(min(my_data['Weight']), max(my_data['Weight']), 0.25, 1.5)
-    age_scalar = mu.make_interpolator(min(my_data['Age']), max(my_data['Age']), 0, 10)
-    bank_scalar = mu.make_interpolator(min(my_data['Bank Balance']), max(my_data['Bank Balance']), 0, 10)
+    height_scalar = mt.make_interpolator(min(my_data['Height']), max(my_data['Height']), 0, 10)
+    weight_scalar = mt.make_interpolator(min(my_data['Weight']), max(my_data['Weight']), 0.25, 1.5)
+    age_scalar = mt.make_interpolator(min(my_data['Age']), max(my_data['Age']), 0, 10)
+    bank_scalar = mt.make_interpolator(min(my_data['Bank Balance']), max(my_data['Bank Balance']), 0, 10)
 
     # create a dictionary mapping names of people to names of colors
-    name_color_legend = mu.create_column_value_color_legend(df['Name'])
+    name_color_legend = mt.create_column_value_color_legend(df['Name'])
 
     for index, row in df.iterrows():
 
@@ -158,7 +158,7 @@ Final Code::
         node.set_color_by_name(name_color_legend[name])
 
         # change the geometry of this node to be a sphere
-        node.geometry = nf.geos['sphere']
+        node.geometry = mt.geos['sphere']
 
         # establish an x, y, and z coorinate based on scaled values of this person's height, weight, and age
         x_coordinate = age_scalar(row["Age"])

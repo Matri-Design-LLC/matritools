@@ -7,7 +7,7 @@ First, import from required libraries
 Import::
 
     import pandas as pd
-    from matritools import nodefile as nf, utils as mu
+    import matritools as mt
 
 Next, we can create some data, load it into a :variable:`pandas DataFrame` and establish a
 :variable:`NodeFile`.
@@ -24,7 +24,7 @@ Create Data::
 
     df = pd.DataFrame(my_data)
 
-    ntf = nf.NodeFile("Example 2")
+    ntf = mt.NodeFile("Example 2")
 
 Now lets create a glyph template inside of antz to represent data points of one person.
 
@@ -52,9 +52,9 @@ that will tell us the index numbers of each node.
 
 Finding indexes::
 
-    from matritools import utils as mu
+    import matritools as mt
 
-    mu.get_node_indexes('Example_2_Template.csv', 'Example_2_Template_tag.csv')
+    mt.get_node_indexes('Example_2_Template.csv', 'Example_2_Template_tag.csv')
 
     # output:
     # 0 : root
@@ -93,15 +93,15 @@ make some scalars and define how far apart we want to space our glyphs.
 
 Set up :variable:`Glyph`, scalars and unit distance::
 
-    glyph = nf.Glyph("Example_2_Glyph_Template.csv")
+    glyph = mt.Glyph("Example_2_Glyph_Template.csv")
 
     # make a reusable function that scales a value originally between the min and max height to be within 0.1, 1.
     # this is used to change all of the values of height to be within 0.1, 1 but keep the same relative distance between
     # each value
-    height_scalar = mu.make_interpolator(min(my_data['Height']), max(my_data['Height']), 0.1, 1)
-    weight_scalar = mu.make_interpolator(min(my_data['Weight']), max(my_data['Weight']), 0.1, 1)
-    age_scalar = mu.make_interpolator(min(my_data['Age']), max(my_data['Age']), 0.1, 1)
-    bank_scalar = mu.make_interpolator(min(my_data['Bank Balance']), max(my_data['Bank Balance']), 0.1, 1)
+    height_scalar = mt.make_interpolator(min(my_data['Height']), max(my_data['Height']), 0.1, 1)
+    weight_scalar = mt.make_interpolator(min(my_data['Weight']), max(my_data['Weight']), 0.1, 1)
+    age_scalar = mt.make_interpolator(min(my_data['Age']), max(my_data['Age']), 0.1, 1)
+    bank_scalar = mt.make_interpolator(min(my_data['Bank Balance']), max(my_data['Bank Balance']), 0.1, 1)
 
     unit_distance = 20
 
@@ -144,7 +144,7 @@ Modify the glyph::
 Final Code::
 
     import pandas as pd
-    from matritools import nodefile as nf, utils as mu
+    import matritools as mt
 
     my_data = {
         'Name'         : ['Kevin', 'Lisa', 'Ranir', 'Abigale', 'Robert', 'Fran'],
@@ -156,17 +156,17 @@ Final Code::
 
     df = pd.DataFrame(my_data)
 
-    ntf = nf.NodeFile("Example 2")
+    ntf = mt.NodeFile("Example 2")
 
-    glyph = nf.Glyph("Example_2_Glyph_Template.csv")
+    glyph = mt.Glyph("Example_2_Glyph_Template.csv")
 
     # make a reusable function that scales a value originally between the min and max height to be within 0.1, 1.
     # this is used to change all of the values of height to be within 0.1, 1 but keep the same relative distance between
     # each value
-    height_scalar = mu.make_interpolator(min(my_data['Height']), max(my_data['Height']), 0.1, 1)
-    weight_scalar = mu.make_interpolator(min(my_data['Weight']), max(my_data['Weight']), 0.1, 1)
-    age_scalar = mu.make_interpolator(min(my_data['Age']), max(my_data['Age']), 0.1, 1)
-    bank_scalar = mu.make_interpolator(min(my_data['Bank Balance']), max(my_data['Bank Balance']), 0.1, 1)
+    height_scalar = mt.make_interpolator(min(my_data['Height']), max(my_data['Height']), 0.1, 1)
+    weight_scalar = mt.make_interpolator(min(my_data['Weight']), max(my_data['Weight']), 0.1, 1)
+    age_scalar = mt.make_interpolator(min(my_data['Age']), max(my_data['Age']), 0.1, 1)
+    bank_scalar = mt.make_interpolator(min(my_data['Bank Balance']), max(my_data['Bank Balance']), 0.1, 1)
 
     # used to space glyphs apart
     unit_distance = 20
