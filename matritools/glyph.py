@@ -128,7 +128,7 @@ class Glyph(nc.NodeContainer):
 		mu.check_type(starting_id, int)
 		
 		# keys = old IDs, values = new IDs
-		ids = {0: 0}
+		ids = {0: 6, 6:6}
 		if self.nodes[0].parent_id != 0:
 			ids[self.nodes[0].parent_id] = self.nodes[0].parent_id
 		current_id = starting_id
@@ -170,7 +170,6 @@ class Glyph(nc.NodeContainer):
 		self.__temp_nodes__.clear()
 	
 	def __populate_glyph__(self, csv_file_name: str = ""):
-		
 		df = pd.read_csv(csv_file_name)
 		df = df.applymap(lambda cell: int(cell) if str(cell).endswith('.0') else cell)
 		root_ids = []
@@ -184,7 +183,8 @@ class Glyph(nc.NodeContainer):
 			line = line[:len(line) - 1]
 			node = n.Node(line)
 			
-			if node.parent_id == 0 and node.id > 7:
+			if node.parent_id == 0 or 6 and node.id > 6:
+				print(node.id)
 				root_ids.append(f'Index: {length}, ID: {node.id}\n\t')
 			
 			if node.id not in range(8):
