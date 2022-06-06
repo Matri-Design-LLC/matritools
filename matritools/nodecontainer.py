@@ -332,10 +332,8 @@ class NodeContainer(fc.FrozenClass):
 			mu.check_type(tag_mode, int)
 		
 		if template is not None:
-			print(template.tag_mode)
 			mu.check_type(template, n.Node, False)
 			node = copy.deepcopy(template)
-			print(node.tag_mode)
 		else:
 			node = n.Node()
 		
