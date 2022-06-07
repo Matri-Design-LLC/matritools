@@ -303,6 +303,9 @@ def __create_grid__(ntf, grid_color):
 	grid.set_aux_a(grid_size, grid_size, grid_size)
 	grid.set_color_by_name(grid_color)
 	grid.set_segments(2, 2, 0)
+	grid.set_translate(25, 25, 5)
+	
+	grid_handle.topo = globals.topos['plane']
 	
 	return grid_handle, grid
 	
