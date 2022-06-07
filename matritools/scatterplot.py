@@ -312,36 +312,38 @@ def __create_cube_corner__(ntf, grid, grid_color, x, y, z, tag):
 	node.set_translate(x,y,z)
 	node.set_tag(tag, 0)
 	node.set_color_by_name(grid_color)
+	return node
 	
 	
 def __create_cube_corners__(ntf, grid, grid_color, z_column, common_tag):
 	__create_cube_corner__(ntf, grid, grid_color, 0, grid_size + 1, 0, "")
 	
 	if z_column is not None:
-		__create_cube_corner__(ntf, grid, grid_color, -grid_size - 1, -grid_size - 1, 0,
+		c1 = __create_cube_corner__(ntf, grid, grid_color, -grid_size - 1, -grid_size - 1, 0,
 							   common_tag + '(' + str(x_column_min) + ', ' + str(round(y_column_min, 2)) + ', ' + str(
 								   round(z_column_min, 2)) + ')')
-		__create_cube_corner__(ntf, grid, grid_color, grid_size + 1, -grid_size - 1, 0,
+		c2 = __create_cube_corner__(ntf, grid, grid_color, grid_size + 1, -grid_size - 1, 0,
 							   common_tag + '(' + str(x_column_max) + ',' + str(round(y_column_min, 2)) + ' , ' + str(
 								   round(z_column_min, 2)) + ')')
-		__create_cube_corner__(ntf, grid, grid_color, -grid_size - 1, grid_size + 1, 0,
+		c3 = __create_cube_corner__(ntf, grid, grid_color, -grid_size - 1, grid_size + 1, 0,
 							   common_tag + '(' + str(x_column_min) + ',' + str(round(y_column_max, 2)) + ', ' + str(
 								   round(z_column_min, 2)) + ')')
-		__create_cube_corner__(ntf, grid, grid_color, grid_size + 1, grid_size + 1, 0,
+		c4 = __create_cube_corner__(ntf, grid, grid_color, grid_size + 1, grid_size + 1, 0,
 							   common_tag + '(' + str(x_column_max) + ', ' + str(round(y_column_max, 2)) + ', ' + str(
 								   round(z_column_min, 2)) + ')')
-		__create_cube_corner__(ntf, grid, grid_color, -grid_size - 1, -grid_size - 1, grid_size,
+		c5 = __create_cube_corner__(ntf, grid, grid_color, -grid_size - 1, -grid_size - 1, grid_size,
 							   common_tag + '(' + str(x_column_min) + ', ' + str(round(y_column_min, 2)) + ',' + str(
 								   round(z_column_max, 2)) + ')')
-		__create_cube_corner__(ntf, grid, grid_color, grid_size + 1, -grid_size - 1, grid_size,
+		c6 = __create_cube_corner__(ntf, grid, grid_color, grid_size + 1, -grid_size - 1, grid_size,
 							   common_tag + '(' + str(x_column_max) + ', ' + str(round(y_column_min, 2)) + ', ' + str(
 								   round(z_column_max, 2)) + ')')
-		__create_cube_corner__(ntf, grid, grid_color, -grid_size - 1, grid_size + 1, grid_size,
+		c7 = __create_cube_corner__(ntf, grid, grid_color, -grid_size - 1, grid_size + 1, grid_size,
 							   common_tag + '(' + str(x_column_min) + ', ' + str(round(y_column_max, 2)) + ', ' + str(
 								   round(z_column_max, 2)) + ')')
-		__create_cube_corner__(ntf, grid, grid_color, grid_size + 1, grid_size + 1, grid_size,
+		c8 = __create_cube_corner__(ntf, grid, grid_color, grid_size + 1, grid_size + 1, grid_size,
 							   common_tag + '(' + str(x_column_max) + ', ' + str(round(y_column_max, 2)) + ', ' + str(
 								   round(z_column_max, 2)) + ')')
+		__link_corner_cubes__(ntf, grid_color, c1, c2, c3, c4, c5, c6, c7, c8)
 	else:
 		__create_cube_corner__(ntf, grid, grid_color, -grid_size - 1, -grid_size - 1, 0,
 							   common_tag + '(' + str(x_column_min) + ', ' + str(round(y_column_min, 2)) + ')')
@@ -351,7 +353,26 @@ def __create_cube_corners__(ntf, grid, grid_color, z_column, common_tag):
 							   common_tag + '(' + str(x_column_min) + ',' + str(round(y_column_max, 2)) + ')')
 		__create_cube_corner__(ntf, grid, grid_color, grid_size + 1, grid_size + 1, 0,
 							   common_tag + '(' + str(x_column_max) + ', ' + str(round(y_column_max, 2)) + ')')
-		
+	
+
+def __link_corner_cubes__(ntf, grid_color, c1, c2, c3, c4, c5, c6, c7, c8):
+	ntf.make_link(c1, c2).set_color_by_name(grid_color)
+	ntf.make_link(c1, c3).set_color_by_name(grid_color)
+	
+	ntf.make_link(c2, c4).set_color_by_name(grid_color)
+	ntf.make_link(c3, c4).set_color_by_name(grid_color)
+	
+	ntf.make_link(c5, c6).set_color_by_name(grid_color)
+	ntf.make_link(c5, c7).set_color_by_name(grid_color)
+	
+	ntf.make_link(c6, c8).set_color_by_name(grid_color)
+	ntf.make_link(c7, c8).set_color_by_name(grid_color)
+	
+	ntf.make_link(c1, c5).set_color_by_name(grid_color)
+	ntf.make_link(c2, c6).set_color_by_name(grid_color)
+	ntf.make_link(c3, c7).set_color_by_name(grid_color)
+	ntf.make_link(c4, c8).set_color_by_name(grid_color)
+	
 		
 def __make_scalars__(z_column, color_column):
 	pos_x_scalar = mu.make_interpolator(x_column_min, x_column_max, -grid_size, grid_size, clamp_x, True, x_column_min)
