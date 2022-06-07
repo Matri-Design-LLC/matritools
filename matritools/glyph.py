@@ -183,11 +183,10 @@ class Glyph(nc.NodeContainer):
 			line = line[:len(line) - 1]
 			node = n.Node(line)
 			
-			if node.parent_id == 0 or 6 and node.id > 6:
-				print(node.id)
+			if (node.parent_id == 0 or node.parent_id == 6) and node.id > 6:
 				root_ids.append(f'Index: {length}, ID: {node.id}\n\t')
 			
-			if node.id not in range(8):
+			if node.id not in range(7):
 				self.nodes.append(node)
 				length += 1
 		
