@@ -1,5 +1,5 @@
-scatter plot globals
---------------------
+scatter plot
+------------
 
 .. toctree::
    :maxdepth: 2
