@@ -313,11 +313,10 @@ def __check_setter_type__(min, max, clamp):
 	mu.check_type(clamp, bool)
 
 def __reset_default_values__():
-	return
-	set_x_column()
-	set_y_column()
-	set_z_column()
-	set_color_column()
+	set_scatter_x_column()
+	set_scatter_y_column()
+	set_scatter_z_column()
+	set_scatter_color_column()
 
 def __get_min_max_from_plots__(plots):
 	min = math.inf
