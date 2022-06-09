@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List
 import pandas as pd
-from matritools import nodefile as nf
+from matritools import nodefile as nf, nodefileglobals as globals
 from ast import literal_eval
 import json
 import inspect
@@ -374,7 +374,7 @@ def create_column_value_color_legend(column_series: pd.Series) -> dict:
 	"""
 	color_keys = []
 	
-	for color in nf.colors.keys():
+	for color in globals.colors.keys():
 		color_keys.append(color)
 	
 	result = {}
