@@ -39,7 +39,7 @@ Parameters:
 |               | called after each plot is plotted. The function will |                               |         |
 |               | be passed the plotted Node and the                   |                               |         |
 |               | DataFrame.iterrows() series for that DataFrame       |                               |         |
-|               | iteration loop.                                      | function(Node, Series)-> None |         |
+|               | iteration loop.                                      | function(Node, Series)-> None | None    |
 +---------------+------------------------------------------------------+-------------------------------+---------+
 
 Returns:

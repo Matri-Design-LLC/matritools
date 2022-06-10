@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from typing import Tuple, Callable
+from typing import List, Tuple, Callable
 import pandas as pd
 from matritools import utils as mu, node as nd, nodefileglobals as nfg, nodefile as nf
 
@@ -199,6 +199,9 @@ scatter_corner_node_template: nd.Node = nd.Node()
 """
 scatter_corner_node_template.geometry = nfg.geos['cube']
 
+__z_column_min__ = None
+__color_column__ = None
+
 # endregion
 
 
@@ -234,14 +237,14 @@ def scatter_plot_merge_plots(df: pd.DataFrame, ntf: nf.NodeFile, grid_color: str
 	__check_scatter_plot_input__(df, ntf, grid_color, key_column, x_column, y_column, z_column,
 								 None, common_tag, None)
 	grid_handle, grid = __create_grid__(ntf, grid_color)
-	pos_x_scalar, pos_y_scalar, pos_z_scalar, color_scalar = __make_scalars__(z_column, None)
-	__create_cube_corners__(ntf, grid, grid_color, z_column, common_tag)
+	pos_x_scalar, pos_y_scalar, pos_z_scalar, color_scalar = __make_scalars__(__z_column__, None)
+	__create_cube_corners__(ntf, grid, grid_color, __z_column__, common_tag)
 	
 	plots = {}
 	for index, row in df.iterrows():
-		if __bad_scatter_plot_input__(x_column, y_column, z_column, None, row):
+		if __bad_scatter_plot_input__(x_column, y_column, __z_column__, None, row):
 			continue
-		__plot_point_merge__(grid, row, ntf, grid_color, key_column, x_column, y_column, z_column,
+		__plot_point_merge__(grid, row, ntf, grid_color, key_column, x_column, y_column, __z_column__,
 					   common_tag, pos_x_scalar, pos_y_scalar, pos_z_scalar, plots)
 		
 	old_min, old_max = __get_min_max_from_plots__(plots)
@@ -289,14 +292,14 @@ def scatter_plot(df: pd.DataFrame, ntf: nf.NodeFile, grid_color: str, key_column
 	__check_scatter_plot_input__(df, ntf, grid_color, key_column, x_column, y_column, z_column,
 								 color_column, common_tag, node_function)
 	grid_handle, grid = __create_grid__(ntf, grid_color)
-	pos_x_scalar, pos_y_scalar, pos_z_scalar, color_scalar = __make_scalars__(z_column, color_column)
-	__create_cube_corners__(ntf, grid, grid_color, z_column, common_tag)
-	
+	pos_x_scalar, pos_y_scalar, pos_z_scalar, color_scalar = __make_scalars__(__z_column__, __color_column__)
+	__create_cube_corners__(ntf, grid, grid_color, __z_column__, common_tag)
+
 	for index, row in df.iterrows():
-		if __bad_scatter_plot_input__(x_column, y_column, z_column, color_column, row):
+		if __bad_scatter_plot_input__(x_column, y_column, __z_column__, __color_column__, row):
 			continue
-		__plot_point__(grid, row, ntf, grid_color, key_column, x_column, y_column, z_column,
-				 	color_column, common_tag, node_function, pos_x_scalar, pos_y_scalar,
+		__plot_point__(grid, row, ntf, grid_color, key_column, x_column, y_column, __z_column__,
+				 	__color_column__, common_tag, node_function, pos_x_scalar, pos_y_scalar,
 				   	pos_z_scalar, color_scalar)
 		
 	__reset_default_values__()
@@ -304,7 +307,203 @@ def scatter_plot(df: pd.DataFrame, ntf: nf.NodeFile, grid_color: str, key_column
 	return grid_handle, grid
 
 
+def multi_scatter_plot_merge_plots(data_df: pd.DataFrame, input_df: pd.DataFrame, ntf: nf.NodeFile, key_column: str) \
+		-> List[Tuple(Node, Node)]:
+	"""
+	Adds a scatter plot with merged plots to a NodeFile per row in an input_df. input_df should contain most of the
+	parameters to call scatter_plot_merge_plots. input_df must contain column names of data_df.
+	Translates grids to form a grid pattern. Returns a list of tuples containg grid_handles and grids.
+	
+	Paremeters:
+		data_df (DataFrame) - DataFrame to plot points from.
+		input_df (DataFrame) - DataFrame containing rows with column names from data_df and parameters for
+		scatter_plot_merge_plots. DataFrame should have the following column names:
+			grid_color,
+			x_column,
+			y_column,
+			z_column,
+			color_column,
+			common_tag,
+			x_min,
+			x_max,
+			y_min,
+			y_max,
+			z_min,
+			z_max,
+			color_min,
+			color_max
+			
+		Use generate_multi_scatter_plot_input_csv to generate a template csv
+		ntf (NodeFile) - NodeFile to add grid and plots too.
+		key_column(str) - Column name used to uniquley identify each row. The data in this column will be used
+							in tags. Can be None.
+
+	Returns:
+		List[Tuple(Node, Node)]
+		
+	Raises:
+		TypeError
+	"""
+	mu.check_type(data_df, pd.DataFrame)
+	mu.check_type(input_df, pd.DataFrame)
+	__sanitize_input_df__(input_df)
+	mu.check_type(ntf, nf.NodeFile)
+	mu.check_type(key_column, str)
+	
+	x_range = 300
+	
+	grid_max_rows = round(len(input_df) ** 0.5)
+	grid_distance = x_range / grid_max_rows
+	grid_offset = (x_range / 2) * -1
+	
+	grid_row = 0
+	grid_column = 0
+	
+	result = []
+	
+	for index, row in input_df.iterrows():
+		__set_interpolator_min_and_max_from_series__(row)
+		
+		grid_handle, grid = scatter_plot_merge_plots(data_df, ntf, row['grid_color'], key_column, row['x_column'], row['y_column'],
+										 row['z_column'], row['common_tag'])
+		
+		x = (grid_row * grid_distance) + grid_offset
+		y = (grid_column * grid_distance) + grid_offset
+		grid_handle.set_translate(x, y)
+		
+		grid_row += 1
+		if grid_row == grid_max_rows:
+			grid_row = 0
+			grid_column += 1
+	
+		result.append((grid_handle, grid))
+	
+	return result
+
+def multi_scatter_plot(data_df: pd.DataFrame, input_df: pd.DataFrame, ntf: nf.NodeFile, key_column: str,
+					   node_function: Callable[[nd.Node, pd.Series], None]=None)-> List[Tuple(Node, Node)]:
+	"""
+	Adds a scatter plot to a NodeFile per row in an input_df. input_df should contain most of the
+	parameters to call scatter_plot. input_df must contain column names of data_df.
+	Translates grids to form a grid pattern. Returns a list of tuples containg grid_handles and grids.
+
+	Paremeters:
+		data_df (DataFrame) - DataFrame to plot points from.
+		input_df (DataFrame) - DataFrame containing rows with column names from data_df and parameters for
+		scatter_plot_merge_plots. DataFrame should have the following column names:
+			grid_color,
+			x_column,
+			y_column,
+			z_column,
+			color_column,
+			common_tag,
+			x_min,
+			x_max,
+			y_min,
+			y_max,
+			z_min,
+			z_max,
+			color_min,
+			color_max
+
+		Use generate_multi_scatter_plot_input_csv to generate a template csv
+		ntf (NodeFile) - NodeFile to add grid and plots too.
+		key_column(str) - Column name used to uniquley identify each row. The data in this column will be used
+							in tags. Can be None.
+		node_function (function(Node, Series): None) - a user implemented function that takes in a Node and Series.
+													   If the function is not None, it will be called after each plot
+													   is plotted. The function will be passed the plotted Node and the
+													   DataFrame.iterrows() series for that DataFrame iteration loop.
+
+	Returns:
+		List[Tuple(Node, Node)]
+
+	Raises:
+		TypeError
+	"""
+	mu.check_type(data_df, pd.DataFrame)
+	mu.check_type(input_df, pd.DataFrame)
+	__sanitize_input_df__(input_df)
+	mu.check_type(ntf, nf.NodeFile)
+	mu.check_type(key_column, str)
+	x_range = 300
+	
+	grid_max_rows = round(len(input_df) ** 0.5)
+	grid_distance = x_range / grid_max_rows
+	grid_offset = (x_range / 2) * -1
+	
+	grid_row = 0
+	grid_column = 0
+	
+	result = []
+	
+	for index, row in input_df.iterrows():
+		__set_interpolator_min_and_max_from_series__(row)
+		
+		grid_handle, grid = scatter_plot(data_df, ntf, row['grid_color'], key_column, row['x_column'], row['y_column'],
+											row['z_column'], row['color_column'], row['common_tag'], node_function)
+		
+		x = (grid_row * grid_distance) + grid_offset
+		y = (grid_column * grid_distance) + grid_offset
+		grid_handle.set_translate(x, y)
+		
+		grid_row += 1
+		if grid_row == grid_max_rows:
+			grid_row = 0
+			grid_column += 1
+			
+		result.append((grid_handle, grid))
+		
+	return result
+
+def generate_multi_scatter_plot_input_csv(file_path: str='multi_scatter_plot_input_template'):
+	"""
+	Creates a csv file template to store parameters used to make multiple scatter plots on the same data frame.
+	
+	Parameters:
+		file_path (str: 'multi_scatter_plot_input_template') - name of output file.
+
+	Returns:
+		List[Tuple(Node, Node)]
+	"""
+	mu.check_type(file_path, str)
+	file_path = str(file_path)
+	if not file_path.endswith('.csv'):
+		file_path += '.csv'
+		
+	columns = ['grid_color','x_column','y_column','z_column','color_column','common_tag','x_min','x_max','y_min',
+			   'y_max','z_min','z_max','color_min','color_max']
+	
+	csv_dict = {}
+	
+	for column in columns:
+		csv_dict[column] = ['']
+		
+	pd.DataFrame(csv_dict).to_csv(file_path, index=None)
+
 # region helper functions
+def __sanitize_input_df__(df):
+	columns = ['x_min', 'x_max', 'y_min', 'y_max', 'z_min', 'z_max', 'color_min', 'color_max']
+	
+	for column in columns:
+		df[column] = pd.to_numeric(df[column])
+	
+
+def __set_interpolator_min_and_max_from_series__(row):
+	global __x_column_min__, __x_column_max__, __y_column_min__, __y_column_max__, __z_column_max__, __z_column_min__, \
+		__color_column_min__, __color_column_max__
+	__x_column_min__ = row['x_min']
+	__x_column_max__ = row['x_max']
+	
+	__y_column_min__ = row['y_min']
+	__y_column_max__ = row['y_max']
+	
+	__z_column_min__ = row['z_min']
+	__z_column_max__ = row['z_max']
+	
+	__color_column_min__ = row['color_min']
+	__color_column_max__ = row['color_max']
+
 def __check_setter_type__(min, max, clamp):
 	if min is not None:
 		mu.check_type(min, float)
@@ -391,6 +590,8 @@ def __add_tag_to_node__(node, row, key_column, x_column, y_column, z_column, col
 		
 def __check_scatter_plot_input__(df, ntf, grid_color, key_column, x_column, y_column,
 				 z_column, color_column, common_tag, node_function):
+	global __z_column__, __color_column__
+	
 	mu.check_type(df, pd.DataFrame, False)
 	mu.check_type(ntf, nf.NodeFile, False)
 	mu.check_type(grid_color, str)
@@ -398,24 +599,34 @@ def __check_scatter_plot_input__(df, ntf, grid_color, key_column, x_column, y_co
 	mu.check_type(x_column, str)
 	mu.check_type(y_column, str)
 	
-	if (z_column is not None):
-		mu.check_type(z_column, str)
-	if (color_column is not None):
-		mu.check_type(color_column, str)
+	__z_column__ = z_column
+	__color_column__ = color_column
+	
+	if (__z_column__ is not None):
+		if str(__z_column__) == 'nan' or str(__z_column__) == '':
+			__z_column__ = None
+		else:
+			mu.check_type(__z_column__, str)
+	if (__color_column__ is not None):
+		if str(__color_column__) == 'nan' or str(__color_column__) == '':
+			__color_column__ = None
+		else:
+			mu.check_type(__color_column__, str)
 	
 	mu.check_type(common_tag, str)
 	if node_function is not None:
 		mu.check_type(node_function, type(__check_scatter_plot_input__), False)
 		
-	if str(z_column) == 'nan' or str(z_column) == '':
-		z_column = None
-	if str(color_column) == 'nan' or str(color_column) == '':
-		color_column = None
-	__sanitize_interpolator_input__(df, x_column, y_column, z_column, color_column)
+	if str(__z_column__) == 'nan' or str(__z_column__) == '':
+		__z_column__ = None
+	if str(__color_column__) == 'nan' or str(__color_column__) == '':
+		__color_column__ = None
+	__sanitize_interpolator_input__(df, x_column, y_column, __z_column__, __color_column__)
 	
 	
 def __sanitize_interpolator_input__(df, x_column, y_column, z_column, color_column):
-	global __x_column_min__, __x_column_max__, __y_column_min__, __y_column_max__, __z_column_max__, __z_column_min__, __color_column_min__, __color_column_max__
+	global __x_column_min__, __x_column_max__, __y_column_min__, __y_column_max__, __z_column_max__, __z_column_min__, \
+		__color_column_min__, __color_column_max__
 	if str(__x_column_min__) == 'nan' or str(__x_column_min__) == '':
 		__x_column_min__ = None
 	if str(__x_column_max__) == 'nan' or str(__x_column_max__) == '':
