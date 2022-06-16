@@ -4,6 +4,7 @@ from matritools import nodefileglobals as nfg
 from matritools import node as n
 from matritools import glyph as g
 from matritools import utils as mu
+from matritools import nodefileglobals as globals
 import pandas as pd
 import copy
 
@@ -69,7 +70,7 @@ class NodeContainer(fc.FrozenClass):
 				None
 		"""
 		if len(self.nodes) == 0:
-			return 1
+			return globals.main_grid_id + 1
 		return self.get_last_node().id + 1
 	
 	def get_node_by_id(self, node_id: int):

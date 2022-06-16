@@ -2,6 +2,7 @@ from __future__ import annotations
 from matritools import nodecontainer as nc
 from matritools import node as n
 from matritools import utils as mu
+from matritools import nodefileglobals as globals
 import pandas as pd
 
 class Glyph(nc.NodeContainer):
@@ -110,7 +111,7 @@ class Glyph(nc.NodeContainer):
 		
 		return self
 	
-	def __make_ids_consecutive__(self, starting_id: int = 8):
+	def __make_ids_consecutive__(self, starting_id: int = globals.main_grid_id + 1):
 		"""
 		Removes gaps in ids. i.e IDs 1,2,4 become 1,2,3.
 		Can also be used to change the ID's of the glyph to start from a specified index.
@@ -123,13 +124,17 @@ class Glyph(nc.NodeContainer):
 
 		Raises:
 			TypeError
+			RuntimeError
 		"""
 		# Error checking
-		mu.check_type(starting_id, int)
+		mu.check_type(starting_id, int, False)
+		
+		if starting_id <= globals.main_grid_id:
+			raise RuntimeError(f"starting_id must be greater than {globals.main_grid_id}")
 		
 		# keys = old IDs, values = new IDs
-		ids = {0: 6, 6:6}
-		if self.nodes[0].parent_id != 0:
+		ids = {0: globals.main_grid_id, globals.main_grid_id:globals.main_grid_id}
+		if self.nodes[0].parent_id != 0 or self.nodes[0].parent_id != globals.main_grid_id:
 			ids[self.nodes[0].parent_id] = self.nodes[0].parent_id
 		current_id = starting_id
 		
@@ -183,10 +188,10 @@ class Glyph(nc.NodeContainer):
 			line = line[:len(line) - 1]
 			node = n.Node(line)
 			
-			if (node.parent_id == 0 or node.parent_id == 6) and node.id > 6:
+			if (node.parent_id == 0 or node.parent_id == globals.main_grid_id) and node.id > globals.main_grid_id:
 				root_ids.append(f'Index: {length}, ID: {node.id}\n\t')
 			
-			if node.id not in range(7):
+			if node.id not in range(globals.main_grid_id + 1):
 				self.nodes.append(node)
 				length += 1
 		
@@ -196,4 +201,4 @@ class Glyph(nc.NodeContainer):
 				  'If this is not by mistake, be sure to manage them properly.' + mu.ENDC + \
 				  'Root Nodes:\n' + str(root_ids))
 		
-		self.__make_ids_consecutive__(8)
+		self.__make_ids_consecutive__(globals.main_grid_id + 1)

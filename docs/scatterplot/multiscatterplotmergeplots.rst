@@ -14,8 +14,8 @@ Parameters:
 | input_df      | DataFrame containing rows with column names from     |                               |         |
 |               | data_df and parameters for scatter_plot_merge_plots. |                               |         |
 |               | DataFrame should have the following column names:    |                               |         |
-|			    | grid_color, x_column,	y_column, z_column,            |                               |         |
-|        		| color_column, common_tag,	x_min, x_max, y_min,       |                               |         |
+|               | grid_color, x_column,	y_column, z_column,            |                               |         |
+|               | color_column, common_tag, x_min, x_max, y_min,       |                               |         |
 |               | y_max, z_min,	z_max, color_min, color_max. Use       |                               |         |
 |               | generate_multi_scatter_plot_input_csv to generate a  |                               |         |
 |               | template csv                                         | DataFrame                     | N/A     |

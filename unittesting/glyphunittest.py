@@ -64,7 +64,8 @@ def test_create_temp_node():
     glyph = mt.Glyph()
     node1 = glyph.create_node()
     node2 = glyph.create_temp_node()
-    assert node1.id == 1 and node2.id == 2 and len(glyph.__temp_nodes__) == 1 and len(glyph.nodes) == 2
+    assert node1.id == mt.main_grid_id + 1 and node2.id == mt.main_grid_id + 2 and len(glyph.__temp_nodes__) == 1 \
+		   and len(glyph.nodes) == 2
 
 def test_create_temp_node_with_tag():
     glyph = mt.Glyph()
@@ -76,7 +77,7 @@ def test_create_temp_node_with_parent():
     glyph = mt.Glyph()
     node1 = glyph.create_node()
     node2 = glyph.create_temp_node(node1)
-    assert node2.parent_id == 1 and node2.branch_level == 2
+    assert node2.parent_id == mt.main_grid_id + 1 and node2.branch_level == 2
 
 def test_create_temp_node_with_template():
     glyph = mt.Glyph()
@@ -126,7 +127,8 @@ def test_create_temp_glyph():
     node2 = temp_glyph.create_node(temp_glyph.create_node())
 
     glyph.add_temp_glyph(temp_glyph, node1.id)
-    assert node1.id == 1 and node2.id == 3 and len(glyph.__temp_nodes__) == 2 and len(glyph.nodes) == 3
+    assert node1.id == mt.main_grid_id + 1 and node2.id == mt.main_grid_id + 3 \
+		   and len(glyph.__temp_nodes__) == 2 and len(glyph.nodes) == 3
 
 # endregion
 

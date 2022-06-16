@@ -3,6 +3,7 @@ from matritools import utils as mu
 from matritools import node as n
 from matritools import glyph as g
 from matritools import nodecontainer as nc
+from matritools import nodefileglobals as globals
 
 class NodeFile(nc.NodeContainer):
 	"""
@@ -118,13 +119,11 @@ class NodeFile(nc.NodeContainer):
 			RuntimeError
 		"""
 		ids = {}
-		i = 0
-		for node in self.nodes:
+		for i, node in enumerate(self.nodes):
 			if node.id in ids.keys():
 				ids[node.id].append(i)
 			else:
 				ids[node.id] = [i]
-			i += 1
 		
 		# check for duplicate ID's
 		if len(set(ids.keys())) != len(self.nodes):
@@ -189,7 +188,7 @@ class NodeFile(nc.NodeContainer):
 							   "0,0,90,270,0,0,0,0,0,0,0,-0,0,0,0,0,1,0,0.1,0,50,101,101,255,0,0,0,0,0,0,"
 							   "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,16,0,0,0,0,0,420"))
 		# Default Grid
-		self.main_grid = n.Node("6,6,6,1,0,0,0,1,0,0,0,0,0,1,360,220,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,0,"
+		self.main_grid = n.Node(f"{globals.main_grid_id},6,{globals.main_grid_id},1,0,0,0,1,0,0,0,0,0,1,360,220,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,0,"
 							  "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0.1,3,0,0,255,150,0,0,0,0,0,0,0,0,0,0,0,"
 							  "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,420")
 		self.nodes.append(self.main_grid)

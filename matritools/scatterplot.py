@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import math
 from typing import List, Tuple, Callable
 import pandas as pd
@@ -199,8 +198,28 @@ scatter_corner_node_template: nd.Node = nd.Node()
 """
 scatter_corner_node_template.geometry = nfg.geos['cube']
 
-__z_column_min__ = None
-__color_column__ = None
+__z_column_min__: float = None
+""" (float: None) - old min for z axis interpolator. Declared globally so helper functions can set them. """
+__color_column__: float = None
+""" (float: None) - old min for color_id interpolator. Declared globally so helper functions can set them. """
+
+__grid_row__: int = 0
+""" (int: 0) - index for how many grids have been placed in the current row. """
+
+__grid_column__: int = 0
+""" (int: 0) - index for how many grids have been placed in the current column. """
+
+__x_range__: float = 300
+""" (float: 300) - range that grids will be placed along the x axis. """
+
+__grid_max_rows__: None
+""" (int : None) - max number of rows in grid formation. """
+
+grid_distance: float = None
+""" (float: None) - distance grids will be placed from one another."""
+
+grid_offset: float = None
+""" (float: None) - offset of first grid on the x and y axis. """
 
 # endregion
 
@@ -234,10 +253,12 @@ def scatter_plot_merge_plots(df: pd.DataFrame, ntf: nf.NodeFile, grid_color: str
 		Raises:
 			TypeError
 	"""
-	__check_scatter_plot_input__(df, ntf, grid_color, key_column, x_column, y_column, z_column,
-								 None, common_tag, None)
+	
+	__check_scatter_plot_input__(df, ntf, grid_color, key_column, x_column, y_column, z_column, None, common_tag, None)
+	
 	grid_handle, grid = __create_grid__(ntf, grid_color)
 	pos_x_scalar, pos_y_scalar, pos_z_scalar, color_scalar = __make_scalars__(__z_column__, None)
+	
 	__create_cube_corners__(ntf, grid, grid_color, __z_column__, common_tag)
 	
 	plots = {}
@@ -289,10 +310,12 @@ def scatter_plot(df: pd.DataFrame, ntf: nf.NodeFile, grid_color: str, key_column
 	Raises:
 		TypeError
 	"""
-	__check_scatter_plot_input__(df, ntf, grid_color, key_column, x_column, y_column, z_column,
-								 color_column, common_tag, node_function)
+	
+	__check_scatter_plot_input__(df, ntf, grid_color, key_column, x_column, y_column, z_column, color_column,
+								 common_tag, node_function)
 	grid_handle, grid = __create_grid__(ntf, grid_color)
 	pos_x_scalar, pos_y_scalar, pos_z_scalar, color_scalar = __make_scalars__(__z_column__, __color_column__)
+	
 	__create_cube_corners__(ntf, grid, grid_color, __z_column__, common_tag)
 
 	for index, row in df.iterrows():
@@ -344,20 +367,10 @@ def multi_scatter_plot_merge_plots(data_df: pd.DataFrame, input_df: pd.DataFrame
 	Raises:
 		TypeError
 	"""
-	mu.check_type(data_df, pd.DataFrame)
-	mu.check_type(input_df, pd.DataFrame)
-	__sanitize_input_df__(input_df)
-	mu.check_type(ntf, nf.NodeFile)
-	mu.check_type(key_column, str)
+	global __grid_row__, __grid_column__
 	
-	x_range = 300
-	
-	grid_max_rows = round(len(input_df) ** 0.5)
-	grid_distance = x_range / grid_max_rows
-	grid_offset = (x_range / 2) * -1
-	
-	grid_row = 0
-	grid_column = 0
+	__check_multi_scatter_plot_input(data_df, input_df, ntf, key_column)
+	__set_grid_variables__(input_df)
 	
 	result = []
 	
@@ -367,14 +380,8 @@ def multi_scatter_plot_merge_plots(data_df: pd.DataFrame, input_df: pd.DataFrame
 		grid_handle, grid = scatter_plot_merge_plots(data_df, ntf, row['grid_color'], key_column, row['x_column'], row['y_column'],
 										 row['z_column'], row['common_tag'])
 		
-		x = (grid_row * grid_distance) + grid_offset
-		y = (grid_column * grid_distance) + grid_offset
-		grid_handle.set_translate(x, y)
-		
-		grid_row += 1
-		if grid_row == grid_max_rows:
-			grid_row = 0
-			grid_column += 1
+		__place_multi_grid__(grid_handle)
+		__increment_grid_indices()
 	
 		result.append((grid_handle, grid))
 	
@@ -421,19 +428,9 @@ def multi_scatter_plot(data_df: pd.DataFrame, input_df: pd.DataFrame, ntf: nf.No
 	Raises:
 		TypeError
 	"""
-	mu.check_type(data_df, pd.DataFrame)
-	mu.check_type(input_df, pd.DataFrame)
-	__sanitize_input_df__(input_df)
-	mu.check_type(ntf, nf.NodeFile)
-	mu.check_type(key_column, str)
-	x_range = 300
 	
-	grid_max_rows = round(len(input_df) ** 0.5)
-	grid_distance = x_range / grid_max_rows
-	grid_offset = (x_range / 2) * -1
-	
-	grid_row = 0
-	grid_column = 0
+	__check_multi_scatter_plot_input(data_df, input_df, ntf, key_column)
+	__set_grid_variables__(input_df)
 	
 	result = []
 	
@@ -443,14 +440,8 @@ def multi_scatter_plot(data_df: pd.DataFrame, input_df: pd.DataFrame, ntf: nf.No
 		grid_handle, grid = scatter_plot(data_df, ntf, row['grid_color'], key_column, row['x_column'], row['y_column'],
 											row['z_column'], row['color_column'], row['common_tag'], node_function)
 		
-		x = (grid_row * grid_distance) + grid_offset
-		y = (grid_column * grid_distance) + grid_offset
-		grid_handle.set_translate(x, y)
-		
-		grid_row += 1
-		if grid_row == grid_max_rows:
-			grid_row = 0
-			grid_column += 1
+		__place_multi_grid__(grid_handle)
+		__increment_grid_indices()
 			
 		result.append((grid_handle, grid))
 		
@@ -482,114 +473,37 @@ def generate_multi_scatter_plot_input_csv(file_path: str='multi_scatter_plot_inp
 	pd.DataFrame(csv_dict).to_csv(file_path, index=None)
 
 # region helper functions
-def __sanitize_input_df__(df):
+
+# region error checking and sanitation.
+def __sanitize_input_df__(input_df: pd.DataFrame):
+	""" ensures input_df columns that should be numeric are numeric """
 	columns = ['x_min', 'x_max', 'y_min', 'y_max', 'z_min', 'z_max', 'color_min', 'color_max']
 	
 	for column in columns:
-		df[column] = pd.to_numeric(df[column])
+		input_df[column] = pd.to_numeric(df[column])
 	
-
-def __set_interpolator_min_and_max_from_series__(row):
-	global __x_column_min__, __x_column_max__, __y_column_min__, __y_column_max__, __z_column_max__, __z_column_min__, \
-		__color_column_min__, __color_column_max__
-	__x_column_min__ = row['x_min']
-	__x_column_max__ = row['x_max']
 	
-	__y_column_min__ = row['y_min']
-	__y_column_max__ = row['y_max']
-	
-	__z_column_min__ = row['z_min']
-	__z_column_max__ = row['z_max']
-	
-	__color_column_min__ = row['color_min']
-	__color_column_max__ = row['color_max']
-
-def __check_setter_type__(min, max, clamp):
+def __check_setter_type__(min: float, max: float, clamp: bool):
+	""" Checks the types for min, max and clamp setter function input"""
 	if min is not None:
 		mu.check_type(min, float)
 	if max is not None:
 		mu.check_type(max, float)
 	mu.check_type(clamp, bool)
+	
 
-def __reset_default_values__():
-	set_scatter_x_column()
-	set_scatter_y_column()
-	set_scatter_z_column()
-	set_scatter_color_column()
-
-def __get_min_max_from_plots__(plots):
-	min = math.inf
-	max = -math.inf
-	for key in plots:
-		if plots[key][1] < min:
-			min = plots[key][1]
-		if plots[key][1] > max:
-			max = plots[key][1]
-			
-	return min, max
+def __check_multi_scatter_plot_input(data_df: pd.DataFrame, input_df: pd.DataFrame, ntf: nf.NodeFile, key_column: str):
+	""" Checks the types of multi scatter plot function parameters. """
+	mu.check_type(data_df, pd.DataFrame)
+	mu.check_type(input_df, pd.DataFrame)
+	__sanitize_input_df__(input_df)
+	mu.check_type(ntf, nf.NodeFile)
+	mu.check_type(key_column, str)
 
 
-def __plot_point_merge__(grid, row, ntf, grid_color, key_column, x_column, y_column, z_column,
-					common_tag, pos_x_scalar, pos_y_scalar, pos_z_scalar, plots):
-	x = pos_x_scalar(row[x_column])
-	y = pos_y_scalar(row[y_column])
-	if z_column is not None:
-		z = pos_z_scalar(row[z_column])
-	else:
-		z = 0
-		
-	if (x,y,z) in plots:
-		plots[(x,y,z)][1] += 1
-		return
-	
-	node = ntf.create_node(grid, template=scatter_plot_template)
-	node.set_translate(x, y, z)
-	node.set_u_scale(__plot_size__)
-	
-	__add_tag_to_node__(node, row, key_column, x_column, y_column, z_column, None, common_tag)
-	
-	plots[(x, y, z)] = [node, 1]
-	
-def __plot_point__(grid, row, ntf, grid_color, key_column, x_column, y_column, z_column,
-				 	color_column, common_tag, node_function,
-					pos_x_scalar, pos_y_scalar, pos_z_scalar, color_scalar):
-	node = ntf.create_node(grid, template=scatter_plot_template)
-	
-	if color_column is not None:
-		node.set_color_by_id(color_scalar(row[color_column]), __palette_id__)
-	
-	x = pos_x_scalar(row[x_column])
-	y = pos_y_scalar(row[y_column])
-	if z_column is not None:
-		z = pos_z_scalar(row[z_column])
-	else:
-		z = 0
-	node.set_translate(x, y, z)
-	node.set_u_scale(__plot_size__)
-	
-	__add_tag_to_node__(node, row, key_column, x_column, y_column, z_column, color_column, common_tag)
-	
-	if node_function is not None:
-		node_function(node, row)
-	
-	
-def __add_tag_to_node__(node, row, key_column, x_column, y_column, z_column, color_column, common_tag):
-	if key_column is None:
-		node.set_tag(common_tag + '(' + str(row[x_column]) + ", " + str(round(row[y_column], 2)))
-	else:
-		node.set_tag(
-			str(row[key_column]) + ", " + common_tag + '(' + str(row[x_column]) + ", " + str(round(row[y_column], 2)))
-	
-	if z_column is not None:
-		node.tag_text += ', ' + str(round(row[z_column], 2))
-	if color_column is not None:
-		node.tag_text += ', ' + str(round(row[color_column], 2))
-		
-	node.tag_text += ")"
-		
-		
 def __check_scatter_plot_input__(df, ntf, grid_color, key_column, x_column, y_column,
-				 z_column, color_column, common_tag, node_function):
+								 z_column, color_column, common_tag, node_function):
+	""" Checks the type of scatter plot parameters and santizies them. """
 	global __z_column__, __color_column__
 	
 	mu.check_type(df, pd.DataFrame, False)
@@ -616,14 +530,14 @@ def __check_scatter_plot_input__(df, ntf, grid_color, key_column, x_column, y_co
 	mu.check_type(common_tag, str)
 	if node_function is not None:
 		mu.check_type(node_function, type(__check_scatter_plot_input__), False)
-		
+	
 	if str(__z_column__) == 'nan' or str(__z_column__) == '':
 		__z_column__ = None
 	if str(__color_column__) == 'nan' or str(__color_column__) == '':
 		__color_column__ = None
 	__sanitize_interpolator_input__(df, x_column, y_column, __z_column__, __color_column__)
-	
-	
+
+
 def __sanitize_interpolator_input__(df, x_column, y_column, z_column, color_column):
 	global __x_column_min__, __x_column_max__, __y_column_min__, __y_column_max__, __z_column_max__, __z_column_min__, \
 		__color_column_min__, __color_column_max__
@@ -662,16 +576,18 @@ def __sanitize_interpolator_input__(df, x_column, y_column, z_column, color_colu
 			__color_column_min__ = df[color_column].min()
 		if __color_column_max__ is None:
 			__color_column_max__ = df[color_column].max()
-		
-			
+
+
 def __bad_input__(value, is_clamped, value_min, value_max):
+	""" Returns True or False if value is out of range or is nan or None"""
 	if str(value) == 'nan' or value is None or (not is_clamped and (value > value_max or value < value_min)):
 		return True
 	else:
 		return False
-	
-	
+
+
 def __bad_scatter_plot_input__(x_column, y_column, z_column, color_column, row):
+	""" Returns True or False if any column data is out of range or is nan or None. """
 	if __bad_input__(row[x_column], __clamp_x__, __x_column_min__, __x_column_max__) or \
 			__bad_input__(row[y_column], __clamp_y__, __y_column_min__, __y_column_max__):
 		return True
@@ -683,8 +599,58 @@ def __bad_scatter_plot_input__(x_column, y_column, z_column, color_column, row):
 	if color_column is not None:
 		if __bad_input__(row[color_column], __clamp_color__, __color_column_min__, __color_column_max__):
 			return True
+
+# endregion
+
+# region setters
+
+def __set_interpolator_min_and_max_from_series__(row):
+	global __x_column_min__, __x_column_max__, __y_column_min__, __y_column_max__, __z_column_max__, __z_column_min__, \
+		__color_column_min__, __color_column_max__
+	__x_column_min__ = row['x_min']
+	__x_column_max__ = row['x_max']
+	
+	__y_column_min__ = row['y_min']
+	__y_column_max__ = row['y_max']
+	
+	__z_column_min__ = row['z_min']
+	__z_column_max__ = row['z_max']
+	
+	__color_column_min__ = row['color_min']
+	__color_column_max__ = row['color_max']
+
+
+def __reset_default_values__():
+	set_scatter_x_column()
+	set_scatter_y_column()
+	set_scatter_z_column()
+	set_scatter_color_column()
+
+
+def __set_grid_variables__(input_df):
+	global __x_range__, __grid_max_rows__, __grid_distance__, __grid_offset__, __grid_row__, __grid_column__
+	
+	__x_range__ = 300
+	
+	__grid_max_rows__ = round(len(input_df) ** 0.5)
+	__grid_distance__ = __x_range__ / __grid_max_rows__
+	__grid_offset__ = (__x_range__ / 2) * -1
+	
+	__grid_row__ = 0
+	__grid_column__ = 0
 	
 	
+def __increment_grid_indices():
+	global __grid_row__, __grid_column__
+	__grid_row__ += 1
+	if __grid_row__ == __grid_max_rows__:
+		__grid_row__ = 0
+		__grid_column__ += 1
+
+# endregion
+
+# region node manipulation
+
 def __create_grid__(ntf, grid_color):
 	grid_handle, grid = ntf.create_grid(ntf.main_grid, grid_template=ntf.main_grid)
 	
@@ -698,43 +664,51 @@ def __create_grid__(ntf, grid_color):
 	grid_handle.topo = nfg.topos['plane']
 	
 	return grid_handle, grid
-	
-	
+
+
 def __create_cube_corner__(ntf, grid, grid_color, x, y, z, tag):
 	node = ntf.create_node(grid, template=scatter_corner_node_template)
-	node.set_translate(x,y,z)
+	node.set_translate(x, y, z)
 	node.set_tag(tag, 0)
 	node.set_color_by_name(grid_color)
 	return node
-	
-	
+
+
 def __create_cube_corners__(ntf, grid, grid_color, z_column, common_tag):
 	__create_cube_corner__(ntf, grid, grid_color, 0, __grid_size__ + 1, 0, "")
 	
 	if z_column is not None:
 		c1 = __create_cube_corner__(ntf, grid, grid_color, -__grid_size__ - 1, -__grid_size__ - 1, 0,
-									common_tag + '(' + str(__x_column_min__) + ', ' + str(round(__y_column_min__, 2)) + ', '
+									common_tag + '(' + str(__x_column_min__) + ', ' + str(
+										round(__y_column_min__, 2)) + ', '
 									+ str(round(__z_column_min__, 2)) + ')')
 		c2 = __create_cube_corner__(ntf, grid, grid_color, __grid_size__ + 1, -__grid_size__ - 1, 0,
-									common_tag + '(' + str(__x_column_max__) + ',' + str(round(__y_column_min__, 2)) + ' , '
+									common_tag + '(' + str(__x_column_max__) + ',' + str(
+										round(__y_column_min__, 2)) + ' , '
 									+ str(round(__z_column_min__, 2)) + ')')
 		c3 = __create_cube_corner__(ntf, grid, grid_color, -__grid_size__ - 1, __grid_size__ + 1, 0,
-									common_tag + '(' + str(__x_column_min__) + ',' + str(round(__y_column_max__, 2)) + ', ' +
+									common_tag + '(' + str(__x_column_min__) + ',' + str(
+										round(__y_column_max__, 2)) + ', ' +
 									str(round(__z_column_min__, 2)) + ')')
 		c4 = __create_cube_corner__(ntf, grid, grid_color, __grid_size__ + 1, __grid_size__ + 1, 0,
-									common_tag + '(' + str(__x_column_max__) + ', ' + str(round(__y_column_max__, 2)) + ', '
+									common_tag + '(' + str(__x_column_max__) + ', ' + str(
+										round(__y_column_max__, 2)) + ', '
 									+ str(round(__z_column_min__, 2)) + ')')
 		c5 = __create_cube_corner__(ntf, grid, grid_color, -__grid_size__ - 1, -__grid_size__ - 1, __grid_size__,
-									common_tag + '(' + str(__x_column_min__) + ', ' + str(round(__y_column_min__, 2)) + ','
+									common_tag + '(' + str(__x_column_min__) + ', ' + str(
+										round(__y_column_min__, 2)) + ','
 									+ str(round(__z_column_max__, 2)) + ')')
 		c6 = __create_cube_corner__(ntf, grid, grid_color, __grid_size__ + 1, -__grid_size__ - 1, __grid_size__,
-									common_tag + '(' + str(__x_column_max__) + ', ' + str(round(__y_column_min__, 2)) + ', '
+									common_tag + '(' + str(__x_column_max__) + ', ' + str(
+										round(__y_column_min__, 2)) + ', '
 									+ str(round(__z_column_max__, 2)) + ')')
 		c7 = __create_cube_corner__(ntf, grid, grid_color, -__grid_size__ - 1, __grid_size__ + 1, __grid_size__,
-									common_tag + '(' + str(__x_column_min__) + ', ' + str(round(__y_column_max__, 2)) + ', '
+									common_tag + '(' + str(__x_column_min__) + ', ' + str(
+										round(__y_column_max__, 2)) + ', '
 									+ str(round(__z_column_max__, 2)) + ')')
 		c8 = __create_cube_corner__(ntf, grid, grid_color, __grid_size__ + 1, __grid_size__ + 1, __grid_size__,
-									common_tag + '(' + str(__x_column_max__) + ', ' + str(round(__y_column_max__, 2)) + ', '
+									common_tag + '(' + str(__x_column_max__) + ', ' + str(
+										round(__y_column_max__, 2)) + ', '
 									+ str(round(__z_column_max__, 2)) + ')')
 		__link_corner_cubes__(ntf, grid_color, c1, c2, c3, c4, c5, c6, c7, c8)
 	else:
@@ -746,7 +720,73 @@ def __create_cube_corners__(ntf, grid, grid_color, z_column, common_tag):
 							   common_tag + '(' + str(__x_column_min__) + ',' + str(round(__y_column_max__, 2)) + ')')
 		__create_cube_corner__(ntf, grid, grid_color, __grid_size__ + 1, __grid_size__ + 1, 0,
 							   common_tag + '(' + str(__x_column_max__) + ', ' + str(round(__y_column_max__, 2)) + ')')
+
+
+def __plot_point_merge__(grid, row, ntf, grid_color, key_column, x_column, y_column, z_column,
+						 common_tag, pos_x_scalar, pos_y_scalar, pos_z_scalar, plots):
+	x = pos_x_scalar(row[x_column])
+	y = pos_y_scalar(row[y_column])
+	if z_column is not None:
+		z = pos_z_scalar(row[z_column])
+	else:
+		z = 0
 	
+	if (x, y, z) in plots:
+		plots[(x, y, z)][1] += 1
+		return
+	
+	node = ntf.create_node(grid, template=scatter_plot_template)
+	node.set_translate(x, y, z)
+	node.set_u_scale(__plot_size__)
+	
+	__add_tag_to_node__(node, row, key_column, x_column, y_column, z_column, None, common_tag)
+	
+	plots[(x, y, z)] = [node, 1]
+
+
+def __plot_point__(grid, row, ntf, grid_color, key_column, x_column, y_column, z_column,
+				   color_column, common_tag, node_function,
+				   pos_x_scalar, pos_y_scalar, pos_z_scalar, color_scalar):
+	node = ntf.create_node(grid, template=scatter_plot_template)
+	
+	if color_column is not None:
+		node.set_color_by_id(color_scalar(row[color_column]), __palette_id__)
+	
+	x = pos_x_scalar(row[x_column])
+	y = pos_y_scalar(row[y_column])
+	if z_column is not None:
+		z = pos_z_scalar(row[z_column])
+	else:
+		z = 0
+	node.set_translate(x, y, z)
+	node.set_u_scale(__plot_size__)
+	
+	__add_tag_to_node__(node, row, key_column, x_column, y_column, z_column, color_column, common_tag)
+	
+	if node_function is not None:
+		node_function(node, row)
+
+
+def __place_multi_grid__(grid_handle):
+	x = (__grid_row__ * __grid_distance__) + __grid_offset__
+	y = (__grid_column__ * __grid_distance__) + __grid_offset__
+	grid_handle.set_translate(x, y)
+	
+def __add_tag_to_node__(node, row, key_column, x_column, y_column, z_column, color_column, common_tag):
+	if key_column is None:
+		node.set_tag(common_tag + '(' + str(row[x_column]) + ", " + str(round(row[y_column], 2)))
+	else:
+		node.set_tag(
+			str(row[key_column]) + ", " + common_tag + '(' + str(row[x_column]) + ", " + str(
+				round(row[y_column], 2)))
+	
+	if z_column is not None:
+		node.tag_text += ', ' + str(round(row[z_column], 2))
+	if color_column is not None:
+		node.tag_text += ', ' + str(round(row[color_column], 2))
+	
+	node.tag_text += ")"
+
 
 def __link_corner_cubes__(ntf, grid_color, c1, c2, c3, c4, c5, c6, c7, c8):
 	ntf.make_link(c1, c2).set_color_by_name(grid_color)
@@ -765,8 +805,23 @@ def __link_corner_cubes__(ntf, grid_color, c1, c2, c3, c4, c5, c6, c7, c8):
 	ntf.make_link(c2, c6).set_color_by_name(grid_color)
 	ntf.make_link(c3, c7).set_color_by_name(grid_color)
 	ntf.make_link(c4, c8).set_color_by_name(grid_color)
+
+# endregion
+
+# region getters
+
+def __get_min_max_from_plots__(plots):
+	min = math.inf
+	max = -math.inf
+	for key in plots:
+		if plots[key][1] < min:
+			min = plots[key][1]
+		if plots[key][1] > max:
+			max = plots[key][1]
+			
+	return min, max
+
 	
-		
 def __make_scalars__(z_column, color_column):
 	pos_x_scalar = mu.make_interpolator(__x_column_min__, __x_column_max__, -__grid_size__, __grid_size__, __clamp_x__,
 										True, __x_column_min__)
@@ -782,5 +837,7 @@ def __make_scalars__(z_column, color_column):
 											__color_id_max__, __clamp_color__, True, __color_id_min__)
 		
 	return pos_x_scalar, pos_y_scalar, pos_z_scalar, color_scalar
+
+# endregion
 
 # endregion

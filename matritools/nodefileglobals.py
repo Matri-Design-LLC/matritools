@@ -93,3 +93,6 @@ colors = {
 	"golden rod": [218, 165, 32],
 	"coral": [255, 127, 80]
 }
+
+main_grid_id = 7
+main_camera_id = 2
