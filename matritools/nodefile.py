@@ -20,26 +20,6 @@ class NodeFile(nc.NodeContainer):
 	  Repeat as necessary.
 	"""
 	
-	node_file_header = "id,type,data,selected,parent_id," \
-					   "branch_level,child_id,child_index,palette_id,ch_input_id," \
-					   "ch_output_id,ch_last_updated,average,samples,aux_a_x," \
-					   "aux_a_y,aux_a_z,aux_b_x,aux_b_y,aux_b_z," \
-					   "color_shift,rotate_vec_x,rotate_vec_y,rotate_vec_z,rotate_vec_s," \
-					   "scale_x,scale_y,scale_z,translate_x,translate_y," \
-					   "translate_z,tag_offset_x,tag_offset_y,tag_offset_z,rotate_rate_x," \
-					   "rotate_rate_y,rotate_rate_z,rotate_x,rotate_y,rotate_z," \
-					   "scale_rate_x,scale_rate_y,scale_rate_z,translate_rate_x,translate_rate_y," \
-					   "translate_rate_z,translate_vec_x,translate_vec_y,translate_vec_z,shader," \
-					   "geometry,line_width,point_size,ratio,color_id," \
-					   "color_r,color_g,color_b,color_a,color_fade," \
-					   "texture_id,hide,freeze,topo,facet," \
-					   "auto_zoom_x,auto_zoom_y,auto_zoom_z,trigger_hi_x,trigger_hi_y," \
-					   "trigger_hi_z,trigger_lo_x,trigger_lo_y,trigger_lo_z,set_hi_x," \
-					   "set_hi_y,set_hi_z,set_lo_x,set_lo_y,set_lo_z," \
-					   "proximity_x,proximity_y,proximity_z,proximity_mode_x,proximity_mode_y," \
-					   "proximity_mode_z,segments_x,segments_y,segments_z,tag_mode," \
-					   "format_id,table_id,record_id,size\n"
-	
 	def __init__(self, file_name: str):
 		"""
 		Parameters:
@@ -118,6 +98,30 @@ class NodeFile(nc.NodeContainer):
 		Raises:
 			RuntimeError
 		"""
+		self.__check_for_duplicate_ids()
+		
+		# open files
+		node_file = open(self.__node_file_name__ + "_node.csv", "w", encoding="utf-8")
+		tag_file = open(self.__node_file_name__ + "_tag.csv", "w", encoding="utf-8")
+		
+		# write headers
+		tag_file.write("id,record_id,table_id,title,description\n")
+		node_file.write(globals.node_file_header)
+		
+		# write tag and node rows
+		for taginc, file_row in enumerate(self.nodes, 1):
+			node_file.write(file_row.to_string())
+			if file_row.tag_text != "":
+				tag_text = str(taginc) + "," + \
+						   str(file_row.record_id) + ",0,\"" + \
+						   str(file_row.tag_text) + "\",\"\"\n"
+				tag_file.write(tag_text)
+		
+		node_file.close()
+		tag_file.close()
+		return self
+	
+	def __check_for_duplicate_ids(self):
 		ids = {}
 		for i, node in enumerate(self.nodes):
 			if node.id in ids.keys():
@@ -125,7 +129,6 @@ class NodeFile(nc.NodeContainer):
 			else:
 				ids[node.id] = [i]
 		
-		# check for duplicate ID's
 		if len(set(ids.keys())) != len(self.nodes):
 			node_container = nc.NodeContainer()
 			result = ""
@@ -140,30 +143,6 @@ class NodeFile(nc.NodeContainer):
 			
 			raise RuntimeError("Created debug_node.csv. Node File contains duplicate IDs.\n\nID | Indexes:\n\n" +
 							   result + str(node_container.to_dataframe().to_string()))
-		
-		# open files
-		node_file = open(self.__node_file_name__ + "_node.csv", "w", encoding="utf-8")
-		tag_file = open(self.__node_file_name__ + "_tag.csv", "w", encoding="utf-8")
-		
-		# write headers
-		tag_file.write("id,record_id,table_id,title,description\n")
-		node_file.write(self.node_file_header)
-		
-		# write tag and node rows
-		taginc = 1
-		for file_row in self.nodes:
-			node_file.write(file_row.to_string())
-			if file_row.tag_text != "":
-				tag_text = str(taginc) + "," + \
-						   str(file_row.record_id) + ",0,\"" + \
-						   str(file_row.tag_text) + "\",\"\"\n"
-				
-				taginc += 1
-				tag_file.write(tag_text)
-		
-		node_file.close()
-		tag_file.close()
-		return self
 	
 	def __add_initial_nodes__(self):
 		# node for world parameters
@@ -192,4 +171,5 @@ class NodeFile(nc.NodeContainer):
 							  "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0.1,3,0,0,255,150,0,0,0,0,0,0,0,0,0,0,0,"
 							  "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,420")
 		self.nodes.append(self.main_grid)
+		
 		

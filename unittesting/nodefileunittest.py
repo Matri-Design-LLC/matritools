@@ -1,4 +1,5 @@
 import matritools as mt
+import os
 import pytest
 
 # region constructor
@@ -140,4 +141,36 @@ def test_create_node_with_parent_node():
     parent_node = ntf.create_node()
     node = ntf.create_node(parent_node)
     assert node.parent_id == parent_node.id
+# endregion
+
+# region write_to_csv
+
+def test_write_to_csv_file_was_written():
+	file_name = 'unittest'
+	ntf = mt.NodeFile(file_name)
+	ntf.write_to_csv()
+	
+	assert os.path.exists(f'{file_name}_node.csv')
+	os.remove(f'{file_name}_node.csv')
+	assert os.path.exists(f'{file_name}_tag.csv')
+	os.remove(f'{file_name}_tag.csv')
+	
+def test_write_to_csv_duplicate_IDs():
+	file_name = 'unittest'
+	ntf = mt.NodeFile(file_name)
+	node1 = ntf.create_node()
+	node2 = ntf.create_node()
+	node2.id = node1.id
+	
+	with pytest.raises(RuntimeError):
+		ntf.write_to_csv()
+		
+	assert os.path.exists('debug_node.csv')
+	os.remove('debug_node.csv')
+	
+	if os.path.exists(f'{file_name}_node.csv'):
+		os.remove(f'{file_name}_node.csv')
+	if os.path.exists(f'{file_name}_tag.csv'):
+		os.remove(f'{file_name}_tag.csv')
+	
 # endregion

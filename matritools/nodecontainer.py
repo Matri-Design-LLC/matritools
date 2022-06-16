@@ -206,7 +206,7 @@ class NodeContainer(fc.FrozenClass):
 			columns = node.to_string().split(",")
 			columns.append(node.tag_text)
 			list_of_lists.append(columns)
-		column_labels = node_file_header.split(',')
+		column_labels = globals.node_file_header.split(',')
 		column_labels.append("tag_text")
 		return pd.DataFrame(data=list_of_lists, columns=column_labels)
 	
