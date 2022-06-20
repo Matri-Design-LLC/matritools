@@ -409,3 +409,20 @@ class NodeContainer(fc.FrozenClass):
 			grid.geometry = nfg.geos['plane']
 			
 			return grid
+		
+	def create_camera(self, template: n.Node=None):
+		"""
+		Adds a camera to the NodeFile.
+		
+		Parameters:
+			template (Node : None) - Created node will be a copy of template if one is passed.
+
+		Returns:
+			Node
+			
+		Raises:
+			TypeError
+		"""
+		camera = self.create_node(template=template)
+		camera.type = globals.types['camera']
+		return camera

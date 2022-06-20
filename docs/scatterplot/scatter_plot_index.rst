@@ -4,8 +4,12 @@ scatter plot
 .. toctree::
    :maxdepth: 2
 
-   scatter_plot <scatterplot>
-   scatter_plot_merge_plots <scatterplotmergeplots>
+   scatter_plot
+   scatter_plot_merge_plots
+   multiscatter_plot
+   multi_scatter_plot_merge_plots
+   generate_multi_scatter_plot_input_csv
+   add_cameras_to_grid
 
 Global properties:
 

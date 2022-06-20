@@ -31,6 +31,6 @@ as well as commonly used data manipulation functions used by Matri Design LLC.
    graphfunctions/graphfunctions
    utils/utils
    dataexploration/dataexploration
-   scatterplot/scatterplotindex
+   scatterplot/scatter_plot_index
 
 

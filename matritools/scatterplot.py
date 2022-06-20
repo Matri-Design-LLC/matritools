@@ -279,6 +279,35 @@ def scatter_plot_merge_plots(df: pd.DataFrame, ntf: nf.NodeFile, grid_color: str
 	
 	return grid_handle, grid
 
+
+def add_cameras_to_grid(ntf:nf.NodeFile, grid_handle: nd.Node):
+	"""
+	Places cameras around a scatter plot. Should be called after grid handle has its final position set. Camera offsets
+	are static will most likley not line up with scatter plots that have custom sizes.
+	
+	Parameters:
+		ntf (NodeFile) - NodeFile to add cameras too
+		grid_handle (Node) - Node to position cameras around
+
+	Returns:
+		None
+		
+	Raises:
+		TypeError
+	"""
+	mu.check_type(ntf, nf.NodeFile, False)
+	mu.check_type(grid_handle, nd.Node, False)
+	
+	camera1 = ntf.create_camera().set_rotate(90)
+	camera1.set_translate(grid_handle.translate_x + 25, grid_handle.translate_y - 50, grid_handle.translate_z + 18)
+	
+	camera2 = ntf.create_camera().set_rotate(90, -90)
+	camera2.set_translate(grid_handle.translate_x + 100, grid_handle.translate_y + 25, grid_handle.translate_z + 18)
+	
+	camera3 = ntf.create_camera().set_rotate()
+	camera3.set_translate(grid_handle.translate_x + 25, grid_handle.translate_y + 25, grid_handle.translate_z + 120)
+
+
 def scatter_plot(df: pd.DataFrame, ntf: nf.NodeFile, grid_color: str, key_column: str, x_column: str, y_column: str,
 				 z_column: str=None, color_column: str=None, common_tag: str="",
 				 node_function: Callable[[nd.Node, pd.Series], None]=None)-> Tuple[nd.Node, nd.Node]:

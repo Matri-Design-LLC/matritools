@@ -157,7 +157,7 @@ class Node(fc.FrozenClass):
 		self.ch_output_id = 0  # channel number
 		self.ch_last_updated = 0  # previous data update time-stamp (last read)
 		self.average = 0  # type of averaging applied to channel data
-		self.samples = 0  # number of samples to average
+		self.samples = 1  # number of samples to average
 		
 		self.aux_a_x = 30  # size of grid segments, x axis (30 is default)
 		self.aux_a_y = 30  # size of grid segments, y axis (30 is default)
@@ -1026,6 +1026,8 @@ class Node(fc.FrozenClass):
 		# Error checking
 		mu.check_type(color, str, False)
 		mu.check_type(color_a, int)
+		
+		color = color.lower()
 		
 		return self.set_color(nfg.colors[color][0], nfg.colors[color][1], nfg.colors[color][2], int(color_a))
 	
