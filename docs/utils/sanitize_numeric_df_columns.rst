@@ -5,21 +5,21 @@ being interpreted as strings and recasts them to an appropriate numeric type.
 
 Parameters:
 
-+-----------------------+------------------------------------------------------------+-----------+----------------+
-| Name                  | Description                                                | Type      | Default        |
-+=======================+============================================================+===========+================+
-| df                    | DataFrame to be operated on.                               | DataFrame | None           |
-+-----------------------+------------------------------------------------------------+-----------+----------------+
-| columns               | list of column names that are numeric                      |           |                |
-|                       | but pandas interprests as strings.                         | List[str] | None           |
-+-----------------------+------------------------------------------------------------+-----------+----------------+
-| strings_to_be_removed | list of strings or characters                              |           |                |
-|                       | to be removed from values.                                 | List[str] | None           |
-+-----------------------+------------------------------------------------------------+-----------+----------------+
-| errors                | If ‘raise’, then invalid parsing will raise an exception.  |           |                |
-|                       | If ‘coerce’, then invalid parsing will be set as NaN.      |           |                |
-|                       | If ‘ignore’, then invalid parsing will return the input.   | str       | None           |
-+-----------------------+------------------------------------------------------------+-----------+----------------+
++-----------------------+------------------------------------------------------------+-----------+-----------------+
+| Name                  | Description                                                | Type      | Default         |
++=======================+============================================================+===========+=================+
+| df                    | DataFrame to be operated on.                               | DataFrame | N/A             |
++-----------------------+------------------------------------------------------------+-----------+-----------------+
+| columns               | list of column names that are numeric                      |           |                 |
+|                       | but pandas interprests as strings.                         | List[str] | N/A             |
++-----------------------+------------------------------------------------------------+-----------+-----------------+
+| strings_to_be_removed | list of strings or characters                              |           |                 |
+|                       | to be removed from values.                                 | List[str] | [',', '$', '%'] |           |
++-----------------------+------------------------------------------------------------+-----------+-----------------+
+| errors                | If ‘raise’, then invalid parsing will raise an exception.  |           |                 |
+|                       | If ‘coerce’, then invalid parsing will be set as NaN.      |           |                 |
+|                       | If ‘ignore’, then invalid parsing will return the input.   | str       | 'raise'         |
++-----------------------+------------------------------------------------------------+-----------+-----------------+
 
 Returns:
     interpolation function
