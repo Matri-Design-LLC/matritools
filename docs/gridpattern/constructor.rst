@@ -40,7 +40,7 @@ Example Default Parameters::
 
 	ntf.write_to_csv()
 
-.. image:: grid_patter_1.png
+.. image:: grid_pattern_1.png
 
 Example x_distance::
 
@@ -55,7 +55,7 @@ Example x_distance::
 
 	ntf.write_to_csv()
 
-.. image:: grid_patter_2.png
+.. image:: grid_pattern_2.png
 
 Example y_distance::
 
@@ -70,7 +70,7 @@ Example y_distance::
 
 	ntf.write_to_csv()
 
-.. image:: grid_patter_3.png
+.. image:: grid_pattern_3.png
 
 Example x_offset::
 
@@ -85,7 +85,7 @@ Example x_offset::
 
 	ntf.write_to_csv()
 
-.. image:: grid_patter_4.png
+.. image:: grid_pattern_4.png
 
 Example y_offset::
 
@@ -100,7 +100,7 @@ Example y_offset::
 
 	ntf.write_to_csv()
 
-.. image:: grid_patter_5.png
+.. image:: grid_pattern_5.png
 
 Example max_rows::
 
@@ -115,7 +115,7 @@ Example max_rows::
 
 	ntf.write_to_csv()
 
-.. image:: grid_patter_6.png
+.. image:: grid_pattern_6.png
 
 Example max_columns::
 
@@ -130,7 +130,7 @@ Example max_columns::
 
 	ntf.write_to_csv()
 
-.. image:: grid_patter_7.png
+.. image:: grid_pattern_7.png
 
 Example z_distance::
 
@@ -145,7 +145,7 @@ Example z_distance::
 
 	ntf.write_to_csv()
 
-.. image:: grid_patter_8.png
+.. image:: grid_pattern_8.png
 
 Example z_offset::
 
@@ -160,4 +160,4 @@ Example z_offset::
 
 	ntf.write_to_csv()
 
-.. image:: grid_patter_9.png
+.. image:: grid_pattern_9.png
