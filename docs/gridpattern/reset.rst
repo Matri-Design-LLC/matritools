@@ -1,5 +1,5 @@
-place_node
-----------
+reset
+-----
 
 Positions a node and increments internal indexes.
 
