@@ -99,3 +99,85 @@ Example::
 
 	print('\n')
 	print(df.head())
+
+Output::
+
+	Data Types:
+
+	Name :: object
+	Height :: int64
+	Weight :: int64
+	Age :: int64
+	Bank Balance :: object
+	Books Started / Finished :: object
+	hypothetical value :: object
+	Data Types:
+
+	Name :: object
+	Height :: int64
+	Weight :: int64
+	Age :: int64
+	Bank Balance :: float64
+	Books Started / Finished :: float64
+	hypothetical value :: object
+
+
+		  Name  Height  ...  Books Started / Finished  hypothetical value
+	0    Kevin      71  ...                      50.0                50-7
+	1     Lisa      64  ...                      60.0                60-8
+	2    Ranir      75  ...                      10.0                20-2
+	3  Abigale      59  ...                      35.6                35-8
+	4   Robert      55  ...                      47.5                12-3
+
+	[5 rows x 7 columns]
+
+
+	Data Types:
+
+	Name :: object
+	Height :: int64
+	Weight :: int64
+	Age :: int64
+	Bank Balance :: float64
+	Books Started / Finished :: float64
+	hypothetical value :: int64
+
+
+		  Name  Height  ...  Books Started / Finished  hypothetical value
+	0    Kevin      71  ...                      50.0                 507
+	1     Lisa      64  ...                      60.0                 608
+	2    Ranir      75  ...                      10.0                 202
+	3  Abigale      59  ...                      35.6                 358
+	4   Robert      55  ...                      47.5                 123
+
+	[5 rows x 7 columns]
+
+
+	Data Types:
+
+	Name :: object
+	Height :: int64
+	Weight :: int64
+	Age :: int64
+	Bank Balance :: object
+	Books Started / Finished :: object
+	hypothetical value :: object
+	Data Types:
+
+	Name :: object
+	Height :: int64
+	Weight :: int64
+	Age :: int64
+	Bank Balance :: float64
+	Books Started / Finished :: float64
+	hypothetical value :: object
+
+
+		  Name  Height  ...  Books Started / Finished  hypothetical value
+	0    Kevin      71  ...                      50.0                50-7
+	1     Lisa      64  ...                      60.0                60-8
+	2    Ranir      75  ...                      10.0                20-2
+	3  Abigale      59  ...                      35.6                35-8
+	4   Robert      55  ...                      47.5                12-3
+
+	[5 rows x 7 columns]
