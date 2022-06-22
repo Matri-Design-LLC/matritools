@@ -8,4 +8,4 @@ Class to contain and manage a list of Nodes
    constructor
    attributes
    place_node
-   rest
+   reset
