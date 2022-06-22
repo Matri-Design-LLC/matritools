@@ -481,3 +481,38 @@ def get_node_indexes(node_file: str, tag_file: str) -> None:
 			if row['np_node_id'] > 7:
 				print(str(i) + ": " + records[row['ext_record_id']])
 				i += 1
+				
+def sanitize_numeric_df_columns(df: pd.DataFrame, columns: List[str],
+								strings_to_be_removed: List[str] = [',', '$', '%'], errors: str = 'raise'):
+	"""
+	Removes characters such as commas, dollar signs, and percent signs from a DataFrame with numeric columns that are
+	being interpreted as strings and recasts them to an appropriate numeric type.
+	
+	Parameters:
+		df (DataFrame) - DataFrame to be operated on.
+		columns (List[str]) - list of column names that are numeric but pandas interprests as strings.
+		strings_to_be_removed (List[str] : [',', '$', '%']) - list of strings or characters to be removed from values.
+		errors: (str : 'raise') - If ‘raise’, then invalid parsing will raise an exception.
+								  If ‘coerce’, then invalid parsing will be set as NaN.
+								  If ‘ignore’, then invalid parsing will return the input.
+
+	Returns:
+		None
+		
+	Raises:
+		TypeError
+	"""
+	check_type(df, pd.DataFrame, False)
+	
+	for column in columns:
+		value = df[column]
+		for char in strings_to_be_removed:
+			if value.dtype == 'object':
+				value = value.str.replace(char, '', regex=True)
+		df[column] = value
+	
+	try:
+		for column in columns:
+			df[column] = df[column].apply(pd.to_numeric, errors=errors)
+	except Exception as e:
+		raise RuntimeError(f"Exception caught while iterating column: {column}.\n Exception: {e}")
